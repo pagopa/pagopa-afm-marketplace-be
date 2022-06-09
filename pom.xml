@@ -14,9 +14,15 @@
 	<name>marketplace-be</name>
 	<description>Marketplace backend for pagoPA AFM</description>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>11</java.version>
+		<cosmos-data-version>3.21.0</cosmos-data-version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-spring-data-cosmos</artifactId>
+			<version>${cosmos-data-version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
@@ -41,6 +47,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
