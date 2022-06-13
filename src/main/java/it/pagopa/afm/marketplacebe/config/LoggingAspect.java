@@ -40,14 +40,12 @@ public class LoggingAspect {
         // all rest controllers
     }
 
-//    @Pointcut("execution(* it.pagopa.afm.marketplacebe.repository..*.*(..))")
-    @Pointcut("execution(* it.pagopa.afm.marketplacebe..*.*(..))")
+    @Pointcut("execution(* it.pagopa.afm.marketplacebe.repository..*.*(..))")
     public void repository() {
         // all repository methods
     }
 
-//    @Pointcut("execution(* it.pagopa.afm.marketplacebe.service..*.*(..))")
-    @Pointcut("execution(* it.pagopa.afm.marketplacebe..*.*(..))")
+    @Pointcut("execution(* it.pagopa.afm.marketplacebe.service..*.*(..))")
     public void service() {
         // all service methods
     }
@@ -89,8 +87,7 @@ public class LoggingAspect {
         log.info("Successful API operation {} - result: {}", joinPoint.getSignature().getName(), result);
     }
 
-//    @AfterReturning(value = "execution(* it.pagopa.afm.marketplacebe.exception.ErrorHandler.*(..))", returning = "result")
-    @AfterReturning(value = "execution(* it.pagopa.afm.marketplacebe.*(..))", returning = "result")
+    @AfterReturning(value = "execution(* it.pagopa.afm.marketplacebe.exception.ErrorHandler.*(..))", returning = "result")
     public void trowingApiInvocation(JoinPoint joinPoint, Object result) {
         log.info("Failed API operation {} - error: {}", joinPoint.getSignature().getName(), result);
     }

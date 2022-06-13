@@ -6,7 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@EnableCosmosRepositories("it.gov.pagopa.afm.marketplace.repository")
+@EnableCosmosRepositories("it.pagopa.afm.marketplace.repository")
 @EnableCosmosAuditing
 public class MarketplaceBeApplication {
 
