@@ -14,7 +14,7 @@ import it.pagopa.afm.marketplacebe.model.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.request.Requests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
-import it.pagopa.afm.marketplacebe.service.RequestService;
+import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -41,7 +42,7 @@ public class PspController {
     private BundleOfferService bundleOfferService;
 
     @Autowired
-    private RequestService requestService;
+    private BundleRequestService bundleRequestService;
 
     /**
      * GET /psps/:idpsp/offers : Get paginated list of PSP offers regarding private bundles
@@ -120,11 +121,11 @@ public class PspController {
             value = "/{idpsp}/requests",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Flux<Requests> getRequests(
+    public Mono<Requests> getRequests(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
             @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
-        return Flux.just(requestService.getRequests(idPsp, size, cursor, ciFiscalCode));
+        return Mono.just(bundleRequestService.getRequests(idPsp, size, cursor, ciFiscalCode));
     }
 }

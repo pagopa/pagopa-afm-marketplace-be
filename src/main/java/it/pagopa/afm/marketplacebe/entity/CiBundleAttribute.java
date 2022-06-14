@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 public class CiBundleAttribute {
 
     @Id
+    @NotNull
     private Long id;
 
     private Long maxPaymentAmount;
@@ -27,6 +29,7 @@ public class CiBundleAttribute {
     private LocalDateTime validityDateTo;
 
     @CreatedDate
+    @NotNull
     private LocalDateTime insertedDate;
 
 }
