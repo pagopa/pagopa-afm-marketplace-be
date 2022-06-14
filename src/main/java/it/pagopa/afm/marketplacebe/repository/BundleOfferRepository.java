@@ -5,8 +5,6 @@ import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
-import java.util.List;
-
 @Repository
 public interface BundleOfferRepository extends ReactiveCosmosRepository<BundleOffer, String> {
 
