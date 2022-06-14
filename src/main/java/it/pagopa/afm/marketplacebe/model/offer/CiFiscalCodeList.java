@@ -1,4 +1,4 @@
-package it.pagopa.afm.marketplacebe.model;
+package it.pagopa.afm.marketplacebe.model.offer;
 
 import lombok.Getter;
 import lombok.Setter;
