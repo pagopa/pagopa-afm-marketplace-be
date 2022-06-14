@@ -31,7 +31,7 @@ public class Requests {
     private List<BundleRequest> requestsList;
 
 
-    @JsonProperty("page_info")
+    @JsonProperty("pageInfo")
     @Schema(required = true)
     @NotNull
     @Valid

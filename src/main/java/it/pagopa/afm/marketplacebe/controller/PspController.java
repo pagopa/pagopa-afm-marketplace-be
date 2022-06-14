@@ -8,9 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.model.BundleOffered;
-import it.pagopa.afm.marketplacebe.model.BundleOffers;
-import it.pagopa.afm.marketplacebe.model.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.request.Requests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -50,8 +51,8 @@ public class PspController {
      * GET /psps/:idpsp/offers : Get paginated list of PSP offers regarding private bundles
      *
      * @param idPsp  PSP identifier.
-     * @param size   Number of elements for page. Default = 50.
-     * @param cursor Cursor from which starts counting.
+     * @param limit  Number of items for page. Default = 50.
+     * @param page   Page number. Default = 0.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
@@ -67,11 +68,11 @@ public class PspController {
             value = "/{idpsp}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Flux<BundleOffer> getOffers(
+    public BundleOffers getOffers(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
-            @Parameter(description = "Starting cursor") @RequestParam(required = false, defaultValue = "") String cursor) {
-        return bundleOfferService.getPspOffers(idPsp, size, cursor);
+            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page) {
+        return bundleOfferService.getPspOffers(idPsp, limit, page);
     }
 
 
