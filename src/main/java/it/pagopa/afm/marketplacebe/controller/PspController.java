@@ -55,7 +55,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of PSP offers regarding private bundles", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get paginated list of PSP offers regarding private bundles", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleOffers.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -82,7 +82,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -91,7 +91,7 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @PostMapping(
-            value = "/{idpsp}/bundles/:idbundle/offers",
+            value = "/{idpsp}/bundles/{idbundle}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<List<BundleOffered>> sendBundleOffer(
@@ -110,7 +110,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -119,7 +119,7 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @DeleteMapping(
-            value = "/{idpsp}/bundles/:idbundle/offers/:idbundleoffer",
+            value = "/{idpsp}/bundles/{idbundle}/offers/{idbundleoffer}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<List<BundleOffered>> removeBundleOffer(
@@ -140,7 +140,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Requests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -161,7 +161,7 @@ public class PspController {
     }
 
 
-    @Operation(summary = "the PSP accepts a request of a CI", security = {}, tags = {"PSP",})
+    @Operation(summary = "the PSP accepts a request of a CI", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Requests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -181,7 +181,7 @@ public class PspController {
     }
 
 
-    @Operation(summary = "the PSP rejects a request of a CI", security = {}, tags = {"PSP",})
+    @Operation(summary = "the PSP rejects a request of a CI", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Requests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
