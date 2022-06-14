@@ -11,6 +11,8 @@ public enum AppError {
 
     BUNDLE_OFFER_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle offer not found", "Bundle offer with id %s not found."),
 
+    BUNDLE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle request not found", "Bundle request with id %s not found."),
+
     UNKNOWN(null, null, null);
 
     public final HttpStatus httpStatus;

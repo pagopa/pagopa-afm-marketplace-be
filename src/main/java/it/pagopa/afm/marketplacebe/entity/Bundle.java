@@ -1,6 +1,7 @@
 package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
+import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,12 +22,14 @@ import java.util.List;
 @Container(containerName = "bundles")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bundle {
 
     @Id
-    private Long id;
+    @GeneratedValue
+    private String id;
 
     @PartitionKey
     @NotNull

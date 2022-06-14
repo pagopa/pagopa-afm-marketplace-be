@@ -18,7 +18,14 @@ import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -97,8 +104,8 @@ public class PspController {
     /**
      * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP offers a private bundle to a creditor institution
      *
-     * @param idPsp PSP identifier.
-     * @param idBundle Bundle identifier.
+     * @param idPsp         PSP identifier.
+     * @param idBundle      Bundle identifier.
      * @param idBundleOffer Bundle Offer identifier.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
@@ -152,4 +159,46 @@ public class PspController {
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
         return Mono.just(bundleRequestService.getRequests(idPsp, size, cursor, ciFiscalCode));
     }
+
+
+    @Operation(summary = "the PSP accepts a request of a CI", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Requests.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{idpsp}/requests/{idBundleRequest}/accept",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public Mono<Void> acceptRequest(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
+        bundleRequestService.acceptRequest(idPsp, idBundleRequest);
+        return Mono.empty();
+    }
+
+
+    @Operation(summary = "the PSP rejects a request of a CI", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Requests.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{idpsp}/requests/{idBundleRequest}/reject",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public Mono<Void> rejectRequest(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
+        bundleRequestService.rejectRequest(idPsp, idBundleRequest);
+        return Mono.empty();
+    }
+
+
 }
