@@ -3,25 +3,19 @@ package it.pagopa.afm.marketplacebe.service;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,16 +27,34 @@ public class BundleOfferService {
     @Autowired
     ModelMapper modelMapper;
 
-    public BundleOffers getPspOffers(String idPsp, Integer limit, Integer pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber, pageNumber);
-        List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> bundleOfferList = new ArrayList<>();
-        Page<BundleOffer> page = bundleOfferRepository.findByIdPsp(idPsp, pageable);
+//    public BundleOffers getPspOffers(String idPsp, Integer limit, Integer pageNumber) {
+//        Pageable pageable = PageRequest.of(pageNumber, limit);
+//        List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> bundleOfferList = new ArrayList<>();
+//        Page<BundleOffer> page = bundleOfferRepository.findByIdPsp(idPsp, pageable);
+//
+//        return BundleOffers.builder()
+//                .offers(getBundleOfferList(page))
+//                .pageInfo(CommonUtil.buildPageInfo(page))
+//                .build();
+//    }
+
+    public BundleOffers getPspOffers(String idPsp) {
+        List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> bundleOfferList = bundleOfferRepository.findByIdPsp(idPsp)
+                .stream()
+                .map(bo -> modelMapper.map(bo, it.pagopa.afm.marketplacebe.model.offer.BundleOffer.class))
+                .collect(Collectors.toList());
+
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(bundleOfferList.size())
+                .totalPages(1)
+                .build();
 
         return BundleOffers.builder()
-                .offers(getBundleOfferList(page))
-                .pageInfo(CommonUtil.buildPageInfo(page))
+                .offers(bundleOfferList)
+                .pageInfo(pageInfo)
                 .build();
     }
+
 
     public List<BundleOffered> sendBundleOffer(String idPsp, String idBundle, CiFiscalCodeList ciFiscalCodeList) {
         // TODO verify idPsp acceptability
@@ -74,27 +86,16 @@ public class BundleOfferService {
         // check the related idPsp and idBundle
         // remove bundle offer
 
-        bundleOfferRepository.findById(idBundleOffer)
-                .switchIfEmpty(Mono.error(new AppException(AppError.BUNDLE_OFFER_NOT_FOUND, idBundleOffer)))
-                .filter(Objects::nonNull)
-                .flatMap(bo -> {
-                    if (!bo.getIdPsp().equals(idPsp) || !bo.getIdBundle().equals(idBundle)) {
-                        Mono.error(new AppException(AppError.BUNDLE_OFFER_NOT_FOUND, idBundleOffer));
-                    }
-                    return bundleOfferRepository.delete(bo).then(Mono.just(bo));
-                });
-    }
+        Optional<BundleOffer> bundleOffer = bundleOfferRepository.findById(idBundleOffer);
 
-    /**
-     * Extract bundle offer list from a page
-     * @param page bundle offer page
-     * @return list of bundle offer
-     */
-    private List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> getBundleOfferList(Page<BundleOffer> page) {
-        return page
-                .stream()
-                .filter(Objects::nonNull)
-                .map(bo -> modelMapper.map(bo, it.pagopa.afm.marketplacebe.model.offer.BundleOffer.class))
-                .collect(Collectors.toList());
+        if (bundleOffer.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_OFFER_NOT_FOUND, idBundleOffer);
+        }
+
+        if (!bundleOffer.get().getIdPsp().equals(idPsp) || !bundleOffer.get().getIdBundle().equals(idBundle)) {
+            throw new AppException(AppError.BUNDLE_OFFER_BAD_REQUEST, String.format("idPSP=%s idBundle=%s", idPsp, idBundle));
+        }
+
+        bundleOfferRepository.delete(bundleOffer.get());
     }
 }

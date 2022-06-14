@@ -9,6 +9,7 @@ import com.azure.spring.data.cosmos.config.CosmosConfig;
 import com.azure.spring.data.cosmos.core.ResponseDiagnostics;
 import com.azure.spring.data.cosmos.core.ResponseDiagnosticsProcessor;
 import com.azure.spring.data.cosmos.core.mapping.EnableCosmosAuditing;
+import com.azure.spring.data.cosmos.repository.config.EnableCosmosRepositories;
 import com.azure.spring.data.cosmos.repository.config.EnableReactiveCosmosRepositories;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +19,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
 
 @Configuration
-@EnableReactiveCosmosRepositories("it.pagopa.afm.marketplacebe.repository")
+//@EnableReactiveCosmosRepositories("it.pagopa.afm.marketplacebe.repository")
+@EnableCosmosRepositories("it.pagopa.afm.marketplacebe.repository")
 @EnableConfigurationProperties
 @EnableCosmosAuditing
 @Slf4j
@@ -32,6 +34,9 @@ public class CosmosDBConfig extends AbstractCosmosConfiguration {
 
     @Value("${azure.cosmos.database}")
     private String cosmosDatabase;
+
+    @Value("${azure.cosmos.populate-query-metrics}")
+    private Boolean cosmosQueryMetrics;
 
     @Bean
     public CosmosClientBuilder getCosmosClientBuilder() {
@@ -47,7 +52,7 @@ public class CosmosDBConfig extends AbstractCosmosConfiguration {
     @Override
     public CosmosConfig cosmosConfig() {
         return CosmosConfig.builder()
-                .enableQueryMetrics(true)
+                .enableQueryMetrics(cosmosQueryMetrics)
                 .responseDiagnosticsProcessor(new ResponseDiagnosticsProcessorImplementation())
                 .build();
     }

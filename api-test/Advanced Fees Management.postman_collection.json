@@ -1,0 +1,154 @@
+{
+	"info": {
+		"_postman_id": "37f66410-b652-4050-8aca-97b181f8adc9",
+		"name": "Advanced Fees Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3634782"
+	},
+	"item": [
+		{
+			"name": "Marketplace",
+			"item": [
+				{
+					"name": "getBundles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getOffers_PSP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/offers",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"offers"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendBundleOffer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ciFiscalCodeList\": [\"{{ci_fiscal_code}}\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/offers",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles",
+								":id_bundle",
+								"offers"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "id_bundle",
+									"value": "{{id_bundle}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeBundleOffer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ciFiscalCodeList\": [\"{{ci_fiscal_code}}\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/offers/:id_bundle_offer",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles",
+								":id_bundle",
+								"offers",
+								":id_bundle_offer"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "id_bundle",
+									"value": "{{id_bundle}}"
+								},
+								{
+									"key": "id_bundle_offer",
+									"value": "{{id_bundle_offer}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

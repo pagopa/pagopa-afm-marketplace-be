@@ -63,8 +63,9 @@ public class PspController {
     public BundleOffers getOffers(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page) {
-        return bundleOfferService.getPspOffers(idPsp, limit, page);
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
+//        return bundleOfferService.getPspOffers(idPsp, limit, page);
+        return bundleOfferService.getPspOffers(idPsp);
     }
 
 
@@ -84,7 +85,7 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @PostMapping(
-            value = "/{idpsp}/bundles/:idbundle/offers",
+            value = "/{idpsp}/bundles/{idbundle}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<List<BundleOffered>> sendBundleOffer(
@@ -112,7 +113,7 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @DeleteMapping(
-            value = "/{idpsp}/bundles/:idbundle/offers/:idbundleoffer",
+            value = "/{idpsp}/bundles/{idbundle}/offers/{idbundleoffer}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<List<BundleOffered>> removeBundleOffer(
