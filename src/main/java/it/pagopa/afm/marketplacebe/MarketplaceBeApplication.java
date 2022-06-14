@@ -10,8 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @EnableCosmosAuditing
 public class MarketplaceBeApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MarketplaceBeApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(MarketplaceBeApplication.class, args);
+    }
 
 }
