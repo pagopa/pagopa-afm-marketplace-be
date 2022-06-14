@@ -2,10 +2,7 @@ package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -55,5 +52,15 @@ public class Bundle {
     @LastModifiedDate
     private LocalDateTime lastUpdatedDate;
 
-
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class Filter {
+        private String idPsp;
+        private String paymentAmount;
+        private Double minPaymentAmount;
+        private Double maxPaymentAmount;
+        private LocalDateTime validityDate;
+    }
 }
