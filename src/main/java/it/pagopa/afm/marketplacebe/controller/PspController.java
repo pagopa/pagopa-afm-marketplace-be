@@ -18,12 +18,7 @@ import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -74,7 +69,7 @@ public class PspController {
 
 
     /**
-     * GET /psps/:idpsp/bunldes/:idbundle/offers : PSP offers a private bundle to a creditor institution
+     * POST /psps/:idpsp/bunldes/:idbundle/offers : PSP offers a private bundle to a creditor institution
      *
      * @param ciFiscalCodeList PSP identifier.
      * @return OK. (status code 200)
@@ -88,7 +83,7 @@ public class PspController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
+    @PostMapping(
             value = "/{idpsp}/bundles/:idbundle/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
@@ -97,6 +92,35 @@ public class PspController {
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @RequestBody @Valid @NotNull CiFiscalCodeList ciFiscalCodeList) {
         return ResponseEntity.ok(bundleOfferService.sendBundleOffer(idPsp, idBundle, ciFiscalCodeList));
+    }
+
+    /**
+     * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP offers a private bundle to a creditor institution
+     *
+     * @param idPsp PSP identifier.
+     * @param idBundle Bundle identifier.
+     * @param idBundleOffer Bundle Offer identifier.
+     * @return OK. (status code 200)
+     * or Service unavailable (status code 500)
+     */
+    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @DeleteMapping(
+            value = "/{idpsp}/bundles/:idbundle/offers/:idbundleoffer",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<List<BundleOffered>> removeBundleOffer(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
+        bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
+        return ResponseEntity.ok().build();
     }
 
 
