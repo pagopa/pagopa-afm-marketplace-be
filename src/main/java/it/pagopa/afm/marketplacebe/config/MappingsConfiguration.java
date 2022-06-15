@@ -18,9 +18,11 @@ public class MappingsConfiguration {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        ConvertBundleEToBundleM convertBundleOfferEToBundleOfferM = new ConvertBundleEToBundleM();
+        ConvertBundleEToBundleM convertBundleEToBundleM = new ConvertBundleEToBundleM();
+        ConvertBundleOfferEToBundleOfferM convertBundleOfferEToBundleOfferM = new ConvertBundleOfferEToBundleOfferM();
 
-        mapper.createTypeMap(Bundle.class, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class).setConverter(convertBundleOfferEToBundleOfferM);
+        mapper.createTypeMap(Bundle.class, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class).setConverter(convertBundleEToBundleM);
+        mapper.createTypeMap(BundleOffer.class, it.pagopa.afm.marketplacebe.model.offer.BundleOffer.class).setConverter(convertBundleOfferEToBundleOfferM);
 
         return mapper;
     }
