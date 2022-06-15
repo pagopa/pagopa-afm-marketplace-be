@@ -72,4 +72,41 @@ public class BundleController {
             @RequestBody @Valid @NotNull BundleRequest bundleRequest){
         return bundleService.createBundle(idPsp, bundleRequest);
     }
+
+    @Operation(summary = "Update a bundle", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE /*, schema = @Schema(implementation = Bundles.class)*/)),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @PutMapping(
+            value = "/{idpsp}/bundles/{idbundle}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public void updateBundle(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @RequestBody @Valid @NotNull BundleRequest bundleRequest){
+        bundleService.updateBundle(idPsp, idBundle, bundleRequest);
+    }
+
+    @Operation(summary = "Delete a bundle", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE /*, schema = @Schema(implementation = Bundles.class)*/)),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @DeleteMapping(
+            value = "/{idpsp}/bundles/{idbundle}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public void removeBundle(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+        bundleService.removeBundle(idPsp, idBundle);
+    }
 }

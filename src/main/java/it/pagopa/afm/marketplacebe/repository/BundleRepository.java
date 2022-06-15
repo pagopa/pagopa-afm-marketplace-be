@@ -11,8 +11,9 @@ import java.util.List;
 
 @Repository
 public interface BundleRepository extends CosmosRepository<Bundle, String> {
-    List<Bundle> findByIdBundle(String idBundle);
+    Bundle findByIdBundle(String idBundle);
     List<Bundle> findByIdPsp(String idPsp);
     Page<Bundle> findByIdBundle(String idBundle, Pageable pageable);
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
+    void deleteByIdBundle(String idBundle);
 }

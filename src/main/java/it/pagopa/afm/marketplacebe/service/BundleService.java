@@ -1,9 +1,11 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import com.azure.cosmos.implementation.NotFoundException;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
@@ -11,6 +13,7 @@ import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -64,6 +67,51 @@ public class BundleService {
                 .build();
 
         return BundleResponse.builder().idBundle(bundleRepository.save(bundle).getIdBundle().toString()).build();
+    }
+
+    public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
+        Bundle bundle = bundleRepository.findByIdBundle(idBundle);
+
+        if(bundle == null){
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Bundle not found", "The requested bundle does not exist");
+        }
+
+        if (idPsp.compareTo(bundle.getIdPsp()) != 0) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Wrong PSP Id", "The bundle requested does not match the provided PSP ID");
+        }
+
+        bundle.setName(bundleRequest.getName());
+        bundle.setDescription(bundleRequest.getDescription());
+        bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
+        bundle.setMinPaymentAmount(bundleRequest.getMinPaymentAmount());
+        bundle.setMaxPaymentAmount(bundleRequest.getMaxPaymentAmount());
+        bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
+        bundle.setTouchpoint(Touchpoint.valueOf(bundleRequest.getTouchpoint()));
+        bundle.setType(BundleType.valueOf(bundleRequest.getType()));
+        bundle.setTransferCategoryList(bundleRequest.getTransferCategoryList());
+        bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
+        bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
+        bundle.setLastUpdatedDate(LocalDateTime.now());
+
+        return bundleRepository.save(bundle);
+    }
+
+    public void removeBundle(String idPsp, String idBundle){
+        Bundle bundle = bundleRepository.findByIdBundle(idBundle);
+
+        if(bundle == null){
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Bundle not found", "The requested bundle does not exist");
+        }
+
+        if (idPsp.compareTo(bundle.getIdPsp()) != 0) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Wrong PSP Id", "The bundle requested does not match the provided PSP ID");
+        }
+
+        bundleRepository.deleteByIdBundle(idBundle);
     }
 
     /*
