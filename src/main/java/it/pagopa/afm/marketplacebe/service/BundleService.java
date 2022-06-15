@@ -16,21 +16,21 @@ public class BundleService {
 
     // TODO: add pagination
     // TODO: add filter
-    public Mono<Bundles> getBundlesByPage(Integer pageNumber, Integer limit, Bundle.Filter filter) {
-        return bundleRepository.findAll().collectList().map(
-                bundles -> new Bundles(bundles, new PageInfo())
-        );
-    }
+//    public Mono<Bundles> getBundlesByPage(Integer pageNumber, Integer limit, Bundle.Filter filter) {
+//        return bundleRepository.findAll().collectList().map(
+//                bundles -> new Bundles(bundles, new PageInfo())
+//        );
+//    }
 
-    public Mono<Bundle> addBundle(Bundle bundle) {
-        return bundleRepository.save(bundle);
-    }
+//    public Mono<Bundle> addBundle(Bundle bundle) {
+//        return bundleRepository.save(bundle);
+//    }
 
-    public Mono<Void> deleteBundle(String idBundle) {
-        return bundleRepository.deleteById(idBundle);
-    }
+//    public Mono<Void> deleteBundle(String idBundle) {
+//        return bundleRepository.deleteById(idBundle);
+//    }
 
-    public Mono<Bundle> updateBundle(Bundle bundle) {
-        return bundleRepository.save(bundle);
-    }
+//    public Mono<Bundle> updateBundle(Bundle bundle) {
+//        return bundleRepository.save(bundle);
+//    }
 }

@@ -1,36 +1,32 @@
-package it.pagopa.afm.marketplacebe.model.bundle;
+package it.pagopa.afm.marketplacebe.model.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString
-public class Bundles {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CiRequests {
 
-    @JsonProperty("services")
+    @JsonProperty("requests")
     @Schema(required = true)
     @NotNull
     @Valid
-    private List<Bundle> bundleList;
+    private List<CiBundleRequest> requestsList;
 
 
-    @JsonProperty("page_info")
+    @JsonProperty("pageInfo")
     @Schema(required = true)
     @NotNull
     @Valid

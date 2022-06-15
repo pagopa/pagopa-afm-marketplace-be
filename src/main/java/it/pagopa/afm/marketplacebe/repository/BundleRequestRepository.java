@@ -1,15 +1,19 @@
 package it.pagopa.afm.marketplacebe.repository;
 
-import com.azure.spring.data.cosmos.repository.ReactiveCosmosRepository;
+import com.azure.spring.data.cosmos.repository.CosmosRepository;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.entity.BundleRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Repository
-public interface BundleRequestRepository extends ReactiveCosmosRepository<BundleRequest, Long> {
+public interface BundleRequestRepository extends CosmosRepository<BundleRequest, String> {
 
-    Flux<BundleRequest> findByIdPsp(String idPsp);
+    List<BundleRequest> findByCiFiscalCode(String fiscalCode);
 
-    Mono<BundleRequest> findByIdAndIdPsp(String id, String idPsp);
+    List<BundleRequest> findByCiFiscalCodeAndIdPsp(String fiscalCode, String idPsp);
+
 }
