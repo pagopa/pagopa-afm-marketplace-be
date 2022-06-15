@@ -9,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CiBundleAttribute {
-
     private Long maxPaymentAmount;
     private String transferCategory;
     private TransferCategoryRelation transferCategoryRelation;
