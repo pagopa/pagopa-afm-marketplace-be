@@ -8,7 +8,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -29,9 +28,7 @@ public class EntityValidator {
      */
     @AfterReturning(pointcut = "execution(* it.pagopa.afm.marketplacebe.repository.*.*(..))", returning = "result")
     public void validateEntity(JoinPoint joinPoint, Object result) {
-        if (result instanceof Flux) {
-//            ((Flux<?>) result).subscribe(this::validate);
-        }
+        validate(result);
     }
 
     private void validate(Object result) {

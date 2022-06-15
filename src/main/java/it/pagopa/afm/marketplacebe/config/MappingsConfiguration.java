@@ -17,7 +17,7 @@ public class MappingsConfiguration {
     public ModelMapper modelMapper() {
 
         ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STANDARD);
 
         ConvertBundleOfferEToBundleOfferM convertBundleOfferEToBundleOfferM = new ConvertBundleOfferEToBundleOfferM();
         ConvertBundleRequestEToCiBundleRequestM convertBundleRequestEToCiBundleRequestM = new ConvertBundleRequestEToCiBundleRequestM();

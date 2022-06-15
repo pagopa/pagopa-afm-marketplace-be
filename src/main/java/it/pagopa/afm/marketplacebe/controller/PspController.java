@@ -7,12 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.pagopa.afm.marketplacebe.entity.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.model.request.Requests;
+import it.pagopa.afm.marketplacebe.model.request.PspRequests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -136,14 +134,14 @@ public class PspController {
      * GET /psps/:idpsp/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
      * @param idPsp  PSP identifier.
-     * @param size   Number of elements for page. Default = 50.
-     * @param cursor Cursor from which starts counting.
+     * @param limit   Number of elements for page. Default = 50.
+     * @param page Page number. Default = 1.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
     @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Requests.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspRequests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -153,12 +151,12 @@ public class PspController {
             value = "/{idpsp}/requests",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Mono<Requests> getRequests(
+    public PspRequests getRequestsByPsp(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
-            @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
+            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
-        return bundleRequestService.getRequests(idPsp, size, cursor, ciFiscalCode);
+        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, ciFiscalCode);
     }
 
 
@@ -170,14 +168,14 @@ public class PspController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
+    @PostMapping(
             value = "/{idpsp}/requests/{idBundleRequest}/accept",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Mono<Void> acceptRequest(
+    public void acceptRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
-        return bundleRequestService.acceptRequest(idPsp, idBundleRequest);
+        bundleRequestService.acceptRequest(idPsp, idBundleRequest);
     }
 
 
@@ -189,14 +187,14 @@ public class PspController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
+    @PostMapping(
             value = "/{idpsp}/requests/{idBundleRequest}/reject",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Mono<Void> rejectRequest(
+    public void rejectRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
-       return  bundleRequestService.rejectRequest(idPsp, idBundleRequest);
+        bundleRequestService.rejectRequest(idPsp, idBundleRequest);
     }
 
 
