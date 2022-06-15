@@ -15,6 +15,7 @@ import it.pagopa.afm.marketplacebe.model.request.PspRequests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -163,7 +164,7 @@ public class PspController {
 
     @Operation(summary = "the PSP accepts a request of a CI", tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -173,16 +174,17 @@ public class PspController {
             value = "/{idpsp}/requests/{idBundleRequest}/accept",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public void acceptRequest(
+    public ResponseEntity<Void> acceptRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
         bundleRequestService.acceptRequest(idPsp, idBundleRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 
     @Operation(summary = "the PSP rejects a request of a CI", tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -192,10 +194,11 @@ public class PspController {
             value = "/{idpsp}/requests/{idBundleRequest}/reject",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public void rejectRequest(
+    public ResponseEntity<Void> rejectRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
         bundleRequestService.rejectRequest(idPsp, idBundleRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 
