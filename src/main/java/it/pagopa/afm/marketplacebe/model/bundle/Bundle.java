@@ -18,7 +18,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class Bundle {
 
-    private Long idBundle;
+    private String idBundle;
     private String idPsp;
     private String name;
     private String description;
