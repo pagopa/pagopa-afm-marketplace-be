@@ -5,10 +5,12 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,23 +26,26 @@ public class BundleService {
     private BundleRepository bundleRepository;
 
     @Autowired
+    private CiBundleRepository ciBundleRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-        List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
+        List<BundleDetails> bundleDetailsList = bundleRepository
                 .findByIdPsp(idPsp)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
-                .itemsFound(bundleList.size())
+                .itemsFound(bundleDetailsList.size())
                 .totalPages(1)
                 .build();
 
-        return Bundles.builder().bundleList(bundleList).pageInfo(pageInfo).build();
+        return Bundles.builder().bundleDetailsList(bundleDetailsList).pageInfo(pageInfo).build();
     }
 
 
@@ -64,6 +69,20 @@ public class BundleService {
                 .build();
 
         return BundleResponse.builder().idBundle(bundleRepository.save(bundle).getIdBundle()).build();
+    }
+
+    public Bundles getBundlesByFiscalCode(String fiscalCode, Integer limit, Integer pageNumber) {
+        var bundleList = ciBundleRepository
+                .findByCiFiscalCode(fiscalCode)
+                .parallelStream()
+                .map(ciBundle -> bundleRepository.findById(ciBundle.getIdBundle()))
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .collect(Collectors.toList());
+
+
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .build();
     }
 
     /*

@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Bundle {
+public class BundleDetails {
 
     private String idBundle;
     private String idPsp;
