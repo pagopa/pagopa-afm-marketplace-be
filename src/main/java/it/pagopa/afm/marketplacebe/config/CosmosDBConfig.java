@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
 
 @Configuration
-//@EnableReactiveCosmosRepositories("it.pagopa.afm.marketplacebe.repository")
 @EnableCosmosRepositories("it.pagopa.afm.marketplacebe.repository")
 @EnableConfigurationProperties
 @EnableCosmosAuditing
