@@ -29,7 +29,7 @@ public class HomeController {
     @Value("${properties.environment}")
     private String environment;
 
-    @Value("${server.servlet.context-path}")
+    @Value("${spring.webflux.base-path}")
     private String basePath;
 
 

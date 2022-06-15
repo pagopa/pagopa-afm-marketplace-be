@@ -40,7 +40,6 @@ public class BundleRequest {
     private String idBundle;
 
     @NotNull
-    @Size(max = 35)
     private String ciFiscalCode;
 
     @Valid

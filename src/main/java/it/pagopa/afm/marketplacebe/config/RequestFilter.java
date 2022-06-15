@@ -15,7 +15,7 @@ import java.util.UUID;
 import static it.pagopa.afm.marketplacebe.util.Constants.HEADER_REQUEST_ID;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class RequestFilter implements WebFilter {
 
