@@ -1,14 +1,49 @@
 {
 	"info": {
-		"_postman_id": "37f66410-b652-4050-8aca-97b181f8adc9",
+		"_postman_id": "732fe1ea-8816-45c2-be96-4d87089a7ac7",
 		"name": "Advanced Fees Management",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "3634782"
+		"_exporter_id": "205220"
 	},
 	"item": [
 		{
 			"name": "Marketplace",
 			"item": [
+				{
+					"name": "createBundle",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"bundle1\",\n  \"description\": \"string\",\n  \"paymentAmount\": 100,\n  \"minPaymentAmount\": 10,\n  \"maxPaymentAmount\": 1000,\n  \"paymentMethod\": \"PPAL\",\n  \"touchpoint\": \"IO\",\n  \"type\": \"PUBLIC\",\n  \"transferCategoryList\": [\n    \"cat1\"\n  ],\n  \"validityDateFrom\": \"2022-06-15T13:37:16.442Z\",\n  \"validityDateTo\": \"2022-06-15T13:37:16.442Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "getBundles",
 					"request": {
@@ -142,6 +177,108 @@
 								{
 									"key": "id_bundle_offer",
 									"value": "{{id_bundle_offer}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRequestsByPsp",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"requests"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "2",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "acceptRequest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/accept",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"requests",
+								":request_id",
+								"accept"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "request_id",
+									"value": "{{request_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "rejectRequest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/reject",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"requests",
+								":request_id",
+								"reject"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "request_id",
+									"value": "{{request_id}}"
 								}
 							]
 						}
