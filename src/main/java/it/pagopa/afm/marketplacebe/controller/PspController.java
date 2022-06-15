@@ -157,7 +157,7 @@ public class PspController {
             @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
             @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
-        return bundleRequestService.getRequests(idPsp, size, cursor, ciFiscalCode);
+        return bundleRequestService.getRequestsByPSP(idPsp, size, cursor, ciFiscalCode);
     }
 
 

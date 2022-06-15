@@ -12,4 +12,6 @@ public interface BundleRequestRepository extends ReactiveCosmosRepository<Bundle
     Flux<BundleRequest> findByIdPsp(String idPsp);
 
     Mono<BundleRequest> findByIdAndIdPsp(String id, String idPsp);
+
+    Flux<BundleRequest> findByCiFiscalCode(String ciFiscalCode);
 }
