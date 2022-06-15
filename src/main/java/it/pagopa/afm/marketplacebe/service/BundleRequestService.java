@@ -81,9 +81,9 @@ public class BundleRequestService {
                 ).collect(Collectors.toList());
 
         BundleRequest request = BundleRequest.builder()
-                .idBundle(ciBundleSubscriptionRequest.getIdBundle())
-                .ciFiscalCode(ciFiscalCode)
+                .idBundle(bundle.getId())
                 .idPsp(bundle.getIdPsp())
+                .ciFiscalCode(ciFiscalCode)
                 .ciBundleAttributes(attributes)
                 .build();
 
