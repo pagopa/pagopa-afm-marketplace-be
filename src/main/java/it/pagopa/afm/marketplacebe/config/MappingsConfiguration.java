@@ -1,5 +1,7 @@
 package it.pagopa.afm.marketplacebe.config;
 
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.mapper.ConvertBundleEToBundleM;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.entity.BundleRequest;
 import it.pagopa.afm.marketplacebe.mapper.ConvertBundleOfferEToBundleOfferM;
@@ -21,9 +23,11 @@ public class MappingsConfiguration {
 
         ConvertBundleOfferEToBundleOfferM convertBundleOfferEToBundleOfferM = new ConvertBundleOfferEToBundleOfferM();
         ConvertBundleRequestEToCiBundleRequestM convertBundleRequestEToCiBundleRequestM = new ConvertBundleRequestEToCiBundleRequestM();
+        ConvertBundleEToBundleM convertBundleOfferEToBundleOfferM = new ConvertBundleEToBundleM();
 
         mapper.createTypeMap(BundleOffer.class, it.pagopa.afm.marketplacebe.model.offer.BundleOffer.class).setConverter(convertBundleOfferEToBundleOfferM);
         mapper.createTypeMap(BundleRequest.class, CiBundleRequest.class).setConverter(convertBundleRequestEToCiBundleRequestM);
+        mapper.createTypeMap(Bundle.class, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class).setConverter(convertBundleOfferEToBundleOfferM);
 
         return mapper;
     }
