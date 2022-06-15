@@ -16,6 +16,8 @@ public interface BundleRequestRepository extends CosmosRepository<BundleRequest,
 
     Page<BundleRequest> findByIdPspAndCiFiscalCode(String idPsp, String fiscalCode, Pageable pageable);
 
+    List<BundleRequest> findByIdPsp(String idPsp);
+
     Optional<BundleRequest> findByIdAndIdPsp(String id, String idPsp);
 
     List<BundleRequest> findByCiFiscalCode(String fiscalCode);

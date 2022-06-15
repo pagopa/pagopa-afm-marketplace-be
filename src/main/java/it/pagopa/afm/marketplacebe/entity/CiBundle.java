@@ -21,7 +21,7 @@ import java.util.List;
 @Container(containerName = "cibundles")
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class CiBundle {
@@ -37,8 +37,7 @@ public class CiBundle {
     private String ciFiscalCode;
 
     @NotNull
-    @Valid
-    private Bundle bundle;
+    private String idBundle;
 
     @Valid
     private List<CiBundleAttribute> attributes;

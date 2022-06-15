@@ -30,7 +30,7 @@ import javax.validation.constraints.Size;
 
 @RestController()
 @RequestMapping(path = "/psps")
-@Tag(name = "PSP service API", description = "Everything about PSP")
+@Tag(name = "PSP", description = "Everything about PSP")
 public class BundleController {
 
     @Autowired
