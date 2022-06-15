@@ -81,8 +81,10 @@ public class BundleService {
                 .insertedDate(now)
                 .lastUpdatedDate(now)
                 .build();
-
-        return BundleResponse.builder().idBundle(bundleRepository.save(bundle).getIdBundle().toString()).build();
+        bundleRepository.save(bundle);
+        return BundleResponse.builder()
+                .idBundle(bundle.getId())
+                .build();
     }
 
     /*

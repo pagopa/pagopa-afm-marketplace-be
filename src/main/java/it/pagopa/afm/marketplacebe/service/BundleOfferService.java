@@ -1,6 +1,9 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -8,8 +11,10 @@ import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +25,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class BundleOfferService {
+
+    @Autowired
+    BundleRepository bundleRepository;
 
     @Autowired
     BundleOfferRepository bundleOfferRepository;
@@ -57,16 +65,21 @@ public class BundleOfferService {
 
 
     public List<BundleOffered> sendBundleOffer(String idPsp, String idBundle, CiFiscalCodeList ciFiscalCodeList) {
-        // TODO verify idPsp acceptability
-        // TODO verify idBundle acceptability
-        // TODO verify fiscal code validity
+        // TODO verify idPsp and fiscal code validity
+
+        Bundle bundle = getBundle(idBundle, idPsp);
+
+        // verify bundle is private
+        if (!bundle.getType().equals(BundleType.PRIVATE)) {
+            throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "type not private");
+        }
 
         List<BundleOffered> bundleOfferedList = new ArrayList<>();
         ciFiscalCodeList.getCiFiscalCodeList().forEach(fiscalCode -> {
             BundleOffer bundleOffer = BundleOffer.builder()
                     .ciFiscalCode(fiscalCode)
                     .idPsp(idPsp)
-                    .idBundle(idBundle)
+                    .idBundle(bundle.getId())
                     .insertedDate(LocalDateTime.now())
                     .build();
             bundleOfferRepository.save(bundleOffer);
@@ -93,9 +106,17 @@ public class BundleOfferService {
         }
 
         if (!bundleOffer.get().getIdPsp().equals(idPsp) || !bundleOffer.get().getIdBundle().equals(idBundle)) {
-            throw new AppException(AppError.BUNDLE_OFFER_BAD_REQUEST, String.format("idPSP=%s idBundle=%s", idPsp, idBundle));
+            throw new AppException(AppError.BUNDLE_OFFER_BAD_REQUEST, idBundle, String.format("idPSP=%s", idPsp));
         }
 
         bundleOfferRepository.delete(bundleOffer.get());
+    }
+
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> optBundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
+        if (optBundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+        return optBundle.get();
     }
 }

@@ -120,7 +120,7 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
-        bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
+         bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
         return ResponseEntity.ok().build();
     }
 

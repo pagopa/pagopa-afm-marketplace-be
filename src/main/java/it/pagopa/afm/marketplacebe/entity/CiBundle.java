@@ -1,6 +1,7 @@
 package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
+import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,12 +21,13 @@ import java.util.List;
 public class CiBundle {
 
     @Id
-    private Long id;
+    @GeneratedValue
+    private String id;
 
     @PartitionKey
     private String ciFiscalCode;
 
-    private Bundle bundle;
+    private String idBundle;
 
     private List<CiBundleAttribute> attributes;
 

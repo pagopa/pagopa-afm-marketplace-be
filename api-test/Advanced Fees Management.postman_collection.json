@@ -36,6 +36,81 @@
 					"response": []
 				},
 				{
+					"name": "createBundle",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"private\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getBundle",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"test\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"GLOBAL\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles",
+								":id_bundle"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "id_bundle",
+									"value": "{{id_bundle}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "getOffers_PSP",
 					"request": {
 						"method": "GET",
@@ -95,7 +170,7 @@
 								},
 								{
 									"key": "id_bundle",
-									"value": "{{id_bundle}}"
+									"value": "{{private_id_bundle}}"
 								}
 							]
 						}
@@ -142,6 +217,119 @@
 								{
 									"key": "id_bundle_offer",
 									"value": "{{id_bundle_offer}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRequests_CI",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"cis",
+								":ci_fiscal_code",
+								"requests"
+							],
+							"variable": [
+								{
+									"key": "ci_fiscal_code",
+									"value": "{{ci_fiscal_code}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createBundleRequest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idBundle\": \"{{id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 10,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"cis",
+								":ci_fiscal_code",
+								"requests"
+							],
+							"variable": [
+								{
+									"key": "ci_fiscal_code",
+									"value": "{{ci_fiscal_code}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeBundleRequest",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests/:id_bundle_requests",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"cis",
+								":ci_fiscal_code",
+								"requests",
+								":id_bundle_requests"
+							],
+							"variable": [
+								{
+									"key": "ci_fiscal_code",
+									"value": "{{ci_fiscal_code}}"
+								},
+								{
+									"key": "id_bundle_requests",
+									"value": "2e4f058f-0402-4091-bddb-299ea448f416"
 								}
 							]
 						}
