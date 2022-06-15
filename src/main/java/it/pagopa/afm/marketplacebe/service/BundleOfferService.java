@@ -14,8 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -87,6 +85,7 @@ public class BundleOfferService {
 
     /**
      * Extract bundle offer list from a page
+     *
      * @param page bundle offer page
      * @return list of bundle offer
      */

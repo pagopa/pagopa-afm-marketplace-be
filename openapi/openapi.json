@@ -8,7 +8,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8585",
+            "url": "http://127.0.0.1:8585/api/v1",
             "description": "Generated server url"
         }
     ],
@@ -27,6 +27,24 @@
                 "summary": "Return OK if application is started",
                 "operationId": "healthCheck",
                 "responses": {
+                    "500": {
+                        "description": "Service unavailable",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
                     "429": {
                         "description": "Too many requests",
                         "headers": {
@@ -49,8 +67,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Service unavailable",
+                    "400": {
+                        "description": "Bad Request",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -81,24 +99,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AppInfo"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemJson"
                                 }
                             }
                         }
@@ -135,7 +135,7 @@
                 }
             ]
         },
-        "/psps/{idpsp}/bundles/:idbundle/offers": {
+        "/psps/{idpsp}/bundles/{idbundle}/offers": {
             "post": {
                 "tags": [
                     "PSP"
@@ -175,8 +175,55 @@
                     "required": true
                 },
                 "responses": {
+                    "500": {
+                        "description": "Service unavailable",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
                     "429": {
                         "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -200,53 +247,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/CiFiscalCodeList"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Service unavailable",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemJson"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemJson"
                                 }
                             }
                         }
@@ -275,7 +275,7 @@
                 }
             ]
         },
-        "/psps/{idpsp}/bundles/:idbundle/offers/:idbundleoffer": {
+        "/psps/{idpsp}/bundles/{idbundle}/offers/{idbundleoffer}": {
             "delete": {
                 "tags": [
                     "PSP"
@@ -314,8 +314,55 @@
                     }
                 ],
                 "responses": {
+                    "500": {
+                        "description": "Service unavailable",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
                     "429": {
                         "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -339,53 +386,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/CiFiscalCodeList"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Service unavailable",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemJson"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemJson"
                                 }
                             }
                         }
@@ -434,9 +434,9 @@
                         }
                     },
                     {
-                        "name": "size",
+                        "name": "limit",
                         "in": "query",
-                        "description": "Number of elements for one page. Default = 50",
+                        "description": "Number of items for page. Default = 50",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -445,19 +445,21 @@
                         }
                     },
                     {
-                        "name": "cursor",
+                        "name": "page",
                         "in": "query",
-                        "description": "Starting cursor",
+                        "description": "Page number. Page number value starts from 0. Default = 0",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "default": ""
+                            "minimum": 0,
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
                         }
                     }
                 ],
                 "responses": {
-                    "429": {
-                        "description": "Too many requests",
+                    "500": {
+                        "description": "Service unavailable",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -465,10 +467,17 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "429": {
+                        "description": "Too many requests",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -496,8 +505,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Service unavailable",
+                    "400": {
+                        "description": "Bad Request",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -514,20 +523,13 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
                                 "schema": {
                                     "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemJson"
                                 }
                             }
                         }
@@ -606,28 +608,6 @@
                     }
                 ],
                 "responses": {
-                    "429": {
-                        "description": "Too many requests",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Service unavailable",
                         "headers": {
@@ -642,6 +622,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -678,6 +669,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -738,28 +740,6 @@
                     }
                 ],
                 "responses": {
-                    "429": {
-                        "description": "Too many requests",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Service unavailable",
                         "headers": {
@@ -774,6 +754,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -810,6 +801,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -870,28 +872,6 @@
                     }
                 ],
                 "responses": {
-                    "429": {
-                        "description": "Too many requests",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Service unavailable",
                         "headers": {
@@ -906,6 +886,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -942,6 +933,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -1089,29 +1091,17 @@
             },
             "PageInfo": {
                 "required": [
-                    "items_found",
-                    "limit",
-                    "page",
-                    "total_pages"
+                    "itemsFound",
+                    "totalPages"
                 ],
                 "type": "object",
                 "properties": {
-                    "page": {
-                        "type": "integer",
-                        "description": "Page number",
-                        "format": "int32"
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "description": "Required number of items per page",
-                        "format": "int32"
-                    },
-                    "items_found": {
+                    "itemsFound": {
                         "type": "integer",
                         "description": "Number of items found. (The last page may have fewer elements than required)",
                         "format": "int32"
                     },
-                    "total_pages": {
+                    "totalPages": {
                         "type": "integer",
                         "description": "Total number of pages",
                         "format": "int32"
@@ -1120,7 +1110,7 @@
             },
             "Requests": {
                 "required": [
-                    "page_info",
+                    "pageInfo",
                     "requests"
                 ],
                 "type": "object",
@@ -1131,13 +1121,54 @@
                             "$ref": "#/components/schemas/BundleRequest"
                         }
                     },
-                    "page_info": {
+                    "pageInfo": {
                         "$ref": "#/components/schemas/PageInfo"
                     }
                 }
             },
+            "BundleOffer": {
+                "type": "object",
+                "properties": {
+                    "idBundleOffer": {
+                        "type": "string"
+                    },
+                    "idBundle": {
+                        "type": "string"
+                    },
+                    "ciFiscalCode": {
+                        "type": "string"
+                    },
+                    "acceptedDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "rejectionDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "insertedDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
             "BundleOffers": {
-                "type": "object"
+                "required": [
+                    "offers",
+                    "pageInfo"
+                ],
+                "type": "object",
+                "properties": {
+                    "offers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/BundleOffer"
+                        }
+                    },
+                    "pageInfo": {
+                        "$ref": "#/components/schemas/PageInfo"
+                    }
+                }
             },
             "AppInfo": {
                 "required": [

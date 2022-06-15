@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.request.Requests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -50,9 +49,9 @@ public class PspController {
     /**
      * GET /psps/:idpsp/offers : Get paginated list of PSP offers regarding private bundles
      *
-     * @param idPsp  PSP identifier.
-     * @param limit  Number of items for page. Default = 50.
-     * @param page   Page number. Default = 0.
+     * @param idPsp PSP identifier.
+     * @param limit Number of items for page. Default = 50.
+     * @param page  Page number. Default = 0.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
@@ -158,7 +157,7 @@ public class PspController {
             @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
             @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
-        return Mono.just(bundleRequestService.getRequests(idPsp, size, cursor, ciFiscalCode));
+        return bundleRequestService.getRequests(idPsp, size, cursor, ciFiscalCode);
     }
 
 
@@ -194,11 +193,11 @@ public class PspController {
             value = "/{idpsp}/requests/{idBundleRequest}/reject",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Mono<Void> rejectRequest(
+    public Mono<BundleRequest> rejectRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
-        bundleRequestService.rejectRequest(idPsp, idBundleRequest);
-        return Mono.empty();
+       return  bundleRequestService.rejectRequest(idPsp, idBundleRequest);
+//        return Mono.empty();
     }
 
 

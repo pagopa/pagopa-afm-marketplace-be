@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 @Service
 public class BundleRequestService {
@@ -24,33 +23,33 @@ public class BundleRequestService {
     @Autowired
     CiBundleRepository ciBundleRepository;
 
-    public Requests getRequests(String idPsp, Integer size, String cursor, String ciFiscalCode) {
+    public Mono<Requests> getRequests(String idPsp, Integer size, String cursor, String ciFiscalCode) {
         // TODO: pageable
         // TODO: filter
         var requests = bundleRequestRepository.findByIdPsp(idPsp);
 
-        return Requests.builder()
-                .requestsList(requests.collectList()
-                        .blockOptional()
-                        .orElse(Collections.emptyList()))
-                .build();
+        return requests.collectList()
+                .map(list -> Requests.builder()
+                        .requestsList(list)
+                        .build());
     }
 
     public void acceptRequest(String idPsp, String idBundleRequest) {
-        bundleRequestRepository.findByIdAndIdPsp(idBundleRequest, idPsp)
+         bundleRequestRepository.findByIdAndIdPsp(idBundleRequest, idPsp)
                 .switchIfEmpty(Mono.error(new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest)))
                 .flatMap(entity -> bundleRequestRepository.save(entity.toBuilder()
                         .acceptedDate(LocalDateTime.now())
                         .build()))
-                .map(entity ->
-                        ciBundleRepository.save(buildEcBundle(entity)));
+                .flatMap(entity ->
+                        ciBundleRepository.save(buildEcBundle(entity)))
+                .subscribe();
     }
 
 
-    public void rejectRequest(String idPsp, String idBundleRequest) {
-        bundleRequestRepository.findByIdAndIdPsp(idBundleRequest, idPsp)
+    public Mono<BundleRequest> rejectRequest(String idPsp, String idBundleRequest) {
+        return bundleRequestRepository.findByIdAndIdPsp(idBundleRequest, idPsp)
                 .switchIfEmpty(Mono.error(new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest)))
-                .map(entity -> bundleRequestRepository.save(entity.toBuilder()
+                .flatMap(entity -> bundleRequestRepository.save(entity.toBuilder()
                         .rejectionDate(LocalDateTime.now())
                         .build()));
     }

@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Data

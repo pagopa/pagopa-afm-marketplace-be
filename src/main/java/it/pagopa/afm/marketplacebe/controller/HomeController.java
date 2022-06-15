@@ -29,6 +29,9 @@ public class HomeController {
     @Value("${properties.environment}")
     private String environment;
 
+    @Value("${server.servlet.context-path}")
+    private String basePath;
+
 
     /**
      * @return redirect to Swagger page documentation
@@ -36,7 +39,7 @@ public class HomeController {
     @Hidden
     @GetMapping("")
     public RedirectView home() {
-        return new RedirectView("/swagger-ui.html");
+        return new RedirectView(basePath + "/swagger-ui.html");
     }
 
     /**

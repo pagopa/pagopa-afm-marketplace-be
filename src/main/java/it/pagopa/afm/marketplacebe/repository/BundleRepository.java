@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface BundleRepository extends ReactiveCosmosRepository<Bundle, String> {}
+public interface BundleRepository extends ReactiveCosmosRepository<Bundle, String> {
+}

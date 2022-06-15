@@ -8,5 +8,5 @@ if [[ "$(pwd)" =~ .*"openapi".* ]]; then
 fi
 
 
-curl http://127.0.0.1:8585/v3/api-docs | python3 -m json.tool > ./openapi/openapi.json
+curl http://127.0.0.1:8585/api/v1/v3/api-docs | python3 -m json.tool > ./openapi/openapi.json
 

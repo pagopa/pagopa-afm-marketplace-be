@@ -7,12 +7,11 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.Set;
 
 @Aspect
 @Component
@@ -29,19 +28,19 @@ public class EntityValidator {
      * @param result    the response to validate
      */
     @AfterReturning(pointcut = "execution(* it.pagopa.afm.marketplacebe.repository.*.*(..))", returning = "result")
-    public void validateResponse(JoinPoint joinPoint, Object result) {
-        if (result instanceof ResponseEntity) {
-            validateResponse((ResponseEntity<?>) result);
+    public void validateEntity(JoinPoint joinPoint, Object result) {
+        if (result instanceof Flux) {
+//            ((Flux<?>) result).subscribe(this::validate);
         }
     }
 
-    private <T> void validateResponse(ResponseEntity<T> response) {
-        if (response.getBody() != null) {
-            Set<ConstraintViolation<T>> validationResults = validator.validate(response.getBody());
+    private void validate(Object result) {
+        if (result != null) {
+            var validationResults = validator.validate(result);
 
             if (!validationResults.isEmpty()) {
                 var sb = new StringBuilder();
-                for (ConstraintViolation<T> error : validationResults) {
+                for (ConstraintViolation<Object> error : validationResults) {
                     sb.append(error.getPropertyPath()).append(" ").append(error.getMessage()).append(". ");
                 }
                 var msg = StringUtils.chop(sb.toString());
