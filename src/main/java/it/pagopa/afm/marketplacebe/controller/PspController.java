@@ -133,9 +133,9 @@ public class PspController {
     /**
      * GET /psps/:idpsp/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
-     * @param idPsp  PSP identifier.
-     * @param limit   Number of elements for page. Default = 50.
-     * @param page Page number. Default = 1.
+     * @param idPsp PSP identifier.
+     * @param limit Number of elements for page. Default = 50.
+     * @param page  Page number. Default = 1.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */

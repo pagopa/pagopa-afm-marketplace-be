@@ -14,7 +14,13 @@ import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -32,9 +38,9 @@ public class CiController {
      * GET /cis/:cifiscalcode/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
      * @param ciFiscalCode CI identifier.
-     * @param size  Number of elements for page. Default = 50.
-     * @param cursor Cursor from which starts counting.
-     * @param idPsp PSP identifier. Optional filter.
+     * @param size         Number of elements for page. Default = 50.
+     * @param cursor       Cursor from which starts counting.
+     * @param idPsp        PSP identifier. Optional filter.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */

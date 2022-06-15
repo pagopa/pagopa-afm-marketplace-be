@@ -1,7 +1,6 @@
 package it.pagopa.afm.marketplacebe.mapper;
 
 import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 

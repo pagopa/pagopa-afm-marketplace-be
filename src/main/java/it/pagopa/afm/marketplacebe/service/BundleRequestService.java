@@ -83,7 +83,7 @@ public class BundleRequestService {
         BundleRequest request = BundleRequest.builder()
                 .idBundle(ciBundleSubscriptionRequest.getIdBundle())
                 .ciFiscalCode(ciFiscalCode)
-                .idPsp(bundle.getIpPsP())
+                .idPsp(bundle.getIdPsp())
                 .ciBundleAttributes(attributes)
                 .build();
 
@@ -152,7 +152,7 @@ public class BundleRequestService {
         return CiBundle.builder()
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .bundle(Bundle.builder()
-                        .id(entity.getIdBundle())
+                        .idBundle(entity.getIdBundle())
                         .build())
                 .attributes(entity.getCiBundleAttributes())
                 .build();

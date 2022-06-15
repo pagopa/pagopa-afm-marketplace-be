@@ -11,9 +11,8 @@ import java.util.List;
 @Setter
 public class CiBundleSubscriptionRequest {
 
-    @NotBlank
-    private String idBundle;
-
     @JsonProperty("attributes")
     List<CiBundleAttribute> ciBundleAttributeList;
+    @NotBlank
+    private String idBundle;
 }

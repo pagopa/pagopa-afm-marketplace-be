@@ -17,7 +17,7 @@ public class ConvertBundleRequestEToCiBundleRequestM implements Converter<Bundle
         @Valid BundleRequest source = context.getSource();
 
         List<CiBundleAttribute> attributes = new ArrayList<>();
-        for(it.pagopa.afm.marketplacebe.entity.CiBundleAttribute attribute : source.getCiBundleAttributes()) {
+        for (it.pagopa.afm.marketplacebe.entity.CiBundleAttribute attribute : source.getCiBundleAttributes()) {
             CiBundleAttribute attr = CiBundleAttribute.builder()
                     .maxPaymentAmount(attribute.getMaxPaymentAmount())
                     .transferCategory(attribute.getTransferCategory())

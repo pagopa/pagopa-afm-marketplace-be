@@ -29,11 +29,11 @@ public class BundleService {
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-         List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
-                 .findByIdPsp(idPsp)
+        List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
+                .findByIdPsp(idPsp)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
-                 .collect(Collectors.toList());
+                .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
@@ -44,7 +44,7 @@ public class BundleService {
     }
 
 
-    public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest){
+    public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
@@ -63,7 +63,7 @@ public class BundleService {
                 .lastUpdatedDate(now)
                 .build();
 
-        return BundleResponse.builder().idBundle(bundleRepository.save(bundle).getIdBundle().toString()).build();
+        return BundleResponse.builder().idBundle(bundleRepository.save(bundle).getIdBundle()).build();
     }
 
     /*
