@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -16,6 +15,7 @@ import it.pagopa.afm.marketplacebe.model.request.Requests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,12 +60,11 @@ public class PspController {
             value = "/{idpsp}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public BundleOffers getOffers(
+    public ResponseEntity<BundleOffers> getOffers(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
-//        return bundleOfferService.getPspOffers(idPsp, limit, page);
-        return bundleOfferService.getPspOffers(idPsp);
+        return ResponseEntity.ok(bundleOfferService.getPspOffers(idPsp));
     }
 
 
@@ -92,7 +91,7 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @RequestBody @Valid @NotNull CiFiscalCodeList ciFiscalCodeList) {
-        return ResponseEntity.ok(bundleOfferService.sendBundleOffer(idPsp, idBundle, ciFiscalCodeList));
+        return ResponseEntity.status(HttpStatus.CREATED).body(bundleOfferService.sendBundleOffer(idPsp, idBundle, ciFiscalCodeList));
     }
 
     /**
