@@ -915,6 +915,96 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "getOffers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/offers",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"offers"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "acceptOffer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/offers/:offer_id/accept",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"offers",
+										":offer_id",
+										"accept"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "offer_id",
+											"value": "{{id_bundle_offer}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "rejectOffer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/offers/:offer_id/reject",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"offers",
+										":offer_id",
+										"reject"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "offer_id",
+											"value": "{{id_bundle_offer}}"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
