@@ -42,7 +42,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"private\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"raw": "{\n    \"name\": \"private-integration\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -71,13 +71,53 @@
 					"response": []
 				},
 				{
-					"name": "getBundle",
+					"name": "updateBundle",
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"test\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"GLOBAL\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"raw": "{\n    \"name\": \"private-updated\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles",
+								":id_bundle"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "id_bundle",
+									"value": "{{id_bundle}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeBundle",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -212,7 +252,7 @@
 								},
 								{
 									"key": "id_bundle",
-									"value": "{{id_bundle}}"
+									"value": "{{private_id_bundle}}"
 								},
 								{
 									"key": "id_bundle_offer",
@@ -268,7 +308,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"idBundle\": \"{{id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 10,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
+							"raw": "{\n    \"idBundle\": \"{{public_id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 15,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
