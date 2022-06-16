@@ -13,9 +13,11 @@ import java.util.Optional;
 @Repository
 public interface BundleRepository extends CosmosRepository<Bundle, String> {
     Optional<Bundle> findById(String idBundle);
+
     Page<Bundle> findById(String idBundle, Pageable pageable);
 
     List<Bundle> findByIdPsp(String idPsp);
+
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
 
     void deleteById(String idBundle);

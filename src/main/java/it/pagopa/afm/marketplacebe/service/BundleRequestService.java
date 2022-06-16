@@ -124,7 +124,7 @@ public class BundleRequestService {
 
     public void acceptRequest(String idPsp, String idBundleRequest) {
         var entity = getBundleRequest(idPsp, idBundleRequest);
-        if (entity.getAcceptedDate() == null) {
+        if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleRequestRepository.save(entity.toBuilder()
                     .acceptedDate(LocalDateTime.now())
                     .rejectionDate(null)
@@ -140,16 +140,11 @@ public class BundleRequestService {
 
     public void rejectRequest(String idPsp, String idBundleRequest) {
         var entity = getBundleRequest(idPsp, idBundleRequest);
-        if (entity.getRejectionDate() == null) {
+        if (entity.getRejectionDate() == null && entity.getAcceptedDate() == null) {
             bundleRequestRepository.save(entity.toBuilder()
                     .rejectionDate(LocalDateTime.now())
                     .build());
 
-            // logical delete of CI-Bundle entity
-            ciBundleRepository.findByIdBundleAndCiFiscalCode(entity.getIdBundle(), entity.getCiFiscalCode())
-                    .ifPresent(bundle -> ciBundleRepository.save(bundle.toBuilder()
-                            .validityDateTo(LocalDateTime.now())
-                            .build()));
         } else {
             throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, entity.getAcceptedDate());
         }
@@ -166,28 +161,11 @@ public class BundleRequestService {
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest));
     }
 
-    private CiBundle getCiBundle(String idBundle, String ciFiscalCode) {
-        return ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode));
-    }
-
-    /**
-     * @param page Page of {@link BundleRequest}
-     * @return map the page in a list
-     */
-    private List<PspBundleRequest> mapRequestList(Page<BundleRequest> page) {
-        return page.stream()
-                .filter(Objects::nonNull)
-                .map(elem -> modelMapper.map(elem, PspBundleRequest.class))
-                .collect(Collectors.toList());
-    }
-
     private CiBundle buildEcBundle(BundleRequest entity) {
         return CiBundle.builder()
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .idBundle(entity.getIdBundle())
                 .attributes(entity.getCiBundleAttributes())
-                .validityDateTo(LocalDateTime.now())
                 .build();
     }
 }

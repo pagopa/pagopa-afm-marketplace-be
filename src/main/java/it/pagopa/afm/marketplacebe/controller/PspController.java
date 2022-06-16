@@ -7,9 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
@@ -34,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -91,7 +87,7 @@ public class PspController {
      */
     @Operation(summary = "Create a new bundle", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = BundleResponse.class))),
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -103,7 +99,7 @@ public class PspController {
     )
     public ResponseEntity<BundleResponse> createBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @RequestBody @Valid @NotNull BundleRequest bundleRequest){
+            @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundle(idPsp, bundleRequest));
     }
 
@@ -136,7 +132,8 @@ public class PspController {
 
     /**
      * DELETE /psps/:idpsp/bundles/:idbundle : Delete the bundle with the given id
-     * @param idPsp : PSP identifier
+     *
+     * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
      * @return
      */
@@ -154,7 +151,7 @@ public class PspController {
     )
     public ResponseEntity<Void> removeBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
         bundleService.removeBundle(idPsp, idBundle);
         return ResponseEntity.ok().build();
     }
@@ -162,9 +159,9 @@ public class PspController {
     /**
      * GET /psps/:idpsp/offers : Get paginated list of PSP offers regarding private bundles
      *
-     * @param idPsp  PSP identifier.
-     * @param limit  Number of items for page. Default = 50.
-     * @param page   Page number. Default = 0.
+     * @param idPsp PSP identifier.
+     * @param limit Number of items for page. Default = 50.
+     * @param page  Page number. Default = 0.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
@@ -217,8 +214,8 @@ public class PspController {
     /**
      * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP offers a private bundle to a creditor institution
      *
-     * @param idPsp PSP identifier.
-     * @param idBundle Bundle identifier.
+     * @param idPsp         PSP identifier.
+     * @param idBundle      Bundle identifier.
      * @param idBundleOffer Bundle Offer identifier.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
@@ -239,7 +236,7 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
-         bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
+        bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
         return ResponseEntity.ok().build();
     }
 
@@ -284,8 +281,7 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @PostMapping(
-            value = "/{idpsp}/requests/{idBundleRequest}/accept",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
+            value = "/{idpsp}/requests/{idBundleRequest}/accept"
     )
     public ResponseEntity<Void> acceptRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
@@ -304,8 +300,7 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @PostMapping(
-            value = "/{idpsp}/requests/{idBundleRequest}/reject",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
+            value = "/{idpsp}/requests/{idBundleRequest}/reject"
     )
     public ResponseEntity<Void> rejectRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
