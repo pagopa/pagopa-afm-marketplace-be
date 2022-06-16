@@ -1,9 +1,6 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -11,12 +8,14 @@ import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +26,9 @@ public class BundleService {
 
     @Autowired
     private BundleRepository bundleRepository;
+
+    @Autowired
+    private CiBundleRepository ciBundleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -119,5 +121,23 @@ public class BundleService {
         }
 
         return bundle.get();
+    }
+    public List<String> getCIs(String idBundle, String idPSP){
+       List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
+       List<String> CIs = new ArrayList<>();
+
+       for(CiBundle ciBundle: subscriptions){
+           if (!checkCiBundle(ciBundle, idPSP)){
+               throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+           }
+           CIs.add(ciBundle.getCiFiscalCode());
+       }
+
+       return CIs;
+    }
+
+    private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
+        return !bundleRepository.findById(ciBundle.getIdBundle()).isEmpty() ||
+                bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp() != idPSP;
     }
 }
