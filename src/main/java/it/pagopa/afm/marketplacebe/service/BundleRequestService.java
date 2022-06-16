@@ -21,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@Transactional
 public class BundleRequestService {
 
     @Autowired
@@ -82,7 +84,7 @@ public class BundleRequestService {
         Bundle bundle = optBundle.get();
 
         if (!bundle.getType().equals(BundleType.PUBLIC)) {
-            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "type not public");
+            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }
 
         List<CiBundleAttribute> attributes = ciBundleSubscriptionRequest.getCiBundleAttributeList()
@@ -172,7 +174,9 @@ public class BundleRequestService {
                     .build());
 
             // create CI-Bundle relation
-            ciBundleRepository.save(buildEcBundle(entity));
+            ciBundleRepository.save(buildCiBundle(entity));
+        } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
+            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, entity.getRejectionDate());
         } else {
             throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, entity.getAcceptedDate());
         }
@@ -186,6 +190,8 @@ public class BundleRequestService {
                     .rejectionDate(LocalDateTime.now())
                     .build());
 
+        } else if (entity.getAcceptedDate() != null && entity.getRejectionDate() == null) {
+            throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, entity.getAcceptedDate());
         } else {
             throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, entity.getAcceptedDate());
         }
@@ -202,7 +208,7 @@ public class BundleRequestService {
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest));
     }
 
-    private CiBundle buildEcBundle(BundleRequest entity) {
+    private CiBundle buildCiBundle(BundleRequest entity) {
         return CiBundle.builder()
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .idBundle(entity.getIdBundle())

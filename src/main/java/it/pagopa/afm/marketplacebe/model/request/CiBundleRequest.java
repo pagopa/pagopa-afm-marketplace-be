@@ -17,7 +17,6 @@ import java.util.List;
 @ToString
 public class CiBundleRequest {
 
-    private String idBundleRequest;
     @JsonProperty("idBundleRequest")
     private String id;
     private String idBundle;

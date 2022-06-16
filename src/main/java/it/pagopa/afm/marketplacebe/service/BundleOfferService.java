@@ -15,6 +15,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class BundleOfferService {
 
     @Autowired
@@ -64,13 +66,13 @@ public class BundleOfferService {
 
 
     public List<BundleOffered> sendBundleOffer(String idPsp, String idBundle, CiFiscalCodeList ciFiscalCodeList) {
-        // TODO verify idPsp and fiscal code validity
+        // TODO verify idPsp and fiscal code
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
         // verify bundle is private
         if (!bundle.getType().equals(BundleType.PRIVATE)) {
-            throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "type not private");
+            throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Type not private");
         }
 
         List<BundleOffered> bundleOfferedList = new ArrayList<>();

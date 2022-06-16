@@ -1,531 +1,541 @@
 {
 	"info": {
-		"_postman_id": "67feac6d-aaa6-4dda-a2ec-2f6961bc6e3a",
+		"_postman_id": "621f015b-585a-4fb4-91a3-24717fba833b",
 		"name": "Advanced Fees Management",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "205220"
+		"_exporter_id": "3634782"
 	},
 	"item": [
 		{
 			"name": "Marketplace",
 			"item": [
 				{
-					"name": "createBundle",
-					"event": [
+					"name": "PSP",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonData = JSON.parse(responseBody);",
-									"var req = JSON.parse(request.data);",
-									"if (req.type === \"PRIVATE\"){",
-									"    postman.setEnvironmentVariable(\"private_id_bundle\", jsonData.idBundle);",
-									"}",
-									"else if (req.type === \"PUBLIC\"){",
-									"    postman.setEnvironmentVariable(\"public_id_bundle\", jsonData.idBundle);",
-									"}",
-									"else {",
-									"    postman.setEnvironmentVariable(\"global_id_bundle\", jsonData.idBundle);",
-									"}",
-									"",
-									"postman.setEnvironmentVariable(\"id_bundle\", jsonData.idBundle);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"private-integration\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"bundles"
-							],
-							"variable": [
+							"name": "createBundle",
+							"event": [
 								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"var req = JSON.parse(request.data);",
+											"if (req.type === \"PRIVATE\"){",
+											"    postman.setEnvironmentVariable(\"private_id_bundle\", jsonData.idBundle);",
+											"}",
+											"else if (req.type === \"PUBLIC\"){",
+											"    postman.setEnvironmentVariable(\"public_id_bundle\", jsonData.idBundle);",
+											"}",
+											"else {",
+											"    postman.setEnvironmentVariable(\"global_id_bundle\", jsonData.idBundle);",
+											"}",
+											"",
+											"postman.setEnvironmentVariable(\"id_bundle\", jsonData.idBundle);",
+											""
+										],
+										"type": "text/javascript"
+									}
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "sendBundleOffer",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"ciFiscalCodeList\": [\"{{ci_fiscal_code}}\"]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/offers",
-							"host": [
-								"{{afm-host}}"
 							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"bundles",
-								":id_bundle",
-								"offers"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"private-integration\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
-								{
-									"key": "id_bundle",
-									"value": "{{private_id_bundle}}"
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										}
+									]
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "createBundleRequest",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"idBundle\": \"{{public_id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 15,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"cis",
-								":ci_fiscal_code",
-								"requests"
-							],
-							"variable": [
-								{
-									"key": "ci_fiscal_code",
-									"value": "{{ci_fiscal_code}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "acceptRequest",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/accept",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"requests",
-								":request_id",
-								"accept"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								},
-								{
-									"key": "request_id",
-									"value": "{{request_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "rejectRequest",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/reject",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"requests",
-								":request_id",
-								"reject"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								},
-								{
-									"key": "request_id",
-									"value": "{{request_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "updateBundle",
-					"event": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var req = JSON.parse(request.data);",
-									"var idBundle = pm.variables.get(\"id_bundle\");",
-									"",
-									"if (req.type === \"PRIVATE\"){",
-									"    postman.setEnvironmentVariable(\"private_id_bundle\", idBundle);",
-									"}",
-									"else if (req.type === \"PUBLIC\"){",
-									"    postman.setEnvironmentVariable(\"public_id_bundle\", idBundle);",
-									"}",
-									"else {",
-									"    postman.setEnvironmentVariable(\"global_id_bundle\", idBundle);",
-									"}",
-									"",
-									"postman.setEnvironmentVariable(\"id_bundle\", idBundle);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"private-updated\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+							"name": "sendBundleOffer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ciFiscalCodeList\": [\"{{ci_fiscal_code}}\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/offers",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle",
+										"offers"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{private_id_bundle}}"
+										}
+									]
 								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"bundles",
-								":id_bundle"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								},
-								{
-									"key": "id_bundle",
-									"value": "{{id_bundle}}"
+						{
+							"name": "acceptRequest",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/accept",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"requests",
+										":request_id",
+										"accept"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "request_id",
+											"value": "{{request_id}}"
+										}
+									]
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getBundles",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"bundles"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getOffers_PSP",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/offers",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"offers"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getRequestsByPsp",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"requests"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "2",
-									"disabled": true
-								}
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getRequests_CI",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"cis",
-								":ci_fiscal_code",
-								"requests"
-							],
-							"variable": [
-								{
-									"key": "ci_fiscal_code",
-									"value": "{{ci_fiscal_code}}"
+						{
+							"name": "rejectRequest",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/reject",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"requests",
+										":request_id",
+										"reject"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "request_id",
+											"value": "{{request_id}}"
+										}
+									]
 								}
-							]
+							},
+							"response": []
+						},
+						{
+							"name": "updateBundle",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var req = JSON.parse(request.data);",
+											"var idBundle = pm.variables.get(\"id_bundle\");",
+											"",
+											"if (req.type === \"PRIVATE\"){",
+											"    postman.setEnvironmentVariable(\"private_id_bundle\", idBundle);",
+											"}",
+											"else if (req.type === \"PUBLIC\"){",
+											"    postman.setEnvironmentVariable(\"public_id_bundle\", idBundle);",
+											"}",
+											"else {",
+											"    postman.setEnvironmentVariable(\"global_id_bundle\", idBundle);",
+											"}",
+											"",
+											"postman.setEnvironmentVariable(\"id_bundle\", idBundle);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"private-updated\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getBundles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getOffers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/offers",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"offers"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getRequests",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"requests"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "2",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "removeBundleOffer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ciFiscalCodeList\": [\"{{ci_fiscal_code}}\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/offers/:id_bundle_offer",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle",
+										"offers",
+										":id_bundle_offer"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{private_id_bundle}}"
+										},
+										{
+											"key": "id_bundle_offer",
+											"value": "{{id_bundle_offer}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "removeBundle",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "removeBundleOffer",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"ciFiscalCodeList\": [\"{{ci_fiscal_code}}\"]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+					"name": "CI",
+					"item": [
+						{
+							"name": "getRequests",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"requests"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
 								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/offers/:id_bundle_offer",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"bundles",
-								":id_bundle",
-								"offers",
-								":id_bundle_offer"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
+						{
+							"name": "createBundleRequest",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"idBundle\": \"{{public_id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 15,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
-								{
-									"key": "id_bundle",
-									"value": "{{private_id_bundle}}"
-								},
-								{
-									"key": "id_bundle_offer",
-									"value": "{{id_bundle_offer}}"
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"requests"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "removeBundle",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"bundles",
-								":id_bundle"
-							],
-							"variable": [
-								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
+						{
+							"name": "removeBundleRequest",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
-								{
-									"key": "id_bundle",
-									"value": "{{id_bundle}}"
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests/:id_bundle_requests",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"requests",
+										":id_bundle_requests"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle_requests",
+											"value": "{{request_id}}"
+										}
+									]
 								}
-							]
+							},
+							"response": []
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "removeBundleRequest",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests/:id_bundle_requests",
-							"host": [
-								"{{afm-host}}"
-							],
-							"path": [
-								"{{afm-base-path}}",
-								"cis",
-								":ci_fiscal_code",
-								"requests",
-								":id_bundle_requests"
-							],
-							"variable": [
-								{
-									"key": "ci_fiscal_code",
-									"value": "{{ci_fiscal_code}}"
-								},
-								{
-									"key": "id_bundle_requests",
-									"value": "2e4f058f-0402-4091-bddb-299ea448f416"
-								}
-							]
-						}
-					},
-					"response": []
+					]
 				}
 			]
 		}
