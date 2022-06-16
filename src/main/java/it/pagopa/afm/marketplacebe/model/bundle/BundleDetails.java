@@ -1,6 +1,6 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
-import com.azure.spring.data.cosmos.core.mapping.Container;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +10,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Container(containerName = "bundles")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +17,8 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class BundleDetails {
 
-    private String idBundle;
+    @JsonProperty("idBundle")
+    private String id;
     private String idPsp;
     private String name;
     private String description;

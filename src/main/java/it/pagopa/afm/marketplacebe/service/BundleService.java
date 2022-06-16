@@ -7,10 +7,14 @@ import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,15 +31,18 @@ public class BundleService {
     private BundleRepository bundleRepository;
 
     @Autowired
+    private CiBundleRepository ciBundleRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-        List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
+        List<BundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -43,9 +50,11 @@ public class BundleService {
                 .totalPages(1)
                 .build();
 
-        return Bundles.builder().bundleList(bundleList).pageInfo(pageInfo).build();
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(pageInfo)
+                .build();
     }
-
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         LocalDateTime now = LocalDateTime.now();
@@ -107,4 +116,45 @@ public class BundleService {
 
         return bundle.get();
     }
+
+    public Bundles getBundlesByFiscalCode(String fiscalCode, Integer limit, Integer pageNumber) {
+        var bundleList = ciBundleRepository
+                .findByCiFiscalCode(fiscalCode)
+                .parallelStream()
+                .map(ciBundle -> bundleRepository.findById(ciBundle.getIdBundle()))
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .collect(Collectors.toList());
+
+
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .build();
+    }
+
+    public BundleDetails getBundleByFiscalCode(String fiscalCode, String idBundle) {
+        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+
+        var bundle = bundleRepository.findById(ciBundle.getIdBundle())
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+
+        return modelMapper.map(bundle, BundleDetails.class);
+    }
+
+    public BundleDetailsAttributes getBundleAttributesByFiscalCode(String fiscalCode, String idBundle) {
+        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+
+        return modelMapper.map(ciBundle, BundleDetailsAttributes.class);
+    }
+
+    public Object createBundleAttributesByCi(String fiscalCode, String idBundle, CiBundleAttribute bundleAttribute) {
+        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+        modelMapper.map(bundleAttribute, CiBundleAttribute.class);
+//        ciBundle.getAttributes().add();
+        ciBundleRepository.save(ciBundle);
+
+    }
+
 }
