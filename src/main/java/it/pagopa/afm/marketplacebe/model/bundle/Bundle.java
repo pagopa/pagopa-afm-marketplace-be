@@ -21,6 +21,7 @@ public class Bundle {
 
     @JsonProperty("idBundle")
     private String id;
+
     private String idPsp;
     private String name;
     private String description;

@@ -17,4 +17,7 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
 
     List<Bundle> findByIdPsp(String idPsp);
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
+
+    void deleteById(String idBundle);
+
 }

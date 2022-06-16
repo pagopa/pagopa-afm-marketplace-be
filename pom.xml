@@ -17,8 +17,11 @@
 		<java.version>11</java.version>
 		<cosmos-data-version>3.21.0</cosmos-data-version>
 		<modelmapper-version>2.4.5</modelmapper-version>
+<<<<<<< HEAD
 		<springdoc-openapi-ui-version>1.6.8</springdoc-openapi-ui-version>
 		<javax-servlet-api-version>3.1.0</javax-servlet-api-version>
+=======
+>>>>>>> main
 	</properties>
 	<dependencies>
 		<dependency>
@@ -73,6 +76,11 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>${javax-servlet-api-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${modelmapper-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>
