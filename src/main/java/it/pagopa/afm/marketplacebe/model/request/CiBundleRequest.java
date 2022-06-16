@@ -26,5 +26,5 @@ public class CiBundleRequest {
     private LocalDateTime rejectionDate;
     private LocalDateTime insertedDate;
 
-    private List<CiBundleAttribute> ciBundleAttributes;
+    private List<CiBundleAttributeModel> ciBundleAttributeModels;
 }

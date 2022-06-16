@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
@@ -108,7 +108,7 @@ public class CiController {
 
     @Operation(summary = "Create a new bundle attribute", security = {}, tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleResponse.class))),
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleAttributeResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -118,14 +118,14 @@ public class CiController {
             value = "/{cifiscalcode}/bundles/{idbundle}/attributes",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<BundleResponse> createBundleAttributesByCi(
+    public ResponseEntity<BundleAttributeResponse> createBundleAttributesByCi(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
-            @RequestBody @Valid @NotNull CiBundleAttribute bundleAttribute) {
+            @RequestBody @Valid @NotNull CiBundleAttributeModel bundleAttribute) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundleAttributesByCi(fiscalCode, idBundle, bundleAttribute));
     }
 
-    @Operation(summary = "Update a bundle", security = {}, tags = {"CI",})
+    @Operation(summary = "Update an attribute of a bundle", security = {}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -133,19 +133,17 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @PutMapping(
-            value = "/{cifiscalcode}/bundles/{idbundle}",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Void> updateBundleByCi(
+    @PutMapping(value = "/{cifiscalcode}/bundles/{idbundle}/attributes/{idattribute}")
+    public ResponseEntity<Void> updateBundleAttributesByCi(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
-            @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
-        bundleService.updateBundleByCi(fiscalCode, idBundle, bundleRequest);
+            @Parameter(description = "Attribute identifier", required = true) @PathVariable("idattribute") String idAttribute,
+            @RequestBody @Valid @NotNull CiBundleAttributeModel bundleAttribute) {
+        bundleService.updateBundleAttributesByCi(fiscalCode, idBundle, idAttribute, bundleAttribute);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Delete a bundle", security = {}, tags = {"CI",})
+    @Operation(summary = "Delete an attribute of a bundle", security = {}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -153,14 +151,12 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @DeleteMapping(
-            value = "/{cifiscalcode}/bundles/{idbundle}",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Void> removeBundleByCi(
+    @DeleteMapping(value = "/{cifiscalcode}/bundles/{idbundle}/attributes/{idattribute}")
+    public ResponseEntity<Void> removeBundleAttributesByCi(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
-            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
-        bundleService.removeBundleByCi(fiscalCode, idBundle);
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Parameter(description = "Attribute identifier", required = true) @PathVariable("idattribute") String idAttribute) {
+        bundleService.removeBundleAttributesByCi(fiscalCode, idBundle, idAttribute);
         return ResponseEntity.ok().build();
     }
 

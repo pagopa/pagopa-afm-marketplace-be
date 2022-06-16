@@ -25,7 +25,8 @@ public enum AppError {
 
     REQUEST_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Request already accepted", "The request %s was accepted on %s"),
     REQUEST_ALREADY_REJECTED(HttpStatus.CONFLICT, "Request already rejected", "The request %s was rejected on %s"),
-    UNKNOWN(null, null, null);
+
+    BUNDLE_ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle attribute not found", "Bundle attribute with id %s not found.");
 
     public final HttpStatus httpStatus;
     public final String title;

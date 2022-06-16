@@ -2,17 +2,20 @@ package it.pagopa.afm.marketplacebe.service;
 
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
@@ -20,9 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -125,7 +130,7 @@ public class BundleService {
         return bundle.get();
     }
 
-    public Bundles getBundlesByFiscalCode(String fiscalCode, Integer limit, Integer pageNumber) {
+    public Bundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
         var bundleList = ciBundleRepository
                 .findByCiFiscalCode(fiscalCode)
                 .parallelStream()
@@ -139,9 +144,8 @@ public class BundleService {
                 .build();
     }
 
-    public BundleDetails getBundleByFiscalCode(String fiscalCode, String idBundle) {
-        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+    public BundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
 
         var bundle = bundleRepository.findById(ciBundle.getIdBundle())
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
@@ -149,20 +153,74 @@ public class BundleService {
         return modelMapper.map(bundle, BundleDetails.class);
     }
 
-    public BundleDetailsAttributes getBundleAttributesByFiscalCode(String fiscalCode, String idBundle) {
-        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+    public BundleDetailsAttributes getBundleAttributesByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
 
         return modelMapper.map(ciBundle, BundleDetailsAttributes.class);
     }
 
-    public Object createBundleAttributesByCi(String fiscalCode, String idBundle, CiBundleAttribute bundleAttribute) {
-        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
-        modelMapper.map(bundleAttribute, CiBundleAttribute.class);
-//        ciBundle.getAttributes().add();
+    public BundleAttributeResponse createBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull CiBundleAttributeModel bundleAttribute) {
+        // find CI-Bundle
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+
+        // create new attribute and add to CI-Bundle
+        var attribute = modelMapper.map(bundleAttribute, CiBundleAttribute.class)
+                .toBuilder()
+                .id(idBundle + "-" + UUID.randomUUID()) // generate id
+                .build();
+
+        ciBundle.getAttributes().add(attribute);
+
+        // save CI-Bundle with new attribute
         ciBundleRepository.save(ciBundle);
 
+        return BundleAttributeResponse.builder()
+                .idBundleAttribute(attribute.getId())
+                .build();
     }
+
+    public void updateBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute, @NotNull CiBundleAttributeModel bundleAttribute) {
+
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+        var attribute = ciBundle.getAttributes().parallelStream()
+                .filter(elem -> idAttribute.equals(elem.getId()))
+                .findFirst();
+
+        if (attribute.isPresent()) {
+            attribute.get().setMaxPaymentAmount(bundleAttribute.getMaxPaymentAmount());
+            attribute.get().setTransferCategory(bundleAttribute.getTransferCategory());
+            attribute.get().setTransferCategoryRelation(bundleAttribute.getTransferCategoryRelation());
+
+            ciBundleRepository.save(ciBundle);
+        } else {
+            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
+        }
+    }
+
+    public void removeBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute) {
+        // find CI-Bundle
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+
+        // remove attribute from CI-Bundle if exists
+        var result = ciBundle.getAttributes()
+                .removeIf(attribute -> idAttribute.equals(attribute.getId()));
+        if (!result) {
+            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
+        }
+    }
+
+    /**
+     * find CI-Bundle by fiscalCode and idBundle if exists from DB
+     *
+     * @param fiscalCode fiscal code of the CI
+     * @param idBundle   id of the bundle
+     * @return the CI-Bundle relation if exists, otherwise throws an exception
+     * @throws AppException if the CI-Bundle relation does not exist
+     */
+    private CiBundle findCiBundle(@NotNull String fiscalCode, @NotNull String idBundle) {
+        return ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+    }
+
 
 }

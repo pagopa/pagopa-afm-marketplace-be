@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CiBundleAttribute {
+public class CiBundleAttributeModel {
 
     private Long maxPaymentAmount;
     private String transferCategory;
