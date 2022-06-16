@@ -20,14 +20,13 @@ import java.util.List;
 @ToString
 public class Bundles {
 
-    @JsonProperty("services")
+    @JsonProperty("bundles")
     @Schema(required = true)
     @NotNull
     @Valid
     private List<Bundle> bundleList;
 
 
-    @JsonProperty("page_info")
     @Schema(required = true)
     @NotNull
     @Valid

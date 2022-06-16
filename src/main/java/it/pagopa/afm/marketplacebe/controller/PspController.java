@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
@@ -88,7 +91,7 @@ public class PspController {
      */
     @Operation(summary = "Create a new bundle", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleResponse.class))),
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = BundleResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -100,7 +103,7 @@ public class PspController {
     )
     public ResponseEntity<BundleResponse> createBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
+            @RequestBody @Valid @NotNull BundleRequest bundleRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundle(idPsp, bundleRequest));
     }
 
@@ -125,7 +128,7 @@ public class PspController {
     )
     public ResponseEntity<Void> updateBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
         bundleService.updateBundle(idPsp, idBundle, bundleRequest);
         return ResponseEntity.ok().build();
@@ -133,8 +136,7 @@ public class PspController {
 
     /**
      * DELETE /psps/:idpsp/bundles/:idbundle : Delete the bundle with the given id
-     *
-     * @param idPsp    : PSP identifier
+     * @param idPsp : PSP identifier
      * @param idBundle : Bundle identifier
      * @return
      */
@@ -152,7 +154,7 @@ public class PspController {
     )
     public ResponseEntity<Void> removeBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
         bundleService.removeBundle(idPsp, idBundle);
         return ResponseEntity.ok().build();
     }
@@ -160,13 +162,13 @@ public class PspController {
     /**
      * GET /psps/:idpsp/offers : Get paginated list of PSP offers regarding private bundles
      *
-     * @param idPsp PSP identifier.
-     * @param limit Number of items for page. Default = 50.
-     * @param page  Page number. Default = 0.
+     * @param idPsp  PSP identifier.
+     * @param limit  Number of items for page. Default = 50.
+     * @param page   Page number. Default = 0.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of PSP offers regarding private bundles", tags = {"PSP",})
+    @Operation(summary = "Get paginated list of PSP offers regarding private bundles", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleOffers.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -178,16 +180,16 @@ public class PspController {
             value = "/{idpsp}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Flux<BundleOffer> getOffers(
+    public ResponseEntity<BundleOffers> getOffers(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
-            @Parameter(description = "Starting cursor") @RequestParam(required = false, defaultValue = "") String cursor) {
-        return bundleOfferService.getPspOffers(idPsp, size, cursor);
+            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
+        return ResponseEntity.ok(bundleOfferService.getPspOffers(idPsp));
     }
 
 
     /**
-     * GET /psps/:idpsp/bunldes/:idbundle/offers : PSP offers a private bundle to a creditor institution
+     * POST /psps/:idpsp/bunldes/:idbundle/offers : PSP offers a private bundle to a creditor institution
      *
      * @param ciFiscalCodeList PSP identifier.
      * @return OK. (status code 200)
@@ -201,15 +203,44 @@ public class PspController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
-            value = "/{idpsp}/bundles/:idbundle/offers",
+    @PostMapping(
+            value = "/{idpsp}/bundles/{idbundle}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<List<BundleOffered>> sendBundleOffer(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @RequestBody @Valid @NotNull CiFiscalCodeList ciFiscalCodeList) {
-        return ResponseEntity.ok(bundleOfferService.sendBundleOffer(idPsp, idBundle, ciFiscalCodeList));
+        return ResponseEntity.status(HttpStatus.CREATED).body(bundleOfferService.sendBundleOffer(idPsp, idBundle, ciFiscalCodeList));
+    }
+
+    /**
+     * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP offers a private bundle to a creditor institution
+     *
+     * @param idPsp PSP identifier.
+     * @param idBundle Bundle identifier.
+     * @param idBundleOffer Bundle Offer identifier.
+     * @return OK. (status code 200)
+     * or Service unavailable (status code 500)
+     */
+    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @DeleteMapping(
+            value = "/{idpsp}/bundles/{idbundle}/offers/{idbundleoffer}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<List<BundleOffered>> removeBundleOffer(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
+         bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
+        return ResponseEntity.ok().build();
     }
 
 

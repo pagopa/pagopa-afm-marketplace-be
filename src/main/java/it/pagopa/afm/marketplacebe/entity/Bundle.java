@@ -24,11 +24,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Bundle{
+public class Bundle {
 
     @Id
     @GeneratedValue
-    private String idBundle;
+    private String id;
 
     @PartitionKey
     @NotNull

@@ -1,10 +1,10 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import com.azure.cosmos.implementation.NotFoundException;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
@@ -16,11 +16,11 @@ import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,8 +37,8 @@ public class BundleService {
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
          List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
                  .findByIdPsp(idPsp)
-                .stream()
-                .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
+                 .stream()
+                 .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
                  .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -50,7 +50,7 @@ public class BundleService {
     }
 
 
-    public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest){
+    public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
@@ -68,22 +68,14 @@ public class BundleService {
                 .insertedDate(now)
                 .lastUpdatedDate(now)
                 .build();
-
-        return BundleResponse.builder().idBundle(bundleRepository.save(bundle).getIdBundle().toString()).build();
+        bundleRepository.save(bundle);
+        return BundleResponse.builder()
+                .idBundle(bundle.getId())
+                .build();
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
-        Bundle bundle = bundleRepository.findByIdBundle(idBundle);
-
-        if(bundle == null){
-            throw new AppException(HttpStatus.NOT_FOUND,
-                    "Bundle not found", "The requested bundle does not exist");
-        }
-
-        if (idPsp.compareTo(bundle.getIdPsp()) != 0) {
-            throw new AppException(HttpStatus.BAD_REQUEST,
-                    "Wrong PSP Id", "The bundle requested does not match the provided PSP ID");
-        }
+        Bundle bundle = getBundle(idBundle, idPsp);
 
         bundle.setName(bundleRequest.getName());
         bundle.setDescription(bundleRequest.getDescription());
@@ -102,28 +94,20 @@ public class BundleService {
     }
 
     public void removeBundle(String idPsp, String idBundle){
-        Bundle bundle = bundleRepository.findByIdBundle(idBundle);
+        Bundle bundle = getBundle(idBundle, idPsp);
+        bundleRepository.delete(bundle);
+    }
 
-        if(bundle == null){
-            throw new AppException(HttpStatus.NOT_FOUND,
-                    "Bundle not found", "The requested bundle does not exist");
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
+        if(bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
 
-        if (idPsp.compareTo(bundle.getIdPsp()) != 0) {
-            throw new AppException(HttpStatus.BAD_REQUEST,
-                    "Wrong PSP Id", "The bundle requested does not match the provided PSP ID");
+        if (idPsp.compareTo(bundle.get().getIdPsp()) != 0) {
+            throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPsp);
         }
 
-        bundleRepository.deleteByIdBundle(idBundle);
+        return bundle.get();
     }
-
-    /*
-    public Mono<Void> deleteBundle(String idBundle){
-        return bundleRepository.deleteById(idBundle);
-    }
-
-    public Mono<Bundle> updateBundle(Bundle bundle){
-        return bundleRepository.save(bundle);
-    }
-     */
 }

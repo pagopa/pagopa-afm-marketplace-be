@@ -1,14 +1,40 @@
 {
 	"info": {
-		"_postman_id": "732fe1ea-8816-45c2-be96-4d87089a7ac7",
+		"_postman_id": "37f66410-b652-4050-8aca-97b181f8adc9",
 		"name": "Advanced Fees Management",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "205220"
+		"_exporter_id": "3634782"
 	},
 	"item": [
 		{
 			"name": "Marketplace",
 			"item": [
+				{
+					"name": "getBundles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "createBundle",
 					"request": {
@@ -16,7 +42,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"bundle1\",\n  \"description\": \"string\",\n  \"paymentAmount\": 100,\n  \"minPaymentAmount\": 10,\n  \"maxPaymentAmount\": 1000,\n  \"paymentMethod\": \"PPAL\",\n  \"touchpoint\": \"IO\",\n  \"type\": \"PUBLIC\",\n  \"transferCategoryList\": [\n    \"cat1\"\n  ],\n  \"validityDateFrom\": \"2022-06-15T13:37:16.442Z\",\n  \"validityDateTo\": \"2022-06-15T13:37:16.442Z\"\n}",
+							"raw": "{\n    \"name\": \"private-integration\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -45,12 +71,21 @@
 					"response": []
 				},
 				{
-					"name": "getBundles",
+					"name": "updateBundle",
 					"request": {
-						"method": "GET",
+						"method": "PUT",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"private-updated\",\n    \"description\": \"description\",\n    \"paymentAmount\": 100,\n    \"minPaymentAmount\": 0,\n    \"maxPaymentAmount\": 100,\n    \"paymentMethod\": \"PO\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"PRIVATE\",\n    \"transferCategoryList\": [\n        \"test\"\n    ],\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
 							"host": [
 								"{{afm-host}}"
 							],
@@ -58,12 +93,57 @@
 								"{{afm-base-path}}",
 								"psps",
 								":id_psp",
-								"bundles"
+								"bundles",
+								":id_bundle"
 							],
 							"variable": [
 								{
 									"key": "id_psp",
 									"value": "{{id_psp}}"
+								},
+								{
+									"key": "id_bundle",
+									"value": "{{id_bundle}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeBundle",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"{{afm-base-path}}",
+								"psps",
+								":id_psp",
+								"bundles",
+								":id_bundle"
+							],
+							"variable": [
+								{
+									"key": "id_psp",
+									"value": "{{id_psp}}"
+								},
+								{
+									"key": "id_bundle",
+									"value": "{{id_bundle}}"
 								}
 							]
 						}
@@ -130,7 +210,7 @@
 								},
 								{
 									"key": "id_bundle",
-									"value": "{{id_bundle}}"
+									"value": "{{private_id_bundle}}"
 								}
 							]
 						}
@@ -172,7 +252,7 @@
 								},
 								{
 									"key": "id_bundle",
-									"value": "{{id_bundle}}"
+									"value": "{{private_id_bundle}}"
 								},
 								{
 									"key": "id_bundle_offer",
@@ -184,37 +264,37 @@
 					"response": []
 				},
 				{
-					"name": "getRequestsByPsp",
+					"name": "getRequests_CI",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests",
+							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
 							"host": [
 								"{{afm-host}}"
 							],
 							"path": [
 								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
+								"cis",
+								":ci_fiscal_code",
 								"requests"
 							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "2",
-									"disabled": true
-								}
-							],
 							"variable": [
 								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
+									"key": "ci_fiscal_code",
+									"value": "{{ci_fiscal_code}}"
 								}
 							]
 						}
@@ -222,31 +302,34 @@
 					"response": []
 				},
 				{
-					"name": "acceptRequest",
+					"name": "createBundleRequest",
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idBundle\": \"{{public_id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 15,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/accept",
+							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
 							"host": [
 								"{{afm-host}}"
 							],
 							"path": [
 								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
-								"requests",
-								":request_id",
-								"accept"
+								"cis",
+								":ci_fiscal_code",
+								"requests"
 							],
 							"variable": [
 								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
-								},
-								{
-									"key": "request_id",
-									"value": "{{request_id}}"
+									"key": "ci_fiscal_code",
+									"value": "{{ci_fiscal_code}}"
 								}
 							]
 						}
@@ -254,31 +337,39 @@
 					"response": []
 				},
 				{
-					"name": "rejectRequest",
+					"name": "removeBundleRequest",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/reject",
+							"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests/:id_bundle_requests",
 							"host": [
 								"{{afm-host}}"
 							],
 							"path": [
 								"{{afm-base-path}}",
-								"psps",
-								":id_psp",
+								"cis",
+								":ci_fiscal_code",
 								"requests",
-								":request_id",
-								"reject"
+								":id_bundle_requests"
 							],
 							"variable": [
 								{
-									"key": "id_psp",
-									"value": "{{id_psp}}"
+									"key": "ci_fiscal_code",
+									"value": "{{ci_fiscal_code}}"
 								},
 								{
-									"key": "request_id",
-									"value": "{{request_id}}"
+									"key": "id_bundle_requests",
+									"value": "2e4f058f-0402-4091-bddb-299ea448f416"
 								}
 							]
 						}
@@ -286,6 +377,108 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "getRequestsByPsp",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests",
+					"host": [
+						"{{afm-host}}"
+					],
+					"path": [
+						"{{afm-base-path}}",
+						"psps",
+						":id_psp",
+						"requests"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1",
+							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "2",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "id_psp",
+							"value": "{{id_psp}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acceptRequest",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/accept",
+					"host": [
+						"{{afm-host}}"
+					],
+					"path": [
+						"{{afm-base-path}}",
+						"psps",
+						":id_psp",
+						"requests",
+						":request_id",
+						"accept"
+					],
+					"variable": [
+						{
+							"key": "id_psp",
+							"value": "{{id_psp}}"
+						},
+						{
+							"key": "request_id",
+							"value": "{{request_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rejectRequest",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/requests/:request_id/reject",
+					"host": [
+						"{{afm-host}}"
+					],
+					"path": [
+						"{{afm-base-path}}",
+						"psps",
+						":id_psp",
+						"requests",
+						":request_id",
+						"reject"
+					],
+					"variable": [
+						{
+							"key": "id_psp",
+							"value": "{{id_psp}}"
+						},
+						{
+							"key": "request_id",
+							"value": "{{request_id}}"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

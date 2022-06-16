@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.entity;
 
+import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,8 +20,9 @@ import java.time.LocalDateTime;
 public class CiBundleAttribute {
 
     @Id
+    @GeneratedValue
     @NotNull
-    private Long id;
+    private String id;
 
     private Long maxPaymentAmount;
 

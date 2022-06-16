@@ -18,9 +18,6 @@
 	<properties>
 		<java.version>11</java.version>
 		<cosmos-data-version>3.22.0</cosmos-data-version>
-		<modelmapper-version>3.1.0</modelmapper-version>
-		<springdoc-openapi-ui-version>1.6.9</springdoc-openapi-ui-version>
-		<javax-servlet-api-version>3.1.0</javax-servlet-api-version>
 	</properties>
 
 	<dependencies>
@@ -69,7 +66,6 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>${springdoc-openapi-ui-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -78,17 +74,7 @@
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
-			<version>${modelmapper-version}</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>javax.validation</groupId>-->
-<!--			<artifactId>validation-api</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.hibernate.validator</groupId>-->
-<!--			<artifactId>hibernate-validator</artifactId>-->
-<!--			<version>7.0.4.Final</version>-->
-<!--		</dependency>-->
 	</dependencies>
 
 	<build>
