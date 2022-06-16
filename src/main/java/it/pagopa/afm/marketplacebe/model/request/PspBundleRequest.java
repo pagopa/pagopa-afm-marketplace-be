@@ -2,34 +2,41 @@ package it.pagopa.afm.marketplacebe.model.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import it.pagopa.afm.marketplacebe.model.PageInfo;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Requests {
+public class PspBundleRequest {
 
-    @JsonProperty("requests")
-    @Schema(required = true)
+    @JsonProperty("idBundleRequest")
     @NotNull
-    @Valid
-    private List<String> requestsList;
+    private String id;
 
+    @NotBlank
+    private String idBundle;
 
-    @JsonProperty("pageInfo")
-    @Schema(required = true)
     @NotNull
+    private String ciFiscalCode;
+
+    private LocalDateTime acceptedDate;
+
+    private LocalDateTime rejectionDate;
+
     @Valid
-    private PageInfo pageInfo;
+    private List<PspCiBundleAttribute> ciBundleAttributes;
+
 }

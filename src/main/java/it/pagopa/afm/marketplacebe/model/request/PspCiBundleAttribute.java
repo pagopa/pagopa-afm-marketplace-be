@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.model.request;
 
+import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BundleRequestId {
+public class PspCiBundleAttribute {
 
-    private String idBundleRequest;
+    private Long maxPaymentAmount;
+
+    private String transferCategory;
+
+    private TransferCategoryRelation transferCategoryRelation;
+
 }

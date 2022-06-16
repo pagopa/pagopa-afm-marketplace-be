@@ -4,6 +4,8 @@ import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,31 +31,12 @@ public class BundleService {
 
     // TODO: add pagination
     // TODO: add filter
-
-//    public Mono<Bundles> getBundlesByPage(Integer pageNumber, Integer limit, Bundle.Filter filter) {
-//        return bundleRepository.findAll().collectList().map(
-//                bundles -> new Bundles(bundles, new PageInfo())
-//        );
-//    }
-
-//    public Mono<Bundle> addBundle(Bundle bundle){
-//        return bundleRepository.save(bundle);
-//    }
-
-//    public Mono<Void> deleteBundle(String idBundle){
-//        return bundleRepository.deleteById(idBundle);
-//    }
-
-//    public Mono<Bundle> updateBundle(Bundle bundle){
-//        return bundleRepository.save(bundle);
-//    }
-
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-         List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
-                 .findByIdPsp(idPsp)
-                 .stream()
-                 .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
-                 .collect(Collectors.toList());
+        List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
+                .findByIdPsp(idPsp)
+                .stream()
+                .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
+                .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
@@ -87,14 +71,40 @@ public class BundleService {
                 .build();
     }
 
-    /*
-    public Mono<Void> deleteBundle(String idBundle){
-        return bundleRepository.deleteById(idBundle);
-    }
+    public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
+        Bundle bundle = getBundle(idBundle, idPsp);
 
-    public Mono<Bundle> updateBundle(Bundle bundle){
+        bundle.setName(bundleRequest.getName());
+        bundle.setDescription(bundleRequest.getDescription());
+        bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
+        bundle.setMinPaymentAmount(bundleRequest.getMinPaymentAmount());
+        bundle.setMaxPaymentAmount(bundleRequest.getMaxPaymentAmount());
+        bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
+        bundle.setTouchpoint(Touchpoint.valueOf(bundleRequest.getTouchpoint()));
+        bundle.setType(BundleType.valueOf(bundleRequest.getType()));
+        bundle.setTransferCategoryList(bundleRequest.getTransferCategoryList());
+        bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
+        bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
+        bundle.setLastUpdatedDate(LocalDateTime.now());
+
         return bundleRepository.save(bundle);
     }
-     */
 
+    public void removeBundle(String idPsp, String idBundle) {
+        Bundle bundle = getBundle(idBundle, idPsp);
+        bundleRepository.delete(bundle);
+    }
+
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
+        if (bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+
+        if (idPsp.compareTo(bundle.get().getIdPsp()) != 0) {
+            throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPsp);
+        }
+
+        return bundle.get();
+    }
 }

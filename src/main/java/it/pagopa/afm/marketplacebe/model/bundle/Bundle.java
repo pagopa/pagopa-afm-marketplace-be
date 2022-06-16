@@ -11,7 +11,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Container(containerName = "bundles")
 @Getter
 @Setter
 @NoArgsConstructor

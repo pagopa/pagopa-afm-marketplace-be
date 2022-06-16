@@ -1,7 +1,6 @@
 package it.pagopa.afm.marketplacebe.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -20,6 +19,17 @@ import javax.validation.constraints.PositiveOrZero;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PageInfo {
+
+    @JsonProperty("page")
+    @Schema(description = "Page number", required = true)
+    @PositiveOrZero
+    Integer page;
+
+    @JsonProperty("limit")
+    @Schema(description = "Required number of items per page", required = true)
+    @Positive
+    Integer limit;
+
     @JsonProperty("itemsFound")
     @Schema(description = "Number of items found. (The last page may have fewer elements than required)", required = true)
     @PositiveOrZero
