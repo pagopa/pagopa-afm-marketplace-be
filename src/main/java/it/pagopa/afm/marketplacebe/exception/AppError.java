@@ -9,6 +9,7 @@ public enum AppError {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something was wrong"),
     ENTITY_VALIDATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "Error during entity validation", "%s"),
 
+    BUNDLE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bundle bad request", "Bundle data not valid. %s"),
     BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle not found", "Bundle with id %s not found."),
     BUNDLE_PSP_CONFLICT(HttpStatus.CONFLICT, "Bundle conflict", "Bundle with id %s and idPsp: %s"),
 
