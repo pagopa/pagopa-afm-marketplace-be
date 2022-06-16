@@ -22,8 +22,8 @@ public enum AppError {
     BUNDLE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle request not found", "Bundle request with id %s not found."),
     BUNDLE_REQUEST_CONFLICT(HttpStatus.CONFLICT, "Bundle request conflict", "Bundle request with id %s. %s"),
 
-    REQUEST_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Request already accepted", "The request {} was accepted on {}"),
-    REQUEST_ALREADY_REJECTED(HttpStatus.CONFLICT, "Request already rejected", "The request {} was rejected on {}"),
+    REQUEST_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Request already accepted", "The request %s was accepted on %s"),
+    REQUEST_ALREADY_REJECTED(HttpStatus.CONFLICT, "Request already rejected", "The request %s was rejected on %s"),
     UNKNOWN(null, null, null);
 
     public final HttpStatus httpStatus;

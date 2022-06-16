@@ -2,6 +2,7 @@ package it.pagopa.afm.marketplacebe.service;
 
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequest;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.exception.AppError;
@@ -12,28 +13,20 @@ import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.lang.Nullable;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.exception.AppError;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.request.*;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,6 +89,7 @@ public class BundleRequestService {
                 .stream()
                 .map(attribute ->
                         CiBundleAttribute.builder()
+                                .id(idBundle + "-" + UUID.randomUUID())
                                 .insertedDate(LocalDateTime.now())
                                 .maxPaymentAmount(attribute.getMaxPaymentAmount())
                                 .transferCategory(attribute.getTransferCategory())

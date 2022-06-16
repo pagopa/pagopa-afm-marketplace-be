@@ -24,7 +24,6 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class BundleRequest {
 
     @Id

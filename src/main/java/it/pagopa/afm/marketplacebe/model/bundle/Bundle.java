@@ -1,6 +1,5 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
-import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

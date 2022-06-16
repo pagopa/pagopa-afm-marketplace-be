@@ -9,9 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import it.pagopa.afm.marketplacebe.entity.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.PageInfo;
-import lombok.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
