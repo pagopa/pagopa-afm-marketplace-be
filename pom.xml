@@ -16,6 +16,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<cosmos-data-version>3.21.0</cosmos-data-version>
+		<modelmapper-version>2.4.5</modelmapper-version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -23,6 +24,7 @@
 			<artifactId>azure-spring-data-cosmos</artifactId>
 			<version>${cosmos-data-version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
@@ -69,6 +71,11 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${modelmapper-version}</version>
 		</dependency>
 	</dependencies>
 
