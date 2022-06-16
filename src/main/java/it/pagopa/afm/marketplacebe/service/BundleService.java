@@ -32,11 +32,11 @@ public class BundleService {
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-         List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
-                 .findByIdPsp(idPsp)
-                 .stream()
-                 .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
-                 .collect(Collectors.toList());
+        List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
+                .findByIdPsp(idPsp)
+                .stream()
+                .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
+                .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
@@ -90,14 +90,14 @@ public class BundleService {
         return bundleRepository.save(bundle);
     }
 
-    public void removeBundle(String idPsp, String idBundle){
+    public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
         bundleRepository.delete(bundle);
     }
 
     private Bundle getBundle(String idBundle, String idPsp) {
         Optional<Bundle> bundle = bundleRepository.findById(idBundle);
-        if(bundle.isEmpty()) {
+        if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
 

@@ -13,6 +13,8 @@ public class CommonUtil {
      */
     public <T> PageInfo buildPageInfo(Page<T> page) {
         return PageInfo.builder()
+                .page(page.getNumber())
+                .limit(page.getSize())
                 .totalPages(page.getTotalPages())
                 .itemsFound(page.getNumberOfElements())
                 .build();

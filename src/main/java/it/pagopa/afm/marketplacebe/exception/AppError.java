@@ -11,11 +11,15 @@ public enum AppError {
 
     BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle not found", "Bundle with id %s not found."),
     BUNDLE_PSP_CONFLICT(HttpStatus.CONFLICT, "Bundle conflict", "Bundle with id %s and idPsp: %s"),
-
     BUNDLE_OFFER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bundle offer bad request", "Bundle offer with id %s not configured with %s."),
     BUNDLE_OFFER_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle offer not found", "Bundle offer with id %s not found."),
     BUNDLE_OFFER_CONFLICT(HttpStatus.CONFLICT, "Bundle offer conflict", "Bundle offer with id %s. %s"),
 
+    CI_BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "No relation CI-BUNDLE found", "Relation between Bundle %s and CI %s not found."),
+
+    BUNDLE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle request not found", "Bundle request with id %s not found."),
+    REQUEST_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Request already accepted", "The request {} was accepted on {}"),
+    REQUEST_ALREADY_REJECTED(HttpStatus.CONFLICT, "Request already rejected", "The request {} was rejected on {}"),
     UNKNOWN(null, null, null);
 
     public final HttpStatus httpStatus;
