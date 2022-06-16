@@ -18,6 +18,7 @@ import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class BundleService {
 
     @Autowired
@@ -57,6 +59,12 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
+
+        LocalDateTime validityDateFrom = bundleRequest.getValidityDateFrom() != null ? bundleRequest.getValidityDateFrom() : LocalDateTime.now();
+        if (bundleRequest.getValidityDateTo() != null && bundleRequest.getValidityDateTo().isBefore(validityDateFrom)) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
+        }
+
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
@@ -69,7 +77,7 @@ public class BundleService {
                 .touchpoint(Touchpoint.valueOf(bundleRequest.getTouchpoint()))
                 .type(BundleType.valueOf(bundleRequest.getType()))
                 .transferCategoryList(bundleRequest.getTransferCategoryList())
-                .validityDateFrom(bundleRequest.getValidityDateFrom())
+                .validityDateFrom(validityDateFrom)
                 .validityDateTo(bundleRequest.getValidityDateTo())
                 .insertedDate(now)
                 .lastUpdatedDate(now)

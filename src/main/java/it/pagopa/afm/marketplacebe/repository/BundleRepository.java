@@ -20,6 +20,4 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
 
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
 
-    void deleteById(String idBundle);
-
 }

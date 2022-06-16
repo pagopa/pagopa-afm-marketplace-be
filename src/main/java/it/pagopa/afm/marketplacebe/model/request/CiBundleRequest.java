@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.model.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,8 @@ import java.util.List;
 @ToString
 public class CiBundleRequest {
 
-    private String idBundleRequest;
+    @JsonProperty("idBundleRequest")
+    private String id;
     private String idBundle;
     private String idPsp;
 
