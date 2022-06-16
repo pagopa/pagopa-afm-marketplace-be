@@ -48,6 +48,11 @@ public class BundleService {
         return Bundles.builder().bundleList(bundleList).pageInfo(pageInfo).build();
     }
 
+    public it.pagopa.afm.marketplacebe.model.bundle.Bundle getBundleById(String idBundle, String idPsp) {
+        Bundle bundle = getBundle(idBundle, idPsp);
+
+        return modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class);
+    }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
 
