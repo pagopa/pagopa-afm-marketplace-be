@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "621f015b-585a-4fb4-91a3-24717fba833b",
+		"_postman_id": "5f6f6527-b220-4b8f-93b1-5a4a08cdbc95",
 		"name": "Advanced Fees Management",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "3634782"
+		"_exporter_id": "205220"
 	},
 	"item": [
 		{
@@ -423,6 +423,141 @@
 					"name": "CI",
 					"item": [
 						{
+							"name": "createBundleAttribute",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"postman.setEnvironmentVariable(\"id_attribute\", jsonData.idBundleAttribute);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"maxPaymentAmount\": 57,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRelation\": \"EQUAL\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createBundleRequest",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"idBundle\": \"{{public_id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 15,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"requests"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateBundleAttribute",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"maxPaymentAmount\": 1,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRelation\": \"NOT_EQUAL\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes/:id_attribute",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes",
+										":id_attribute"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										},
+										{
+											"key": "id_attribute",
+											"value": "{{id_attribute}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "getRequests",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
@@ -461,13 +596,16 @@
 							"response": []
 						},
 						{
-							"name": "createBundleRequest",
+							"name": "getBundles",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
 							"request": {
-								"method": "POST",
+								"method": "GET",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"idBundle\": \"{{public_id_bundle}}\",\n    \"attributes\": [\n      {\n        \"maxPaymentAmount\": 15,\n        \"transferCategory\": \"PO\",\n        \"transferCategoryRelation\": \"EQUAL\"\n      }\n    ]\n}",
+									"raw": "",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -475,7 +613,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/requests",
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles",
 									"host": [
 										"{{afm-host}}"
 									],
@@ -483,12 +621,136 @@
 										"{{afm-base-path}}",
 										"cis",
 										":ci_fiscal_code",
-										"requests"
+										"bundles"
 									],
 									"variable": [
 										{
 											"key": "ci_fiscal_code",
 											"value": "{{ci_fiscal_code}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getBundle",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getBundleAttributes",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteBundleAttribute",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes/:id_attribute",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes",
+										":id_attribute"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										},
+										{
+											"key": "id_attribute",
+											"value": "{{id_attribute}}"
 										}
 									]
 								}

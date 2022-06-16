@@ -11,7 +11,6 @@ import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
@@ -49,7 +48,7 @@ public class CiController {
     @Autowired
     private BundleService bundleService;
 
-    @Operation(summary = "Get paginated list of bundles of a CI", security = {}, tags = {"CI",})
+    @Operation(summary = "Get paginated list of bundles of a CI", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -69,7 +68,7 @@ public class CiController {
         return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page);
     }
 
-    @Operation(summary = "Get a bundle of a CI", security = {}, tags = {"CI",})
+    @Operation(summary = "Get a bundle of a CI", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetails.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -87,7 +86,7 @@ public class CiController {
         return bundleService.getBundleByFiscalCode(fiscalCode, idBundle);
     }
 
-    @Operation(summary = "Get attributes of a bundle of a CI", security = {}, tags = {"CI",})
+    @Operation(summary = "Get attributes of a bundle of a CI", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetailsAttributes.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -106,7 +105,7 @@ public class CiController {
     }
 
 
-    @Operation(summary = "Create a new bundle attribute", security = {}, tags = {"CI",})
+    @Operation(summary = "Create a new bundle attribute", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleAttributeResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -125,7 +124,7 @@ public class CiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundleAttributesByCi(fiscalCode, idBundle, bundleAttribute));
     }
 
-    @Operation(summary = "Update an attribute of a bundle", security = {}, tags = {"CI",})
+    @Operation(summary = "Update an attribute of a bundle", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -143,7 +142,7 @@ public class CiController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Delete an attribute of a bundle", security = {}, tags = {"CI",})
+    @Operation(summary = "Delete an attribute of a bundle", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),

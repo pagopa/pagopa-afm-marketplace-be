@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 
 import javax.validation.constraints.NotNull;
@@ -32,7 +31,6 @@ public class CiBundleAttribute {
 
     private LocalDateTime validityDateTo;
 
-    @CreatedDate
     @NotNull
     private LocalDateTime insertedDate;
 

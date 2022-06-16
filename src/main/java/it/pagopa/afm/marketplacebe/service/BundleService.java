@@ -167,6 +167,7 @@ public class BundleService {
         var attribute = modelMapper.map(bundleAttribute, CiBundleAttribute.class)
                 .toBuilder()
                 .id(idBundle + "-" + UUID.randomUUID()) // generate id
+                .insertedDate(LocalDateTime.now())
                 .build();
 
         ciBundle.getAttributes().add(attribute);
