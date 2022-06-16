@@ -7,9 +7,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.*;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import org.modelmapper.ModelMapper;
@@ -19,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,9 +47,9 @@ public class BundleOfferService {
 //    }
 
     public BundleOffers getPspOffers(String idPsp) {
-        List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> bundleOfferList = bundleOfferRepository.findByIdPsp(idPsp)
+        List<PspBundleOffer> bundleOfferList = bundleOfferRepository.findByIdPsp(idPsp)
                 .stream()
-                .map(bo -> modelMapper.map(bo, it.pagopa.afm.marketplacebe.model.offer.BundleOffer.class))
+                .map(bo -> modelMapper.map(bo, PspBundleOffer.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -59,7 +58,7 @@ public class BundleOfferService {
                 .build();
 
         return BundleOffers.builder()
-                .offers(bundleOfferList)
+                .offers(Collections.singletonList(bundleOfferList))
                 .pageInfo(pageInfo)
                 .build();
     }
@@ -111,6 +110,25 @@ public class BundleOfferService {
         }
 
         bundleOfferRepository.delete(bundleOffer.get());
+    }
+
+    public BundleOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
+
+        List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPsp(idPsp, new PartitionKey(ciFiscalCode));
+        List<CiBundleOffer> bundleOfferList = offerList
+                .stream()
+                .map(bo -> modelMapper.map(bo, CiBundleOffer.class))
+                .collect(Collectors.toList());
+
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(bundleOfferList.size())
+                .totalPages(1)
+                .build();
+
+        return BundleOffers.builder()
+                .offers(Collections.singletonList(bundleOfferList))
+                .pageInfo(pageInfo)
+                .build();
     }
 
     private Bundle getBundle(String idBundle, String idPsp) {

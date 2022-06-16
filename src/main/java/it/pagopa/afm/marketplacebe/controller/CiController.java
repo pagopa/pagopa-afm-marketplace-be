@@ -12,10 +12,12 @@ import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
+import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class CiController {
 
     @Autowired
     private BundleRequestService bundleRequestService;
+
+    @Autowired
+    private BundleOfferService bundleOfferService;
 
     @Autowired
     private BundleService bundleService;
@@ -241,5 +246,36 @@ public class CiController {
             @Parameter(description = "CI identifier", required = true) @PathVariable("idbundlerequest") String idBundleRequest) {
         bundleRequestService.removeBundleRequest(ciFiscalCode, idBundleRequest);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * GET /cis/:cifiscalcode/offers : Get paginated list of PSP offers to the CI regarding private bundles
+     *
+     * @param ciFiscalCode CI identifier.
+     * @param size         Number of elements for page. Default = 50.
+     * @param cursor       Cursor from which starts counting.
+     * @param idPsp        PSP identifier. Optional filter.
+     * @return OK. (status code 200)
+     * or Service unavailable (status code 500)
+     */
+    @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleOffers.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{cifiscalcode}/offers",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<BundleOffers> getOffersByCI(
+            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
+            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
+            @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
+            @Parameter(description = "Filter by psp") @RequestParam(required = false) String idPsp) {
+        return ResponseEntity.ok(bundleOfferService.getCiOffers(ciFiscalCode, size, cursor, idPsp));
+
     }
 }
