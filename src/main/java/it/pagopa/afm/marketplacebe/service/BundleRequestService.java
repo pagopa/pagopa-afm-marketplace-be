@@ -136,7 +136,6 @@ public class BundleRequestService {
     }
 
     public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode) {
-        // TODO: verify idPsp and fiscal code
         // TODO: pageable
 
         List<BundleRequest> result;
@@ -155,8 +154,6 @@ public class BundleRequestService {
 
 
     public void acceptRequest(String idPsp, String idBundleRequest) {
-        // TODO: verify idPsp
-
         var entity = getBundleRequest(idPsp, idBundleRequest);
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleRequestRepository.save(entity.toBuilder()
@@ -174,8 +171,6 @@ public class BundleRequestService {
 
 
     public void rejectRequest(String idPsp, String idBundleRequest) {
-        // TODO: verify idPsp and fiscal code
-
         var entity = getBundleRequest(idPsp, idBundleRequest);
         if (entity.getRejectionDate() == null && entity.getAcceptedDate() == null) {
             bundleRequestRepository.save(entity.toBuilder()
