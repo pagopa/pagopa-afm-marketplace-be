@@ -13,11 +13,7 @@ public enum PaymentMethod {
 
     private final String paymentMethod;
 
-    PaymentMethod(final String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
+    PaymentMethod(final String paymentMethod) { this.paymentMethod = paymentMethod; }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
+    public String getPaymentMethod() { return paymentMethod; }
 }

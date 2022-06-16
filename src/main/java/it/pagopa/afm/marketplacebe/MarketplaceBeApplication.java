@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import javax.validation.Validator;
 
 @SpringBootApplication
+@EnableCosmosRepositories
 public class MarketplaceBeApplication {
 
     public static void main(String[] args) {
