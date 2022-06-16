@@ -1,15 +1,14 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.offer.*;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,9 @@ public class BundleOfferService {
 
     @Autowired
     BundleOfferRepository bundleOfferRepository;
+
+    @Autowired
+    CiBundleRepository ciBundleRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -138,4 +140,57 @@ public class BundleOfferService {
         }
         return optBundle.get();
     }
+
+    public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
+        BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
+        if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
+            bundleOfferRepository.save(
+                    entity.toBuilder()
+                            .acceptedDate(LocalDateTime.now())
+                            .rejectionDate(null)
+                            .build());
+
+            // create CI-Bundle relation
+            return CiBundleId.builder()
+                    .id(ciBundleRepository.save(buildCiBundle(entity)).getId())
+                    .build();
+        } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
+        } else {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, entity.getAcceptedDate());
+        }
+    }
+
+    public void rejectOffer(String ciFiscalCode, String idBundleOffer) {
+        BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
+        if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
+            bundleOfferRepository.save(
+                    entity.toBuilder()
+                            .rejectionDate(LocalDateTime.now())
+                            .build());
+        } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
+        } else {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, entity.getAcceptedDate());
+        }
+    }
+
+    /**
+     * @param idBundleOffer Bundle Offer identifier
+     * @param ciFiscalCode    CI identifier
+     * @return the entity if exist
+     * @throws AppException if not found
+     */
+    private BundleOffer getBundleOffer(String idBundleOffer, String ciFiscalCode) {
+        return bundleOfferRepository.findById(idBundleOffer, new PartitionKey(ciFiscalCode))
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_OFFER_NOT_FOUND, idBundleOffer));
+    }
+
+    private CiBundle buildCiBundle(BundleOffer entity) {
+        return CiBundle.builder()
+                .ciFiscalCode(entity.getCiFiscalCode())
+                .idBundle(entity.getIdBundle())
+                .build();
+    }
+
 }

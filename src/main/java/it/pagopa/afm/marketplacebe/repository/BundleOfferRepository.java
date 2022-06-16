@@ -8,10 +8,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BundleOfferRepository extends CosmosRepository<BundleOffer, String> {
-
+    Optional<BundleOffer> findById(String idBundleOffer, PartitionKey ciFiscalCode);
 
     List<BundleOffer> findByIdPsp(String idPsp);
     List<BundleOffer> findByIdPsp(String idPsp, PartitionKey ciFiscalCode);
