@@ -7,13 +7,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
 public interface BundleRepository extends CosmosRepository<Bundle, String> {
-    Bundle findByIdBundle(String idBundle);
+    Optional<Bundle> findById(String idBundle);
+    Page<Bundle> findById(String idBundle, Pageable pageable);
+
     List<Bundle> findByIdPsp(String idPsp);
-    Page<Bundle> findByIdBundle(String idBundle, Pageable pageable);
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
-    void deleteByIdBundle(String idBundle);
+
+    void deleteById(String idBundle);
+
 }

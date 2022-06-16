@@ -27,7 +27,7 @@ public class Requests {
     private List<String> requestsList;
 
 
-    @JsonProperty("page_info")
+    @JsonProperty("pageInfo")
     @Schema(required = true)
     @NotNull
     @Valid
