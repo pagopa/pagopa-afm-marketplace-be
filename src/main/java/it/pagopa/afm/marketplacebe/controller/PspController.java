@@ -84,7 +84,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return
      */
-    @Operation(summary = "Get paginated list of bundles of a PSP", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get a bundle", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundle.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -111,7 +111,6 @@ public class PspController {
      */
     @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
-            // TODO: update schema - 200
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
@@ -124,7 +123,8 @@ public class PspController {
     )
     public ResponseEntity<CiFiscalCodeList> getBundleCreditorInstitutions(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+        // TODO: return pagination
         return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp));
     }
 

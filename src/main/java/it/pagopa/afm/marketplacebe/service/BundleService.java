@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
@@ -112,18 +113,6 @@ public class BundleService {
         bundleRepository.delete(bundle);
     }
 
-    private Bundle getBundle(String idBundle, String idPsp) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
-        if (bundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-
-        if (idPsp.compareTo(bundle.get().getIdPsp()) != 0) {
-            throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPsp);
-        }
-
-        return bundle.get();
-    }
     public CiFiscalCodeList getCIs(String idBundle, String idPSP){
        List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
        List<String> CIs = new ArrayList<>();
@@ -141,13 +130,13 @@ public class BundleService {
     }
 
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
-        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
+        Bundle bundle = getBundle(idBundle, idPsp);
+
+        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
 
         if(ciBundle.isEmpty()){
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
-
-        getBundle(idBundle, idPsp);
 
         return CiBundleDetails.builder()
                 .validityDateTo(ciBundle.get().getValidityDateTo())
@@ -159,7 +148,22 @@ public class BundleService {
     }
 
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
-        return !bundleRepository.findById(ciBundle.getIdBundle()).isEmpty() ||
-                bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp() != idPSP;
+        return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
+                !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
+    }
+
+    /** Retrieve a bundle by id and partition key
+     *
+     * @param idBundle Bundle identifier
+     * @param idPsp PSP identifier
+     * @return bundle
+     */
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
+        if (bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+
+        return bundle.get();
     }
 }
