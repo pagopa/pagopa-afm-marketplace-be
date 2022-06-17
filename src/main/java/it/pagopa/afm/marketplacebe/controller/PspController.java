@@ -90,7 +90,7 @@ public class PspController {
     )
     public ResponseEntity<BundleDetails> getBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
         return ResponseEntity.ok(bundleService.getBundleById(idBundle, idPsp));
     }
 
@@ -144,8 +144,8 @@ public class PspController {
     )
     public ResponseEntity<CiBundleDetails> getBundleCreditorInstitutionDetails(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode){
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode) {
         return ResponseEntity.ok(bundleService.getCIDetails(idBundle, idPsp, ciFiscalCode));
     }
 
