@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
 
     Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode);
+    List<CiBundle> findByIdBundle(String idBundle);
 
     List<CiBundle> findByCiFiscalCode(String ciFiscalCode);
 
