@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundle;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -115,7 +112,7 @@ public class PspController {
     @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
             // TODO: update schema - 200
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -125,12 +122,40 @@ public class PspController {
             value = "/{idpsp}/bundles/{idbundle}/creditorInstitutions",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<List<String>> getBundleCreditorInstitutions(
+    public ResponseEntity<CiFiscalCodeList> getBundleCreditorInstitutions(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
         return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp));
     }
 
+    /**
+     * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions/:cifiscalcode : Get attribute details set by the creditor
+     * institution
+     *
+     * @param idPsp : PSP identifier
+     * @param idBundle : Bundle identifier
+     * @param ciFiscalCode : Creditor Institution fiscal code
+     * @return
+     */
+    @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            // TODO: update schema - 200
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiBundleDetails.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{idpsp}/bundles/{idbundle}/creditorInstitutions/{ciFiscalCode}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<CiBundleDetails> getBundleCreditorInstitutionDetails(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String ciFiscalCode){
+        return ResponseEntity.ok(bundleService.getCIDetails(idBundle, idPsp, ciFiscalCode));
+    }
 
 
     /**

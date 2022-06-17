@@ -7,6 +7,8 @@ import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
@@ -122,9 +124,10 @@ public class BundleService {
 
         return bundle.get();
     }
-    public List<String> getCIs(String idBundle, String idPSP){
+    public CiFiscalCodeList getCIs(String idBundle, String idPSP){
        List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
        List<String> CIs = new ArrayList<>();
+       CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
 
        for(CiBundle ciBundle: subscriptions){
            if (!checkCiBundle(ciBundle, idPSP)){
@@ -132,8 +135,25 @@ public class BundleService {
            }
            CIs.add(ciBundle.getCiFiscalCode());
        }
+       ciFiscalCodeList.setCiFiscalCodeList(CIs);
 
-       return CIs;
+       return ciFiscalCodeList;
+    }
+
+    public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
+        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
+
+        if(ciBundle.isEmpty()){
+            throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle);
+        }
+
+        return CiBundleDetails.builder()
+                .validityDateTo(ciBundle.get().getValidityDateTo())
+                .attributes(ciBundle.get().getAttributes().stream().map(
+                        attribute -> modelMapper.map(
+                                attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
+                ).collect(Collectors.toList()))
+                .build();
     }
 
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
