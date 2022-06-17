@@ -116,7 +116,7 @@ public class BundleOfferService {
 
     public BundleOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
 
-        List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPsp(idPsp, new PartitionKey(ciFiscalCode));
+        List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPspAndCiFiscalCode(idPsp, new PartitionKey(ciFiscalCode));
         List<CiBundleOffer> bundleOfferList = offerList
                 .stream()
                 .map(bo -> modelMapper.map(bo, CiBundleOffer.class))

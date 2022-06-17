@@ -25,21 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import javax.validation.constraints.Size;
 
 @RestController()
 @RequestMapping(path = "/cis")
@@ -111,7 +102,6 @@ public class CiController {
         return bundleService.getBundleAttributesByFiscalCode(fiscalCode, idBundle);
     }
 
-
     @Operation(summary = "Create a new bundle attribute", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleAttributeResponse.class))),
@@ -165,7 +155,6 @@ public class CiController {
         bundleService.removeBundleAttributesByCi(fiscalCode, idBundle, idAttribute);
         return ResponseEntity.ok().build();
     }
-
 
     /**
      * GET /cis/:cifiscalcode/requests : Get paginated list of CI requests to the PSP regarding public bundles
@@ -222,7 +211,6 @@ public class CiController {
             @RequestBody @Valid @NotNull CiBundleSubscriptionRequest ciBundleSubscriptionRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleRequestService.createBundleRequest(ciFiscalCode, ciBundleSubscriptionRequest));
     }
-
 
     /**
      * DELETE /cis/:cifiscalcode/requests/:idbundlerequest : Delete CI request regarding public bundles
@@ -296,7 +284,6 @@ public class CiController {
             @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleOfferService.acceptOffer(ciFiscalCode, idBundleOffer));
     }
-
 
     @Operation(summary = "The CI rejects the offer of the PSP", tags = {"CI",})
     @ApiResponses(value = {
