@@ -86,7 +86,7 @@ public class PspController {
      */
     @Operation(summary = "Get a bundle", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundle.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetails.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -96,7 +96,7 @@ public class PspController {
             value = "/{idpsp}/bundles/{idbundle}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<Bundle> getBundle(
+    public ResponseEntity<BundleDetails> getBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
         return ResponseEntity.ok(bundleService.getBundleById(idBundle, idPsp));

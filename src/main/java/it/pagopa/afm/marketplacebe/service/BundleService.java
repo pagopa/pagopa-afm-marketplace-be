@@ -162,26 +162,6 @@ public class BundleService {
                 .build();
     }
 
-    private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
-        return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
-                !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
-    }
-
-    /** Retrieve a bundle by id and partition key
-     *
-     * @param idBundle Bundle identifier
-     * @param idPsp PSP identifier
-     * @return bundle
-     */
-    private Bundle getBundle(String idBundle, String idPsp) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
-        if (bundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-
-        return bundle.get();
-    }
-
     public Bundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
         var bundleList = ciBundleRepository
                 .findByCiFiscalCode(fiscalCode)
@@ -275,5 +255,24 @@ public class BundleService {
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
     }
 
+    private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
+        return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
+                !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
+    }
+
+    /** Retrieve a bundle by id and partition key
+     *
+     * @param idBundle Bundle identifier
+     * @param idPsp PSP identifier
+     * @return bundle
+     */
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
+        if (bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+
+        return bundle.get();
+    }
 
 }
