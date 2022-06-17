@@ -1,22 +1,24 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +29,9 @@ public class BundleService {
 
     @Autowired
     private BundleRepository bundleRepository;
+
+    @Autowired
+    private CiBundleRepository ciBundleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -48,6 +53,11 @@ public class BundleService {
         return Bundles.builder().bundleList(bundleList).pageInfo(pageInfo).build();
     }
 
+    public it.pagopa.afm.marketplacebe.model.bundle.Bundle getBundleById(String idBundle, String idPsp) {
+        Bundle bundle = getBundle(idBundle, idPsp);
+
+        return modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class);
+    }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
 
@@ -103,14 +113,55 @@ public class BundleService {
         bundleRepository.delete(bundle);
     }
 
-    private Bundle getBundle(String idBundle, String idPsp) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
-        if (bundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+    public CiFiscalCodeList getCIs(String idBundle, String idPSP){
+       List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
+       List<String> CIs = new ArrayList<>();
+       CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
+
+       for(CiBundle ciBundle: subscriptions){
+           if (!checkCiBundle(ciBundle, idPSP)){
+               throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+           }
+           CIs.add(ciBundle.getCiFiscalCode());
+       }
+       ciFiscalCodeList.setCiFiscalCodeList(CIs);
+
+       return ciFiscalCodeList;
+    }
+
+    public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
+        Bundle bundle = getBundle(idBundle, idPsp);
+
+        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
+
+        if(ciBundle.isEmpty()){
+            throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
 
-        if (idPsp.compareTo(bundle.get().getIdPsp()) != 0) {
-            throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPsp);
+        return CiBundleDetails.builder()
+                .validityDateTo(ciBundle.get().getValidityDateTo())
+                .attributes(ciBundle.get().getAttributes().stream().map(
+                        attribute -> modelMapper.map(
+                                attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
+                ).collect(Collectors.toList()))
+                .build();
+    }
+
+    private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
+        return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
+                !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
+    }
+
+    /** Retrieve a bundle by id and partition key
+     *
+     * @param idBundle Bundle identifier
+     * @param idPsp PSP identifier
+     * @return bundle
+     */
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
+        if (bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
 
         return bundle.get();

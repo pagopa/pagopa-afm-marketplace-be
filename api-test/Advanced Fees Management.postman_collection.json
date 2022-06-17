@@ -268,6 +268,75 @@
 							"response": []
 						},
 						{
+							"name": "getBundleCreditorInstitutions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/creditorInstitutions",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle",
+										"creditorInstitutions"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getBundleCreditorInstitutionDetails",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle/creditorInstitutions/:ci_fiscal_code",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle",
+										"creditorInstitutions",
+										":ci_fiscal_code"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										},
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "getOffers",
 							"request": {
 								"method": "GET",
@@ -529,6 +598,96 @@
 										{
 											"key": "id_bundle_requests",
 											"value": "{{request_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getOffers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/offers",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"offers"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "acceptOffer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/offers/:offer_id/accept",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"offers",
+										":offer_id",
+										"accept"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "offer_id",
+											"value": "{{id_bundle_offer}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "rejectOffer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/offers/:offer_id/reject",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"offers",
+										":offer_id",
+										"reject"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "offer_id",
+											"value": "{{id_bundle_offer}}"
 										}
 									]
 								}

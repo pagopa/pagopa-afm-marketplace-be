@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -75,9 +73,90 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
-        // TODO filter single bundle
         return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, 0, 100));
     }
+
+
+    /**
+     * GET /psps/:idpsp/bundle/:idbundle : Get a bundle
+     *
+     * @param idPsp : PSP identifier
+     * @param idBundle : Bundle identifier
+     * @return
+     */
+    @Operation(summary = "Get a bundle", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundle.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{idpsp}/bundles/{idbundle}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<Bundle> getBundle(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+        return ResponseEntity.ok(bundleService.getBundleById(idBundle, idPsp));
+    }
+
+    /**
+     * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions : Get CIs subscribed to a bundle
+     *
+     * @param idPsp : PSP identifier
+     * @param idBundle : Bundle identifier
+     * @return
+     */
+    @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiFiscalCodeList.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{idpsp}/bundles/{idbundle}/creditorInstitutions",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<CiFiscalCodeList> getBundleCreditorInstitutions(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+        // TODO: return pagination
+        return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp));
+    }
+
+    /**
+     * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions/:cifiscalcode : Get details of a relationship between a bundle and a creditor institution
+     * institution
+     *
+     * @param idPsp : PSP identifier
+     * @param idBundle : Bundle identifier
+     * @param ciFiscalCode : Creditor Institution fiscal code
+     * @return
+     */
+    @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", security = {}, tags = {"PSP",})
+    @ApiResponses(value = {
+            // TODO: update schema - 200
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiBundleDetails.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{idpsp}/bundles/{idbundle}/creditorInstitutions/{cifiscalcode}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<CiBundleDetails> getBundleCreditorInstitutionDetails(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode){
+        return ResponseEntity.ok(bundleService.getCIDetails(idBundle, idPsp, ciFiscalCode));
+    }
+
 
     /**
      * POST /psps/:idpsp/bundles : Create a bundle

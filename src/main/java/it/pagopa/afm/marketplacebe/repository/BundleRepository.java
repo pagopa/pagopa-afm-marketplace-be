@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.repository;
 
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import java.util.Optional;
 @Repository
 public interface BundleRepository extends CosmosRepository<Bundle, String> {
     Optional<Bundle> findById(String idBundle);
+    Optional<Bundle> findById(String idBundle, PartitionKey idPsp);
 
     Page<Bundle> findById(String idBundle, Pageable pageable);
 
