@@ -1,12 +1,12 @@
-package it.pagopa.afm.marketplacebe.entity;
+package it.pagopa.afm.marketplacebe.model.bundle;
 
-import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -15,11 +15,10 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
-public class CiBundleAttribute {
+@Builder
+public class BundleAttribute {
 
-    @Id
-    @GeneratedValue
+    @JsonProperty("idBundleAttribute")
     @NotNull
     private String id;
 

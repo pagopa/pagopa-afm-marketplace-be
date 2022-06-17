@@ -693,6 +693,228 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "getBundles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getBundle",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getBundleDetails",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createBundleDetails",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"maxPaymentAmount\": 10,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRel\": \"EQUAL\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateBundleDetails",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"maxPaymentAmount\": 15,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRel\": \"EQUAL\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes/:id_bundle_attribute",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes",
+										":id_bundle_attribute"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										},
+										{
+											"key": "id_bundle_attribute",
+											"value": "{{id_bundle_attribute}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "removeBundleDetails",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/cis/:ci_fiscal_code/bundles/:id_bundle/attributes/:id_bundle_attribute",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"cis",
+										":ci_fiscal_code",
+										"bundles",
+										":id_bundle",
+										"attributes",
+										":id_bundle_attribute"
+									],
+									"variable": [
+										{
+											"key": "ci_fiscal_code",
+											"value": "{{ci_fiscal_code}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										},
+										{
+											"key": "id_bundle_attribute",
+											"value": "{{id_bundle_attribute}}"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}

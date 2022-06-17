@@ -24,7 +24,7 @@ public class Bundles {
     @Schema(required = true)
     @NotNull
     @Valid
-    private List<Bundle> bundleList;
+    private List<BundleDetails> bundleDetailsList;
 
 
     @Schema(required = true)

@@ -1,37 +1,30 @@
-package it.pagopa.afm.marketplacebe.entity;
+package it.pagopa.afm.marketplacebe.model.bundle;
 
-import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class CiBundleAttribute {
-
-    @Id
-    @GeneratedValue
-    @NotNull
-    private String id;
-
-    private Long maxPaymentAmount;
-
-    private String transferCategory;
-
-    private TransferCategoryRelation transferCategoryRelation;
+public class BundleDetailsAttributes {
 
     private LocalDateTime validityDateTo;
 
     @NotNull
     private LocalDateTime insertedDate;
+
+    @Valid
+    @NotNull
+    private List<BundleAttribute> attributes;
 
 }

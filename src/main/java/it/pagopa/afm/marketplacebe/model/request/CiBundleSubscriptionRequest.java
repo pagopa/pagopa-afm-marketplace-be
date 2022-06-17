@@ -21,5 +21,5 @@ public class CiBundleSubscriptionRequest {
 
     @JsonProperty("attributes")
     @Valid
-    private List<CiBundleAttribute> ciBundleAttributeList;
+    private List<CiBundleAttributeModel> ciBundleAttributeModelList;
 }

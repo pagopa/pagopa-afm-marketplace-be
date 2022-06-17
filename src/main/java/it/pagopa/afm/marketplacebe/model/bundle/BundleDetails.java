@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Bundle {
+public class BundleDetails {
 
     @JsonProperty("idBundle")
     private String id;

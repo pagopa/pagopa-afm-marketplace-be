@@ -2,14 +2,24 @@ package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
@@ -17,10 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,10 +51,10 @@ public class BundleService {
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-        List<it.pagopa.afm.marketplacebe.model.bundle.Bundle> bundleList = bundleRepository
+        List<BundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class))
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -50,13 +62,16 @@ public class BundleService {
                 .totalPages(1)
                 .build();
 
-        return Bundles.builder().bundleList(bundleList).pageInfo(pageInfo).build();
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(pageInfo)
+                .build();
     }
 
-    public it.pagopa.afm.marketplacebe.model.bundle.Bundle getBundleById(String idBundle, String idPsp) {
+    public BundleDetails getBundleById(String idBundle, String idPsp) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        return modelMapper.map(bundle, it.pagopa.afm.marketplacebe.model.bundle.Bundle.class);
+        return modelMapper.map(bundle, BundleDetails.class);
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
@@ -147,6 +162,99 @@ public class BundleService {
                 .build();
     }
 
+    public Bundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
+        var bundleList = ciBundleRepository
+                .findByCiFiscalCode(fiscalCode)
+                .parallelStream()
+                .map(ciBundle -> bundleRepository.findById(ciBundle.getIdBundle()))
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .collect(Collectors.toList());
+
+
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .build();
+    }
+
+    public BundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+
+        var bundle = bundleRepository.findById(ciBundle.getIdBundle())
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+
+        return modelMapper.map(bundle, BundleDetails.class);
+    }
+
+    public BundleDetailsAttributes getBundleAttributesByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+
+        return modelMapper.map(ciBundle, BundleDetailsAttributes.class);
+    }
+
+    public BundleAttributeResponse createBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull CiBundleAttributeModel bundleAttribute) {
+        // find CI-Bundle
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+
+        // create new attribute and add to CI-Bundle
+        var attribute = modelMapper.map(bundleAttribute, CiBundleAttribute.class)
+                .toBuilder()
+                .id(idBundle + "-" + UUID.randomUUID()) // generate id
+                .insertedDate(LocalDateTime.now())
+                .build();
+
+        ciBundle.getAttributes().add(attribute);
+
+        // save CI-Bundle with new attribute
+        ciBundleRepository.save(ciBundle);
+
+        return BundleAttributeResponse.builder()
+                .idBundleAttribute(attribute.getId())
+                .build();
+    }
+
+    public void updateBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute, @NotNull CiBundleAttributeModel bundleAttribute) {
+
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+        var attribute = ciBundle.getAttributes().parallelStream()
+                .filter(elem -> idAttribute.equals(elem.getId()))
+                .findFirst();
+
+        if (attribute.isPresent()) {
+            attribute.get().setMaxPaymentAmount(bundleAttribute.getMaxPaymentAmount());
+            attribute.get().setTransferCategory(bundleAttribute.getTransferCategory());
+            attribute.get().setTransferCategoryRelation(bundleAttribute.getTransferCategoryRelation());
+
+            ciBundleRepository.save(ciBundle);
+        } else {
+            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
+        }
+    }
+
+    public void removeBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute) {
+        // find CI-Bundle
+        var ciBundle = findCiBundle(fiscalCode, idBundle);
+
+        // remove attribute from CI-Bundle if exists
+        var result = ciBundle.getAttributes()
+                .removeIf(attribute -> idAttribute.equals(attribute.getId()));
+        if (!result) {
+            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
+        }
+    }
+
+    /**
+     * find CI-Bundle by fiscalCode and idBundle if exists from DB
+     *
+     * @param fiscalCode fiscal code of the CI
+     * @param idBundle   id of the bundle
+     * @return the CI-Bundle relation if exists, otherwise throws an exception
+     * @throws AppException if the CI-Bundle relation does not exist
+     */
+    private CiBundle findCiBundle(@NotNull String fiscalCode, @NotNull String idBundle) {
+        return ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+    }
+
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
         return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
                 !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
@@ -166,4 +274,5 @@ public class BundleService {
 
         return bundle.get();
     }
+
 }

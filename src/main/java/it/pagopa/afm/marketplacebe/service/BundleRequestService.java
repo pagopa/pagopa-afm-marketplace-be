@@ -87,7 +87,7 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }
 
-        List<CiBundleAttribute> attributes = ciBundleSubscriptionRequest.getCiBundleAttributeList()
+        List<CiBundleAttribute> attributes = ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
                 .stream()
                 .map(attribute ->
                         CiBundleAttribute.builder()
@@ -136,19 +136,7 @@ public class BundleRequestService {
     }
 
     public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode) {
-//        CosmosPageRequest pageable = new CosmosPageRequest(pageNumber - 1, limit, cursor);
-//
-//        Page<BundleRequest> page;
-//        if (ciFiscalCode != null) {
-//            page = bundleRequestRepository.findByIdPspAndCiFiscalCode(idPsp, ciFiscalCode, pageable);
-//        } else {
-//            page = bundleRequestRepository.findByIdPsp(idPsp, pageable);
-//        }
-
-//        return PspRequests.builder()
-//                .requestsList(mapRequestList(page))
-//                .pageInfo(CommonUtil.buildPageInfo(page))
-//                .build();
+        // TODO: pageable
 
         List<BundleRequest> result;
         if (ciFiscalCode != null) {
@@ -170,7 +158,6 @@ public class BundleRequestService {
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleRequestRepository.save(entity.toBuilder()
                     .acceptedDate(LocalDateTime.now())
-                    .rejectionDate(null)
                     .build());
 
             // create CI-Bundle relation
