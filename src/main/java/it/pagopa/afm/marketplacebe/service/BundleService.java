@@ -144,8 +144,10 @@ public class BundleService {
         Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
 
         if(ciBundle.isEmpty()){
-            throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle);
+            throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
+
+        getBundle(idBundle, idPsp);
 
         return CiBundleDetails.builder()
                 .validityDateTo(ciBundle.get().getValidityDateTo())
