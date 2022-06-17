@@ -129,7 +129,7 @@ public class PspController {
     }
 
     /**
-     * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions/:cifiscalcode : Get attribute details set by the creditor
+     * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions/:cifiscalcode : Get details of a relationship between a bundle and a creditor institution
      * institution
      *
      * @param idPsp : PSP identifier
@@ -137,7 +137,7 @@ public class PspController {
      * @param ciFiscalCode : Creditor Institution fiscal code
      * @return
      */
-    @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", security = {}, tags = {"PSP",})
     @ApiResponses(value = {
             // TODO: update schema - 200
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiBundleDetails.class))),
@@ -147,13 +147,13 @@ public class PspController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(
-            value = "/{idpsp}/bundles/{idbundle}/creditorInstitutions/{ciFiscalCode}",
+            value = "/{idpsp}/bundles/{idbundle}/creditorInstitutions/{cifiscalcode}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<CiBundleDetails> getBundleCreditorInstitutionDetails(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
-            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String ciFiscalCode){
+            @Size(max = 35) @Parameter(description = "Bundle identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode){
         return ResponseEntity.ok(bundleService.getCIDetails(idBundle, idPsp, ciFiscalCode));
     }
 
