@@ -101,17 +101,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -148,6 +137,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Bundles"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -211,24 +211,6 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/BundleDetails"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Service unavailable",
                         "headers": {
@@ -247,17 +229,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -269,8 +240,37 @@
                             }
                         }
                     },
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BundleDetails"
+                                }
+                            }
+                        }
+                    },
                     "429": {
                         "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -357,13 +357,20 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
                                 "schema": {
                                     "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BundleDetailsAttributes"
                                 }
                             }
                         }
@@ -390,20 +397,13 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
                                 "schema": {
                                     "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/BundleDetailsAttributes"
                                 }
                             }
                         }
@@ -483,17 +483,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -530,6 +519,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/BundleAttributeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -630,8 +630,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -639,6 +639,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {}
                         }
                     },
                     "404": {
@@ -663,8 +666,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -672,9 +675,6 @@
                                     "type": "string"
                                 }
                             }
-                        },
-                        "content": {
-                            "application/json": {}
                         }
                     }
                 }
@@ -751,6 +751,42 @@
                             }
                         }
                     },
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "headers": {
@@ -758,6 +794,103 @@
                                 "description": "This header identifies the call",
                                 "schema": {
                                     "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "X-Request-Id",
+                    "in": "header",
+                    "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "/cis/{cifiscalcode}/offers": {
+            "get": {
+                "tags": [
+                    "CI"
+                ],
+                "summary": "Get paginated list of PSP offers to the CI regarding private bundles",
+                "operationId": "getOffersByCI",
+                "parameters": [
+                    {
+                        "name": "cifiscalcode",
+                        "in": "path",
+                        "description": "CI identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Number of elements for one page. Default = 50",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "Starting cursor",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idPsp",
+                        "in": "query",
+                        "description": "Filter by psp",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service unavailable",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
                                 }
                             }
                         }
@@ -795,7 +928,274 @@
                             }
                         },
                         "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BundleOffers"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "X-Request-Id",
+                    "in": "header",
+                    "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "/cis/{cifiscalcode}/offers/{idbundleoffer}/accept": {
+            "post": {
+                "tags": [
+                    "CI"
+                ],
+                "summary": "The CI accepts an offer of a PSP",
+                "operationId": "acceptOffer",
+                "parameters": [
+                    {
+                        "name": "cifiscalcode",
+                        "in": "path",
+                        "description": "PSP identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idbundleoffer",
+                        "in": "path",
+                        "description": "Bundle offer identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service unavailable",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "OK",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CiBundleId"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "parameters": [
+                {
+                    "name": "X-Request-Id",
+                    "in": "header",
+                    "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "/cis/{cifiscalcode}/offers/{idbundleoffer}/reject": {
+            "post": {
+                "tags": [
+                    "CI"
+                ],
+                "summary": "The CI rejects the offer of the PSP",
+                "operationId": "rejectOffer",
+                "parameters": [
+                    {
+                        "name": "cifiscalcode",
+                        "in": "path",
+                        "description": "CI identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "idbundleoffer",
+                        "in": "path",
+                        "description": "Bundle offer identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service unavailable",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemJson"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
                             "application/json": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -895,8 +1295,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -906,8 +1306,19 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -931,17 +1342,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/CiRequests"
-                                }
-                            }
-                        }
-                    },
-                    "429": {
-                        "description": "Too many requests",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
                                 }
                             }
                         }
@@ -1012,13 +1412,20 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "201": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
                                 "schema": {
                                     "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BundleRequestId"
                                 }
                             }
                         }
@@ -1045,20 +1452,13 @@
                             }
                         }
                     },
-                    "201": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
                                 "schema": {
                                     "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/BundleRequestId"
                                 }
                             }
                         }
@@ -1140,8 +1540,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1149,6 +1549,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {}
                         }
                     },
                     "404": {
@@ -1173,8 +1576,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1182,9 +1585,6 @@
                                     "type": "string"
                                 }
                             }
-                        },
-                        "content": {
-                            "application/json": {}
                         }
                     }
                 }
@@ -1244,17 +1644,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "403": {
                         "description": "Forbidden",
                         "headers": {
@@ -1291,6 +1680,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AppInfo"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -1396,17 +1796,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -1443,6 +1832,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Bundles"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -1515,30 +1915,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "429": {
-                        "description": "Too many requests",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1562,6 +1940,28 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/BundleResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -1604,8 +2004,6 @@
                         "description": "Bundle identifier",
                         "required": true,
                         "schema": {
-                            "maxLength": 35,
-                            "minLength": 0,
                             "type": "string"
                         }
                     }
@@ -1629,24 +2027,6 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/BundleDetails"
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Service unavailable",
                         "headers": {
@@ -1665,17 +2045,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -1687,8 +2056,37 @@
                             }
                         }
                     },
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BundleDetails"
+                                }
+                            }
+                        }
+                    },
                     "429": {
                         "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1775,8 +2173,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1784,6 +2182,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {}
                         }
                     },
                     "404": {
@@ -1808,8 +2209,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1817,9 +2218,6 @@
                                     "type": "string"
                                 }
                             }
-                        },
-                        "content": {
-                            "application/json": {}
                         }
                     }
                 }
@@ -1889,8 +2287,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1898,6 +2296,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {}
                         }
                     },
                     "404": {
@@ -1922,8 +2323,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -1931,9 +2332,6 @@
                                     "type": "string"
                                 }
                             }
-                        },
-                        "content": {
-                            "application/json": {}
                         }
                     }
                 }
@@ -2015,8 +2413,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2044,8 +2442,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "429": {
+                        "description": "Too many requests",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2055,8 +2453,8 @@
                             }
                         }
                     },
-                    "429": {
-                        "description": "Too many requests",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2104,8 +2502,6 @@
                         "description": "Bundle identifier",
                         "required": true,
                         "schema": {
-                            "maxLength": 35,
-                            "minLength": 0,
                             "type": "string"
                         }
                     },
@@ -2115,8 +2511,6 @@
                         "description": "Bundle identifier",
                         "required": true,
                         "schema": {
-                            "maxLength": 35,
-                            "minLength": 0,
                             "type": "string"
                         }
                     }
@@ -2158,17 +2552,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -2182,6 +2565,17 @@
                     },
                     "429": {
                         "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2298,8 +2692,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2327,8 +2721,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "429": {
+                        "description": "Too many requests",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2338,8 +2732,8 @@
                             }
                         }
                     },
-                    "429": {
-                        "description": "Too many requests",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2437,8 +2831,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "404": {
+                        "description": "Not Found",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2466,8 +2860,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "429": {
+                        "description": "Too many requests",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2477,8 +2871,8 @@
                             }
                         }
                     },
-                    "429": {
-                        "description": "Too many requests",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2581,17 +2975,6 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "404": {
                         "description": "Not Found",
                         "headers": {
@@ -2628,6 +3011,17 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/BundleOffers"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -2744,6 +3138,17 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
                     "200": {
                         "description": "OK",
                         "headers": {
@@ -2762,30 +3167,19 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "headers": {
-                            "X-Request-Id": {
-                                "description": "This header identifies the call",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
                     "429": {
                         "description": "Too many requests",
+                        "headers": {
+                            "X-Request-Id": {
+                                "description": "This header identifies the call",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2833,8 +3227,6 @@
                         "description": "Bundle Request identifier",
                         "required": true,
                         "schema": {
-                            "maxLength": 35,
-                            "minLength": 0,
                             "type": "string"
                         }
                     }
@@ -2876,8 +3268,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "201": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2885,6 +3277,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {}
                         }
                     },
                     "404": {
@@ -2909,8 +3304,8 @@
                             }
                         }
                     },
-                    "201": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -2918,9 +3313,6 @@
                                     "type": "string"
                                 }
                             }
-                        },
-                        "content": {
-                            "application/json": {}
                         }
                     }
                 }
@@ -2961,8 +3353,6 @@
                         "description": "Bundle Request identifier",
                         "required": true,
                         "schema": {
-                            "maxLength": 35,
-                            "minLength": 0,
                             "type": "string"
                         }
                     }
@@ -3004,8 +3394,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -3013,6 +3403,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "content": {
+                            "application/json": {}
                         }
                     },
                     "404": {
@@ -3037,8 +3430,8 @@
                             }
                         }
                     },
-                    "201": {
-                        "description": "OK",
+                    "401": {
+                        "description": "Unauthorized",
                         "headers": {
                             "X-Request-Id": {
                                 "description": "This header identifies the call",
@@ -3046,9 +3439,6 @@
                                     "type": "string"
                                 }
                             }
-                        },
-                        "content": {
-                            "application/json": {}
                         }
                     }
                 }
@@ -3198,6 +3588,14 @@
                     }
                 }
             },
+            "CiBundleId": {
+                "type": "object",
+                "properties": {
+                    "idCiBundle": {
+                        "type": "string"
+                    }
+                }
+            },
             "BundleAttributeResponse": {
                 "type": "object",
                 "properties": {
@@ -3307,32 +3705,6 @@
                     }
                 }
             },
-            "BundleOffer": {
-                "type": "object",
-                "properties": {
-                    "idBundle": {
-                        "type": "string"
-                    },
-                    "ciFiscalCode": {
-                        "type": "string"
-                    },
-                    "acceptedDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "rejectionDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "insertedDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "idBundleOffer": {
-                        "type": "string"
-                    }
-                }
-            },
             "BundleOffers": {
                 "required": [
                     "offers",
@@ -3343,7 +3715,7 @@
                     "offers": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/BundleOffer"
+                            "type": "object"
                         }
                     },
                     "pageInfo": {

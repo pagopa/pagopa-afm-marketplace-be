@@ -1,11 +1,7 @@
 package it.pagopa.afm.marketplacebe.model.offer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,12 +10,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class BundleOffer {
+public class CiBundleOffer {
 
     @JsonProperty("idBundleOffer")
     private String id;
     private String idBundle;
-    private String ciFiscalCode;
+    private String idPsp;
     private LocalDateTime acceptedDate;
     private LocalDateTime rejectionDate;
     private LocalDateTime insertedDate;

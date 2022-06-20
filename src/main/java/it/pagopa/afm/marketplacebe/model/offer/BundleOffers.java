@@ -22,7 +22,7 @@ public class BundleOffers {
     @Schema(required = true)
     @NotNull
     @Valid
-    List<BundleOffer> offers;
+    List<Object> offers;
 
     @Schema(required = true)
     @NotNull

@@ -356,7 +356,7 @@ public class PspController {
     )
     public ResponseEntity<Void> acceptRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
+            @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
         bundleRequestService.acceptRequest(idPsp, idBundleRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -364,7 +364,7 @@ public class PspController {
 
     @Operation(summary = "the PSP rejects a request of a CI", tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -375,9 +375,9 @@ public class PspController {
     )
     public ResponseEntity<Void> rejectRequest(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Size(max = 35) @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
+            @Parameter(description = "Bundle Request identifier", required = true) @PathVariable("idBundleRequest") String idBundleRequest) {
         bundleRequestService.rejectRequest(idPsp, idBundleRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok().build();
     }
 
 

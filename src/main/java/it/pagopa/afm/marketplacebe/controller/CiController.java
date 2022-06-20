@@ -12,25 +12,20 @@ import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
+import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -44,6 +39,9 @@ public class CiController {
 
     @Autowired
     private BundleRequestService bundleRequestService;
+
+    @Autowired
+    private BundleOfferService bundleOfferService;
 
     @Autowired
     private BundleService bundleService;
@@ -104,7 +102,6 @@ public class CiController {
         return bundleService.getBundleAttributesByFiscalCode(fiscalCode, idBundle);
     }
 
-
     @Operation(summary = "Create a new bundle attribute", tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleAttributeResponse.class))),
@@ -158,7 +155,6 @@ public class CiController {
         bundleService.removeBundleAttributesByCi(fiscalCode, idBundle, idAttribute);
         return ResponseEntity.ok().build();
     }
-
 
     /**
      * GET /cis/:cifiscalcode/requests : Get paginated list of CI requests to the PSP regarding public bundles
@@ -216,7 +212,6 @@ public class CiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleRequestService.createBundleRequest(ciFiscalCode, ciBundleSubscriptionRequest));
     }
 
-
     /**
      * DELETE /cis/:cifiscalcode/requests/:idbundlerequest : Delete CI request regarding public bundles
      *
@@ -240,6 +235,71 @@ public class CiController {
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
             @Parameter(description = "CI identifier", required = true) @PathVariable("idbundlerequest") String idBundleRequest) {
         bundleRequestService.removeBundleRequest(ciFiscalCode, idBundleRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * GET /cis/:cifiscalcode/offers : Get paginated list of PSP offers to the CI regarding private bundles
+     *
+     * @param ciFiscalCode CI identifier.
+     * @param size         Number of elements for page. Default = 50.
+     * @param cursor       Cursor from which starts counting.
+     * @param idPsp        PSP identifier. Optional filter.
+     * @return OK. (status code 200)
+     * or Service unavailable (status code 500)
+     */
+    @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleOffers.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{cifiscalcode}/offers",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<BundleOffers> getOffersByCI(
+            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
+            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
+            @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
+            @Parameter(description = "Filter by psp") @RequestParam(required = false) String idPsp) {
+        return ResponseEntity.ok(bundleOfferService.getCiOffers(ciFiscalCode, size, cursor, idPsp));
+    }
+
+    @Operation(summary = "The CI accepts an offer of a PSP", tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundleId.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @PostMapping(
+            value = "/{cifiscalcode}/offers/{idbundleoffer}/accept"
+    )
+    public ResponseEntity<CiBundleId> acceptOffer(
+            @Parameter(description = "PSP identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
+            @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bundleOfferService.acceptOffer(ciFiscalCode, idBundleOffer));
+    }
+
+    @Operation(summary = "The CI rejects the offer of the PSP", tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @PostMapping(
+            value = "/{cifiscalcode}/offers/{idbundleoffer}/reject"
+    )
+    public ResponseEntity<Void> rejectOffer(
+            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
+            @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
+        bundleOfferService.rejectOffer(ciFiscalCode, idBundleOffer);
         return ResponseEntity.ok().build();
     }
 }
