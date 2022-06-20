@@ -147,7 +147,6 @@ public class BundleOfferService {
             bundleOfferRepository.save(
                     entity.toBuilder()
                             .acceptedDate(LocalDateTime.now())
-                            .rejectionDate(null)
                             .build());
 
             // create CI-Bundle relation
