@@ -17,12 +17,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class BundleOffers {
+public class BundleCiOffers {
 
     @Schema(required = true)
     @NotNull
     @Valid
-    List<PspBundleOffer> offers;
+    List<CiBundleOffer> offers;
 
     @Schema(required = true)
     @NotNull

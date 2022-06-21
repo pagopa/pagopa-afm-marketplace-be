@@ -12,6 +12,7 @@ import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
@@ -250,7 +251,7 @@ public class CiController {
      */
     @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleOffers.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleCiOffers.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -260,7 +261,7 @@ public class CiController {
             value = "/{cifiscalcode}/offers",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<BundleOffers> getOffersByCI(
+    public ResponseEntity<BundleCiOffers> getOffersByCI(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
             @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
             @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
