@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,7 +59,7 @@ public class BundleOfferService {
                 .build();
 
         return BundleOffers.builder()
-                .offers(Collections.singletonList(bundleOfferList))
+                .offers(bundleOfferList)
                 .pageInfo(pageInfo)
                 .build();
     }
@@ -114,7 +113,7 @@ public class BundleOfferService {
         bundleOfferRepository.delete(bundleOffer.get());
     }
 
-    public BundleOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
+    public BundleCiOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
 
         List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPspAndCiFiscalCode(idPsp, new PartitionKey(ciFiscalCode));
         List<CiBundleOffer> bundleOfferList = offerList
@@ -127,8 +126,8 @@ public class BundleOfferService {
                 .totalPages(1)
                 .build();
 
-        return BundleOffers.builder()
-                .offers(Collections.singletonList(bundleOfferList))
+        return BundleCiOffers.builder()
+                .offers(bundleOfferList)
                 .pageInfo(pageInfo)
                 .build();
     }
