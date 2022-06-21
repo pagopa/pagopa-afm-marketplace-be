@@ -29,10 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,6 +77,10 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
         }
 
+        if(!bundleRepository.findByIdPspAndName(idPsp, bundleRequest.getName()).isEmpty()){
+            throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
+        }
+
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
@@ -105,6 +106,12 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
+        Optional<Bundle> duplicateBundle = bundleRepository.findByIdPspAndName(idPsp, bundleRequest.getName());
+
+
+        if(duplicateBundle.isPresent() && duplicateBundle.get().getId().compareTo(idBundle) != 0){
+            throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
+        }
 
         bundle.setName(bundleRequest.getName());
         bundle.setDescription(bundleRequest.getDescription());
@@ -128,19 +135,19 @@ public class BundleService {
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP){
-       List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
-       List<String> CIs = new ArrayList<>();
-       CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
+        List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
+        List<String> CIs = new ArrayList<>();
+        CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
 
-       for(CiBundle ciBundle: subscriptions){
-           if (!checkCiBundle(ciBundle, idPSP)){
-               throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
-           }
-           CIs.add(ciBundle.getCiFiscalCode());
-       }
-       ciFiscalCodeList.setCiFiscalCodeList(CIs);
+        for(CiBundle ciBundle: subscriptions){
+            if (!checkCiBundle(ciBundle, idPSP)){
+                throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+            }
+            CIs.add(ciBundle.getCiFiscalCode());
+        }
+        ciFiscalCodeList.setCiFiscalCodeList(CIs);
 
-       return ciFiscalCodeList;
+        return ciFiscalCodeList;
     }
 
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
@@ -154,10 +161,12 @@ public class BundleService {
 
         return CiBundleDetails.builder()
                 .validityDateTo(ciBundle.get().getValidityDateTo())
-                .attributes(ciBundle.get().getAttributes().stream().map(
-                        attribute -> modelMapper.map(
-                                attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
-                ).collect(Collectors.toList()))
+                .attributes(
+                        ciBundle.get().getAttributes().isEmpty() || ciBundle.get().getAttributes() == null
+                                ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
+                                attribute -> modelMapper.map(
+                                        attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
+                        ).collect(Collectors.toList()))
                 .build();
     }
 
