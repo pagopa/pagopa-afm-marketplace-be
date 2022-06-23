@@ -76,7 +76,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return
      */
-    @Operation(summary = "Get a bundle", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get a bundle", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetails.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -101,7 +101,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return
      */
-    @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get paginated list of CI subscribed to a bundle", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -129,7 +129,7 @@ public class PspController {
      * @param ciFiscalCode : Creditor Institution fiscal code
      * @return
      */
-    @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", security = {}, tags = {"PSP",})
+    @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", tags = {"PSP",})
     @ApiResponses(value = {
             // TODO: update schema - 200
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiBundleDetails.class))),
@@ -263,7 +263,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", tags = {"PSP",})
+    @Operation(summary = "PSP offers a private bundle to a creditor institution", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
