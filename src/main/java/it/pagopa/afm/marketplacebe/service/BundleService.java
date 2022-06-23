@@ -36,7 +36,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class BundleService {
 
     @Autowired
@@ -147,7 +146,7 @@ public class BundleService {
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
+        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(), ciFiscalCode);
 
         if(ciBundle.isEmpty()){
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
@@ -170,7 +169,6 @@ public class BundleService {
                 .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
                 .collect(Collectors.toList());
 
-
         return Bundles.builder()
                 .bundleDetailsList(bundleList)
                 .build();
@@ -192,8 +190,28 @@ public class BundleService {
     }
 
     public BundleAttributeResponse createBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull CiBundleAttributeModel bundleAttribute) {
-        // find CI-Bundle
-        var ciBundle = findCiBundle(fiscalCode, idBundle);
+        // bundle attribute should be created only for global bundle
+        // for public bundle CI should send a new request to PSP
+        Bundle bundle = getBundle(idBundle);
+
+        if (!bundle.getType().equals(BundleType.GLOBAL)) {
+            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
+        }
+
+        // find or create CI-Bundle
+        CiBundle ciBundle;
+        try {
+            ciBundle = findCiBundle(fiscalCode, bundle.getId());
+        } catch (AppException e) {
+            // create
+            ciBundle = CiBundle.builder()
+                    .ciFiscalCode(fiscalCode)
+                    .idBundle(bundle.getId())
+                    .insertedDate(LocalDateTime.now())
+                    .attributes(new ArrayList<>())
+                    .build();
+            ciBundleRepository.save(ciBundle);
+        }
 
         // create new attribute and add to CI-Bundle
         var attribute = modelMapper.map(bundleAttribute, CiBundleAttribute.class)
@@ -213,6 +231,13 @@ public class BundleService {
     }
 
     public void updateBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute, @NotNull CiBundleAttributeModel bundleAttribute) {
+        // bundle attribute should be updated only for global bundle
+        // for public bundle CI should send a new request to PSP
+        Bundle bundle = getBundle(idBundle);
+
+        if (!bundle.getType().equals(BundleType.GLOBAL)) {
+            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
+        }
 
         var ciBundle = findCiBundle(fiscalCode, idBundle);
         var attribute = ciBundle.getAttributes().parallelStream()
@@ -231,6 +256,13 @@ public class BundleService {
     }
 
     public void removeBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute) {
+        // bundle attribute should be removed only for global and public bundles
+        Bundle bundle = getBundle(idBundle);
+
+        if (bundle.getType().equals(BundleType.PRIVATE)) {
+            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global or public.", idBundle));
+        }
+
         // find CI-Bundle
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
@@ -239,6 +271,14 @@ public class BundleService {
                 .removeIf(attribute -> idAttribute.equals(attribute.getId()));
         if (!result) {
             throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
+        }
+        else {
+            ciBundleRepository.save(ciBundle);
+            // if bundle is global and there are no attributes -> remove ci-bundle relationship
+            // in order to maintain logical relationship instead of physical one
+            if (bundle.getType().equals(BundleType.GLOBAL) && ciBundle.getAttributes().size() == 0) {
+                ciBundleRepository.delete(ciBundle);
+            }
         }
     }
 
@@ -251,13 +291,27 @@ public class BundleService {
      * @throws AppException if the CI-Bundle relation does not exist
      */
     private CiBundle findCiBundle(@NotNull String fiscalCode, @NotNull String idBundle) {
-        return ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+        return ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(idBundle, fiscalCode)
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
     }
 
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
         return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
                 !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
+    }
+
+    /** Retrieve a bundle by id
+     *
+     * @param idBundle Bundle identifier
+     * @return bundle
+     */
+    private Bundle getBundle(String idBundle) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
+        if (bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+
+        return bundle.get();
     }
 
     /** Retrieve a bundle by id and partition key
