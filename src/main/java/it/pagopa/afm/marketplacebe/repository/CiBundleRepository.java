@@ -1,8 +1,6 @@
 package it.pagopa.afm.marketplacebe.repository;
 
-import com.azure.cosmos.models.PartitionKey;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import org.springframework.stereotype.Repository;
 
@@ -18,10 +16,4 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
 
     Optional<CiBundle> findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(String idBundle, String ciFiscalCode);
 
-//    List<CiBundle> findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(String idBundle, String ciFiscalCode);
-//
-//    default Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode) {
-//        List<CiBundle> items = findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(idBundle, ciFiscalCode);
-//        return items.size() == 0 ? Optional.empty() : Optional.of(items.get(0));
-//    }
 }
