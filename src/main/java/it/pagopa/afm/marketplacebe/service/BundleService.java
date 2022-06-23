@@ -77,7 +77,7 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
         }
 
-        if(!bundleRepository.findByIdPspAndName(idPsp, bundleRequest.getName()).isEmpty()){
+        if(bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()){
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -106,10 +106,10 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
-        Optional<Bundle> duplicateBundle = bundleRepository.findByIdPspAndName(idPsp, bundleRequest.getName());
+        Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), new PartitionKey(idPsp));
 
 
-        if(duplicateBundle.isPresent() && duplicateBundle.get().getId().compareTo(idBundle) != 0){
+        if(duplicateBundle.isPresent() && duplicateBundle.get().getId().equals(idBundle)){
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -162,7 +162,7 @@ public class BundleService {
         return CiBundleDetails.builder()
                 .validityDateTo(ciBundle.get().getValidityDateTo())
                 .attributes(
-                        ciBundle.get().getAttributes().isEmpty() || ciBundle.get().getAttributes() == null
+                        ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
                                 ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
                                 attribute -> modelMapper.map(
                                         attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
@@ -306,7 +306,7 @@ public class BundleService {
 
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
         return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
-                !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
+                !bundleRepository.findById(ciBundle.getIdBundle(), new PartitionKey(idPSP)).get().getIdPsp().equals(idPSP);
     }
 
     /** Retrieve a bundle by id
