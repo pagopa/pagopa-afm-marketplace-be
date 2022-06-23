@@ -24,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,7 +84,8 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }
 
-        List<CiBundleAttribute> attributes = ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
+        List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null && ciBundleSubscriptionRequest.getCiBundleAttributeModelList().size() > 0) ?
+         ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
                 .stream()
                 .map(attribute ->
                         CiBundleAttribute.builder()
@@ -97,7 +95,7 @@ public class BundleRequestService {
                                 .transferCategory(attribute.getTransferCategory())
                                 .transferCategoryRelation(attribute.getTransferCategoryRelation())
                                 .build()
-                ).collect(Collectors.toList());
+                ).collect(Collectors.toList()) : new ArrayList<>();
 
         BundleRequest request = BundleRequest.builder()
                 .idBundle(bundle.getId())
