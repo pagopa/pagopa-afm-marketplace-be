@@ -19,7 +19,8 @@ public enum AppError {
     BUNDLE_OFFER_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Bundle Offer already accepted", "The offer %s was accepted on %s"),
     BUNDLE_OFFER_ALREADY_REJECTED(HttpStatus.CONFLICT, "Bundle Offer already rejected", "The offer %s was rejected on %s"),
 
-    CI_BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "No relation CI-BUNDLE found", "Relation between Bundle %s and CI %s not found."),
+    CI_BUNDLE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "CI-BUNDLE bad request", "Problem to create CI-BUNDLE. %s"),
+    CI_BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "No CI-BUNDLE relationship found", "Relation between Bundle %s and CI %s not found."),
 
     BUNDLE_REQUEST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bundle request bad request", "Bundle request with id %s not configured with %s."),
     BUNDLE_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle request not found", "Bundle request with id %s not found."),
