@@ -101,7 +101,7 @@ public class BundleService {
         Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
 
 
-        if(duplicateBundle.isPresent() && duplicateBundle.get().getId().equals(idBundle)){
+        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)){
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -296,9 +296,14 @@ public class BundleService {
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
     }
 
+    /** Check ciBundle consistency
+     *
+     * @param ciBundle CI Bundle
+     * @param idPSP PSP identifier
+     * @return check if the bundle referenced in ciBundle exists and is linked to the same PSP
+     */
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
-        return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
-                !bundleRepository.findById(ciBundle.getIdBundle(), new PartitionKey(idPSP)).get().getIdPsp().equals(idPSP);
+        return bundleRepository.findById(ciBundle.getIdBundle(), new PartitionKey(idPSP)).isPresent();
     }
 
     /** Retrieve a bundle by id
