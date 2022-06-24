@@ -69,7 +69,7 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
         }
 
-        if(bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()){
+        if(bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()){
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -98,7 +98,7 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
-        Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), new PartitionKey(idPsp));
+        Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
 
 
         if(duplicateBundle.isPresent() && duplicateBundle.get().getId().equals(idBundle)){
