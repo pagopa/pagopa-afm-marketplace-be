@@ -71,6 +71,10 @@ public class BundleOfferService {
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         // verify bundle is private
         if (!bundle.getType().equals(BundleType.PRIVATE)) {
             throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Type not private");
@@ -116,7 +120,7 @@ public class BundleOfferService {
 
     public BundleCiOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
 
-        List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPspAndCiFiscalCode(idPsp, new PartitionKey(ciFiscalCode));
+        List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPsp(idPsp, new PartitionKey(ciFiscalCode));
         List<CiBundleOffer> bundleOfferList = offerList
                 .stream()
                 .map(bo -> modelMapper.map(bo, CiBundleOffer.class))
@@ -143,6 +147,9 @@ public class BundleOfferService {
 
     public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
+
+        verifyBundle(entity.getIdBundle(), ciFiscalCode);
+
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleOfferRepository.save(
                     entity.toBuilder()
@@ -162,6 +169,9 @@ public class BundleOfferService {
 
     public void rejectOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
+
+        verifyBundle(entity.getIdBundle(), ciFiscalCode);
+
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleOfferRepository.save(
                     entity.toBuilder()
@@ -190,6 +200,21 @@ public class BundleOfferService {
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .idBundle(entity.getIdBundle())
                 .build();
+    }
+
+    /**
+     * Verify bundle consistency
+     * @param idBundle
+     * @param ciFiscalCode
+     */
+    private void verifyBundle(String idBundle, String ciFiscalCode) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(ciFiscalCode));
+        if (bundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+        else if (bundle.get().getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
     }
 
 }

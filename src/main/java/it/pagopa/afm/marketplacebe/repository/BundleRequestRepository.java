@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.repository;
 
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.entity.BundleRequest;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,8 @@ public interface BundleRequestRepository extends CosmosRepository<BundleRequest,
     Page<BundleRequest> findByIdPspAndCiFiscalCode(String idPsp, String fiscalCode, Pageable pageable);
 
     List<BundleRequest> findByIdPsp(String idPsp);
+
+    List<BundleRequest> findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(String idBundle, String idPsp);
 
     Optional<BundleRequest> findByIdAndIdPsp(String id, String idPsp);
 

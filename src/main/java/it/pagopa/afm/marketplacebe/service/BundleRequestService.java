@@ -69,6 +69,10 @@ public class BundleRequestService {
 
         Bundle bundle = optBundle.get();
 
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         if (!bundle.getType().equals(BundleType.PUBLIC)) {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }

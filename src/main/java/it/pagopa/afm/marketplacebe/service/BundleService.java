@@ -10,12 +10,15 @@ import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,6 +35,12 @@ public class BundleService {
 
     @Autowired
     private CiBundleRepository ciBundleRepository;
+
+    @Autowired
+    private BundleRequestRepository bundleRequestRepository;
+
+    @Autowired
+    private BundleOfferRepository bundleOfferRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -98,10 +107,14 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
+
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
 
-
-        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)){
+        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -123,7 +136,40 @@ public class BundleService {
 
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
-        bundleRepository.delete(bundle);
+
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
+        }
+
+        // set validityDateTo=now in order to invalidate the bundle (logical delete)
+        LocalDateTime now = LocalDateTime.now();
+        bundle.setValidityDateTo(LocalDateTime.now());
+        bundleRepository.save(bundle);
+
+        // invalidate all references
+        // ci-bundles
+        List<CiBundle> ciBundleList = ciBundleRepository.findByIdBundle(idBundle);
+        ciBundleList.forEach(ciBundle -> {
+            ciBundle.setValidityDateTo(now);
+            @Valid List<CiBundleAttribute> attributes = ciBundle.getAttributes();
+            if (attributes != null) {
+                attributes.forEach(attribute -> {
+                    attribute.setValidityDateTo(now);
+                });
+            }
+        });
+        ciBundleRepository.saveAll(ciBundleList);
+
+        // bundle requests
+        List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
+        requests.forEach(request -> {
+            request.setRejectionDate(now);
+        });
+        bundleRequestRepository.saveAll(requests);
+
+        // bundle offers (if not accepted/rejected can be deleted physically)
+        List<BundleOffer> offers = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
+        bundleOfferRepository.deleteAll(offers);
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP){
@@ -195,6 +241,10 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
         }
@@ -236,6 +286,10 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
         }
@@ -259,6 +313,10 @@ public class BundleService {
     public void removeBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute) {
         // bundle attribute should be removed only for global and public bundles
         Bundle bundle = getBundle(idBundle);
+
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
 
         if (bundle.getType().equals(BundleType.PRIVATE)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global or public.", idBundle));
