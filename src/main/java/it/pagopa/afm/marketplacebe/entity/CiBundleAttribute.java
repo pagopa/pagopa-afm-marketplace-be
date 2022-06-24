@@ -1,11 +1,7 @@
 package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 
 import javax.validation.constraints.NotNull;
