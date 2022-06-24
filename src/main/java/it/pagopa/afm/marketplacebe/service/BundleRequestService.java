@@ -1,18 +1,9 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleRequest;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiRequests;
-import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
-import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.model.request.*;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
@@ -21,18 +12,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Transactional
 public class BundleRequestService {
 
     @Autowired
@@ -87,7 +73,8 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }
 
-        List<CiBundleAttribute> attributes = ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
+        List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null && ciBundleSubscriptionRequest.getCiBundleAttributeModelList().size() > 0) ?
+         ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
                 .stream()
                 .map(attribute ->
                         CiBundleAttribute.builder()
@@ -97,7 +84,7 @@ public class BundleRequestService {
                                 .transferCategory(attribute.getTransferCategory())
                                 .transferCategoryRelation(attribute.getTransferCategoryRelation())
                                 .build()
-                ).collect(Collectors.toList());
+                ).collect(Collectors.toList()) : new ArrayList<>();
 
         BundleRequest request = BundleRequest.builder()
                 .idBundle(bundle.getId())

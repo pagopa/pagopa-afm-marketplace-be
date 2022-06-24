@@ -1,23 +1,13 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.*;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
@@ -25,7 +15,6 @@ import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -80,6 +69,10 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
         }
 
+        if(bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()){
+            throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
+        }
+
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
@@ -105,6 +98,12 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
+        Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
+
+
+        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)){
+            throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
+        }
 
         bundle.setName(bundleRequest.getName());
         bundle.setDescription(bundleRequest.getDescription());
@@ -128,19 +127,19 @@ public class BundleService {
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP){
-       List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
-       List<String> CIs = new ArrayList<>();
-       CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
+        List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
+        List<String> CIs = new ArrayList<>();
+        CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
 
-       for(CiBundle ciBundle: subscriptions){
-           if (!checkCiBundle(ciBundle, idPSP)){
-               throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
-           }
-           CIs.add(ciBundle.getCiFiscalCode());
-       }
-       ciFiscalCodeList.setCiFiscalCodeList(CIs);
+        for(CiBundle ciBundle: subscriptions){
+            if (!checkCiBundle(ciBundle, idPSP)){
+                throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+            }
+            CIs.add(ciBundle.getCiFiscalCode());
+        }
+        ciFiscalCodeList.setCiFiscalCodeList(CIs);
 
-       return ciFiscalCodeList;
+        return ciFiscalCodeList;
     }
 
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
@@ -154,10 +153,12 @@ public class BundleService {
 
         return CiBundleDetails.builder()
                 .validityDateTo(ciBundle.get().getValidityDateTo())
-                .attributes(ciBundle.get().getAttributes().stream().map(
-                        attribute -> modelMapper.map(
-                                attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
-                ).collect(Collectors.toList()))
+                .attributes(
+                        ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
+                                ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
+                                attribute -> modelMapper.map(
+                                        attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
+                        ).collect(Collectors.toList()))
                 .build();
     }
 
@@ -295,9 +296,14 @@ public class BundleService {
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
     }
 
+    /** Check ciBundle consistency
+     *
+     * @param ciBundle CI Bundle
+     * @param idPSP PSP identifier
+     * @return check if the bundle referenced in ciBundle exists and is linked to the same PSP
+     */
     private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
-        return bundleRepository.findById(ciBundle.getIdBundle()).isPresent() ||
-                !bundleRepository.findById(ciBundle.getIdBundle()).get().getIdPsp().equals(idPSP);
+        return bundleRepository.findById(ciBundle.getIdBundle(), new PartitionKey(idPSP)).isPresent();
     }
 
     /** Retrieve a bundle by id
