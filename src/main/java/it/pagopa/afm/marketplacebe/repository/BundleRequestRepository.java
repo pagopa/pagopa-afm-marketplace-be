@@ -1,6 +1,5 @@
 package it.pagopa.afm.marketplacebe.repository;
 
-import com.azure.cosmos.models.PartitionKey;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.entity.BundleRequest;
 import org.springframework.data.domain.Page;
