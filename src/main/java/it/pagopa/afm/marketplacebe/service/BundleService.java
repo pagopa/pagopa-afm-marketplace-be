@@ -74,10 +74,10 @@ public class BundleService {
     }
 
     public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
-        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
         var bundle = bundleRepository.findById(idBundle)
                 .orElseThrow(()-> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
         if (BundleType.GLOBAL.equals(bundle.getType())){
             ciBundleRepository.delete(ciBundle);
         }
