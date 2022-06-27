@@ -70,8 +70,8 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 # add jvm trust-store
 keystore_alias="cosmoskeystore"
 echo "Remember, the keystore passowrd is: changeit"
-sudo keytool -delete -alias $keystore_alias -keystore "${JAVA_HOME}/lib/security/cacerts"
-sudo keytool -trustcacerts -keystore "${JAVA_HOME}/lib/security/cacerts" -storepass changeit -importcert -alias $keystore_alias -file emulatorcert.crt
+sudo keytool -delete -alias $keystore_alias -keystore "${JVM_HOME}/lib/security/cacerts"
+sudo keytool -trustcacerts -keystore "${JVM_HOME}/lib/security/cacerts" -storepass changeit -importcert -alias $keystore_alias -file emulatorcert.crt
 
 echo "Setting certificate...done."
 

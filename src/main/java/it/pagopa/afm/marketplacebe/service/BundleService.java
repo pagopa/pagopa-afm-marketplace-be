@@ -45,6 +45,24 @@ public class BundleService {
     @Autowired
     private ModelMapper modelMapper;
 
+    public Bundles getBundles(List<BundleType> bundleTypes, Integer pageNumber, Integer limit) {
+        List<String> types = bundleTypes.stream().map(Enum::toString).collect(Collectors.toList());
+        List<BundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
+                .stream()
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .collect(Collectors.toList());
+
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(bundleList.size())
+                .totalPages(1)
+                .build();
+
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
@@ -228,6 +246,13 @@ public class BundleService {
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
 
         return modelMapper.map(bundle, BundleDetails.class);
+    }
+
+    public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {
+        CiBundle ciBundle = ciBundleRepository.findById(idCiBundle, new PartitionKey(fiscalCode))
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_ID_NOT_FOUND, idCiBundle));
+
+        ciBundleRepository.delete(ciBundle);
     }
 
     public BundleDetailsAttributes getBundleAttributesByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
