@@ -1,29 +1,25 @@
-FROM openjdk:17-slim as build
-WORKDIR /workspace/app
+FROM adoptopenjdk/openjdk11:alpine-jre as builder
 
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-RUN ./mvnw dependency:copy-dependencies
-RUN ./mvnw dependency:go-offline
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE}  application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
 
-COPY src src
-COPY api-spec api-spec
-RUN ./mvnw install -DskipTests --offline
-RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
+FROM adoptopenjdk/openjdk11:alpine-jre
 
-FROM openjdk:17-slim
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
 
-RUN addgroup --system user && adduser --ingroup user --system user
-USER user:user
+ADD --chown=spring:spring https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.1.1/applicationinsights-agent-3.1.1.jar /applicationinsights-agent.jar
+COPY --chown=spring:spring docker/applicationinsights.json ./applicationinsights.json
 
-WORKDIR /app/
+COPY --chown=spring:spring  --from=builder dependencies/ ./
+COPY --chown=spring:spring  --from=builder snapshot-dependencies/ ./
+# https://github.com/moby/moby/issues/37965#issuecomment-426853382
+RUN true
+COPY --chown=spring:spring  --from=builder spring-boot-loader/ ./
+COPY --chown=spring:spring  --from=builder application/ ./
 
-ARG EXTRACTED=/workspace/app/target/extracted
+EXPOSE 8080
 
-COPY --from=build --chown=user ${EXTRACTED}/dependencies/ ./
-COPY --from=build --chown=user ${EXTRACTED}/spring-boot-loader/ ./
-COPY --from=build --chown=user ${EXTRACTED}/snapshot-dependencies/ ./
-COPY --from=build --chown=user ${EXTRACTED}/application/ ./
-
-ENTRYPOINT ["java","org.springframework.boot.loader.JarLauncher"]
+COPY --chown=spring:spring docker/run.sh ./run.sh
+ENTRYPOINT ["./run.sh"]
