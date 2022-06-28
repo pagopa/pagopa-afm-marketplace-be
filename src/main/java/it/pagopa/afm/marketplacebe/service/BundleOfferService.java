@@ -148,7 +148,7 @@ public class BundleOfferService {
     public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
 
-        verifyBundle(entity.getIdBundle(), ciFiscalCode);
+        verifyBundle(entity.getIdBundle(), entity.getIdPsp());
 
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleOfferRepository.save(
@@ -170,7 +170,7 @@ public class BundleOfferService {
     public void rejectOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
 
-        verifyBundle(entity.getIdBundle(), ciFiscalCode);
+        verifyBundle(entity.getIdBundle(), entity.getIdPsp());
 
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             bundleOfferRepository.save(
@@ -205,10 +205,10 @@ public class BundleOfferService {
     /**
      * Verify bundle consistency
      * @param idBundle
-     * @param ciFiscalCode
+     * @param idPsp
      */
-    private void verifyBundle(String idBundle, String ciFiscalCode) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(ciFiscalCode));
+    private void verifyBundle(String idBundle, String idPsp) {
+        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
         if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
