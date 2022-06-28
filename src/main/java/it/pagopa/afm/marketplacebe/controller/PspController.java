@@ -197,7 +197,7 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
-        bundleService.updateBundle(idPsp, idBundle, bundleRequest);
+        it.pagopa.afm.marketplacebe.entity.Bundle bundle = bundleService.updateBundle(idPsp, idBundle, bundleRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -283,7 +283,7 @@ public class PspController {
     }
 
     /**
-     * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP offers a private bundle to a creditor institution
+     * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP deletes a private bundle offered
      *
      * @param idPsp         PSP identifier.
      * @param idBundle      Bundle identifier.
@@ -291,7 +291,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", tags = {"PSP",})
+    @Operation(summary = "PSP deletes a private bundle offered", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
