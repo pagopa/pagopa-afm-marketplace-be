@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
@@ -151,8 +152,15 @@ public class BundleRequestService {
                     .acceptedDate(LocalDateTime.now())
                     .build());
 
-            // create CI-Bundle relation
-            ciBundleRepository.save(buildCiBundle(entity));
+            // verify if it is a new relation or should be updated an existent relationship
+            Optional<CiBundle> optCiBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(entity.getIdBundle(), entity.getCiFiscalCode());
+            if (optCiBundle.isEmpty()) {
+                ciBundleRepository.save(buildCiBundle(entity));
+            } else {
+                CiBundle ciBundle = optCiBundle.get();
+                ciBundle.setAttributes(entity.getCiBundleAttributes());
+                ciBundleRepository.save(ciBundle);
+            }
         } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
             throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, entity.getRejectionDate());
         } else {
