@@ -142,6 +142,7 @@ stages:
 
           - script: |
               git checkout $(SOURCE_BRANCH)
+
           - task: Bash@3
             name: application_properties
             inputs:
