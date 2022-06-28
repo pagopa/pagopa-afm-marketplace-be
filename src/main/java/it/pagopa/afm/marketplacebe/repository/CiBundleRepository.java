@@ -11,9 +11,10 @@ import java.util.Optional;
 @Repository
 public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
 
-    Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode);
     List<CiBundle> findByIdBundle(String idBundle);
-
     List<CiBundle> findByCiFiscalCode(String ciFiscalCode);
+
+    Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode);
+    Optional<CiBundle> findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(String idBundle, String ciFiscalCode);
 
 }

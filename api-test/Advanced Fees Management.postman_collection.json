@@ -281,6 +281,37 @@
 							"response": []
 						},
 						{
+							"name": "getBundle",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles/:id_bundle",
+									"host": [
+										"{{afm-host}}"
+									],
+									"path": [
+										"{{afm-base-path}}",
+										"psps",
+										":id_psp",
+										"bundles",
+										":id_bundle"
+									],
+									"variable": [
+										{
+											"key": "id_psp",
+											"value": "{{id_psp}}"
+										},
+										{
+											"key": "id_bundle",
+											"value": "{{id_bundle}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "getBundleCreditorInstitutions",
 							"request": {
 								"method": "GET",
@@ -834,7 +865,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"maxPaymentAmount\": 10,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRel\": \"EQUAL\"\n}",
+									"raw": "{\n  \"maxPaymentAmount\": 10,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRelation\": \"EQUAL\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -875,7 +906,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"maxPaymentAmount\": 15,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRel\": \"EQUAL\"\n}",
+									"raw": "{\n  \"maxPaymentAmount\": 15,\n  \"transferCategory\": \"PO\",\n  \"transferCategoryRelation\": \"EQUAL\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"

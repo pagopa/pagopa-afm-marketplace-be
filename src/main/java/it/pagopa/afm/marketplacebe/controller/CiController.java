@@ -84,22 +84,22 @@ public class CiController {
         return bundleService.getBundleByFiscalCode(fiscalCode, idBundle);
     }
 
-    @Operation(summary = "Delete a bundle of a CI", tags = {"CI",})
+    @Operation(summary = "Remove a bundle of a CI", tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @DeleteMapping(
-            value = "/{cifiscalcode}/bundles/{idbundle}",
+            value = "/{cifiscalcode}/bundles/{idcibundle}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<Void> deleteBundleByFiscalCode(
+    public ResponseEntity<Void> removeBundleByFiscalCode(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
-            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
-        bundleService.deleteBundleByFiscalCode(fiscalCode, idBundle);
+            @Parameter(description = "CIBundle identifier", required = true) @PathVariable("idcibundle") String idCiBundle) {
+        bundleService.removeBundleByFiscalCode(fiscalCode, idCiBundle);
         return ResponseEntity.ok().build();
     }
 
