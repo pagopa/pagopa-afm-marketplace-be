@@ -197,7 +197,7 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
-        bundleService.updateBundle(idPsp, idBundle, bundleRequest);
+        it.pagopa.afm.marketplacebe.entity.Bundle bundle = bundleService.updateBundle(idPsp, idBundle, bundleRequest);
         return ResponseEntity.ok().build();
     }
 

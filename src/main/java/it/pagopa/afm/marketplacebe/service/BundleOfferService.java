@@ -1,7 +1,10 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
