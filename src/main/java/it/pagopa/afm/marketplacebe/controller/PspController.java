@@ -208,7 +208,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return
      */
-    @Operation(summary = "Delete a bundle", tags = {"PSP",})
+    @Operation(summary = "Delete the bundle with the given id", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
