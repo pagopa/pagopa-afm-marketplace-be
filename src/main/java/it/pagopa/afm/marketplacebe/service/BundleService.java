@@ -241,15 +241,19 @@ public class BundleService {
                 .build();
     }
 
-    public Bundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
+    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
         var bundleList = ciBundleRepository
                 .findByCiFiscalCode(fiscalCode)
                 .parallelStream()
-                .map(ciBundle -> bundleRepository.findById(ciBundle.getIdBundle()))
-                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .map(ciBundle -> {
+                    Bundle bundle = bundleRepository.findById(ciBundle.getIdBundle()).orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, ciBundle.getIdBundle()));
+                    CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
+                    ciBundleInfo.setIdCiBundle(ciBundle.getId());
+                    return ciBundleInfo;
+                })
                 .collect(Collectors.toList());
 
-        return Bundles.builder()
+        return CiBundles.builder()
                 .bundleDetailsList(bundleList)
                 .build();
     }
