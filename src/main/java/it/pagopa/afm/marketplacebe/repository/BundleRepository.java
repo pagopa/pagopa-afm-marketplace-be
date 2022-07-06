@@ -17,6 +17,7 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     Optional<Bundle> findById(String idBundle, PartitionKey idPsp);
     Page<Bundle> findById(String idBundle, Pageable pageable);
 
+    List<Bundle> findByName(String name);
     Optional<Bundle> findByName(String name, PartitionKey idPsp);
 
     List<Bundle> findByIdPsp(String idPsp);
