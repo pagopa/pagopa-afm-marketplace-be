@@ -3,6 +3,9 @@ package it.pagopa.afm.marketplacebe.repository;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -23,6 +26,8 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     List<Bundle> findByIdPsp(String idPsp);
 
     List<Bundle> findByValidityDateToIsNullAndTypeIn(List<String> types);
+
+    List<Bundle> findByTypeAndPaymentMethodAndTouchpoint(BundleType type, PaymentMethod paymentMethod, Touchpoint touchpoint);
 
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
 

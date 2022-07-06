@@ -1,5 +1,8 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,9 +19,9 @@ public class BundleRequest {
     private Long paymentAmount;
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
-    private String paymentMethod;
-    private String touchpoint;
-    private String type;
+    private PaymentMethod paymentMethod;
+    private Touchpoint touchpoint;
+    private BundleType type;
     private List<String> transferCategoryList;
     private LocalDateTime validityDateFrom;
     private LocalDateTime validityDateTo;

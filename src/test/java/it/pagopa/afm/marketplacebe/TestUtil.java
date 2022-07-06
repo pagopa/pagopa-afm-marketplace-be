@@ -14,59 +14,86 @@ import org.assertj.core.util.Lists;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import lombok.experimental.UtilityClass;
+import org.modelmapper.ModelMapper;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 
 @UtilityClass
 public class TestUtil {
 
-    static public Bundle getMockBundle() {
-        return Bundle.builder()
-                .id(UUID.randomUUID().toString())
-                .idPsp("test_psp")
+    public static String getMockIdPsp() {
+        return "1234567890";
+    }
+
+    public static BundleRequest getMockBundleRequest() {
+        List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
+
+        return BundleRequest.builder()
                 .name("name")
                 .description("description")
                 .paymentAmount(100L)
-                .minPaymentAmount(1L)
-                .maxPaymentAmount(1000L)
-                .paymentMethod(PaymentMethod.valueOf("PO"))
-                .touchpoint(Touchpoint.valueOf("IO"))
-                .type(BundleType.valueOf("PRIVATE"))
-                .transferCategoryList(List.of("TEST"))
-                .validityDateFrom(null)
-                .validityDateTo(null)
-                .insertedDate(LocalDateTime.now().minusDays(2))
-                .lastUpdatedDate(LocalDateTime.now().minusDays(1))
+                .minPaymentAmount(0L)
+                .maxPaymentAmount(10000L)
+                .paymentMethod(PaymentMethod.CP)
+                .touchpoint(Touchpoint.IO)
+                .type(BundleType.GLOBAL)
+                .transferCategoryList(transferCategoryList)
+                .validityDateFrom(LocalDateTime.now())
+                .validityDateTo(LocalDateTime.now().plusDays(7))
                 .build();
     }
 
-    static public CiBundle getMockCiBundle() {
-        return CiBundle.builder()
-                .id(UUID.randomUUID().toString())
-                .ciFiscalCode("ABCD")
-                .validityDateTo(LocalDateTime.now())
-                .insertedDate(LocalDateTime.now())
-                .idBundle(UUID.randomUUID().toString())
-                .attributes(Lists.newArrayList(getMockCiBundleAttribute()))
-                .build();
+    public static Bundle getMockBundle() {
+        ModelMapper modelMapper = new ModelMapper();
+        Bundle bundle = modelMapper.map(getMockBundleRequest(), Bundle.class);
+        bundle.setId("cbfbc9c6-6c0b-429e-83ca-30ef453504f8");
+        bundle.setIdPsp(getMockIdPsp());
+        bundle.setInsertedDate(LocalDateTime.now());
+        bundle.setLastUpdatedDate(LocalDateTime.now());
+        return bundle;
     }
 
-    private static CiBundleAttribute getMockCiBundleAttribute() {
-        return CiBundleAttribute.builder()
-                .id(UUID.randomUUID().toString())
-                .maxPaymentAmount(100L)
-                .insertedDate(LocalDateTime.now())
-                .transferCategory("E")
-                .transferCategoryRelation(TransferCategoryRelation.EQUAL)
-                .build();
+    public static List<Bundle> getMockBundleSameConfiguration() {
+        Bundle bundle = getMockBundle();
+        return List.of(bundle);
     }
 
-    static public BundleRequest getMockBundleRequest() {
-        return BundleRequest.builder()
-                .ciFiscalCode("ABCD")
-                .idPsp("test_psp")
-                .idBundle(UUID.randomUUID().toString())
-                .insertedDate(LocalDateTime.now())
-                .ciBundleAttributes(Lists.newArrayList(getMockCiBundleAttribute()))
-                .build();
+    public static List<Bundle> getMockBundleSameConfigurationDifferentPaymentAmountRange() {
+        List<String> transferCategoryList = Arrays.asList("taxonomy1");
+
+        Bundle bundle1 = getMockBundle();
+        bundle1.setMinPaymentAmount(10001L);
+        bundle1.setMaxPaymentAmount(20000L);
+
+        Bundle bundle2 = getMockBundle();
+        bundle2.setMinPaymentAmount(10001L);
+        bundle2.setMaxPaymentAmount(20000L);
+        bundle2.setTransferCategoryList(transferCategoryList);
+
+        return List.of(bundle1, bundle2);
     }
+
+    public static List<Bundle> getMockBundleWithoutValidityDateTo() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(null);
+        return List.of(bundle);
+    }
+
 
 }

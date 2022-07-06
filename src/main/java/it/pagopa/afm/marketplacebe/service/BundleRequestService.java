@@ -1,6 +1,5 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
