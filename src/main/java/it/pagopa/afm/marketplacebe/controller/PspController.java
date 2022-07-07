@@ -208,7 +208,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return
      */
-    @Operation(summary = "Delete a bundle", tags = {"PSP",})
+    @Operation(summary = "Delete the bundle with the given id", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -283,7 +283,7 @@ public class PspController {
     }
 
     /**
-     * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP offers a private bundle to a creditor institution
+     * DELETE /psps/:idpsp/bunldes/:idbundle/offers/:idbundleoffer : PSP deletes a private bundle offered
      *
      * @param idPsp         PSP identifier.
      * @param idBundle      Bundle identifier.
@@ -291,7 +291,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get cursored list of PSP offers regarding private bundles", tags = {"PSP",})
+    @Operation(summary = "PSP deletes a private bundle offered", tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),

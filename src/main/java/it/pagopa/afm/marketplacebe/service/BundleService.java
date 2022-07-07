@@ -10,12 +10,15 @@ import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,7 +38,31 @@ public class BundleService {
     private CiBundleRepository ciBundleRepository;
 
     @Autowired
+    private BundleRequestRepository bundleRequestRepository;
+
+    @Autowired
+    private BundleOfferRepository bundleOfferRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
+
+    public Bundles getBundles(List<BundleType> bundleTypes, Integer pageNumber, Integer limit) {
+        List<String> types = bundleTypes.stream().map(Enum::toString).collect(Collectors.toList());
+        List<BundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
+                .stream()
+                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .collect(Collectors.toList());
+
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(bundleList.size())
+                .totalPages(1)
+                .build();
+
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(pageInfo)
+                .build();
+    }
 
     // TODO: add pagination
     // TODO: add filter
@@ -61,6 +88,21 @@ public class BundleService {
         Bundle bundle = getBundle(idBundle, idPsp);
 
         return modelMapper.map(bundle, BundleDetails.class);
+    }
+
+    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
+        var bundle = bundleRepository.findById(idBundle)
+                .orElseThrow(()-> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+        if (BundleType.GLOBAL.equals(bundle.getType())){
+            ciBundleRepository.delete(ciBundle);
+        }
+        else {
+            ciBundleRepository.save(ciBundle.toBuilder()
+                    .validityDateTo(LocalDateTime.now())
+                    .build());
+        }
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
@@ -100,10 +142,14 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
+
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
 
-
-        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)){
+        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -125,35 +171,66 @@ public class BundleService {
 
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
-        // TODO: Delete from main collection and store into archive
-        // bundleRepository.delete(bundle);
 
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
+        }
+
+        // TODO: Delete from main collection and store into archive
+        // set validityDateTo=now in order to invalidate the bundle (logical delete)
+        LocalDateTime now = LocalDateTime.now();
         bundle.setValidityDateTo(LocalDate.now());
+
         bundleRepository.save(bundle);
+
+        // invalidate all references
+        // ci-bundles
+        List<CiBundle> ciBundleList = ciBundleRepository.findByIdBundle(idBundle);
+        ciBundleList.forEach(ciBundle -> {
+            ciBundle.setValidityDateTo(now);
+            @Valid List<CiBundleAttribute> attributes = ciBundle.getAttributes();
+            if (attributes != null) {
+                attributes.forEach(attribute -> {
+                    attribute.setValidityDateTo(now);
+                });
+            }
+        });
+        ciBundleRepository.saveAll(ciBundleList);
+
+        // bundle requests
+        List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
+        requests.forEach(request -> {
+            request.setRejectionDate(now);
+        });
+        bundleRequestRepository.saveAll(requests);
+
+        // bundle offers (if not accepted/rejected can be deleted physically)
+        List<BundleOffer> offers = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
+        bundleOfferRepository.deleteAll(offers);
     }
 
-    public CiFiscalCodeList getCIs(String idBundle, String idPSP){
-        List<CiBundle> subscriptions =  ciBundleRepository.findByIdBundle(idBundle);
-        List<String> CIs = new ArrayList<>();
+    public CiFiscalCodeList getCIs(String idBundle, String idPSP) {
+        List<CiBundle> subscriptions = ciBundleRepository.findByIdBundle(idBundle);
+        List<String> ciList = new ArrayList<>();
         CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
 
-        for(CiBundle ciBundle: subscriptions){
-            if (!checkCiBundle(ciBundle, idPSP)){
+        for (CiBundle ciBundle : subscriptions) {
+            if (!checkCiBundle(ciBundle, idPSP)) {
                 throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
             }
-            CIs.add(ciBundle.getCiFiscalCode());
+            ciList.add(ciBundle.getCiFiscalCode());
         }
-        ciFiscalCodeList.setCiFiscalCodeList(CIs);
+        ciFiscalCodeList.setCiFiscalCodeList(ciList);
 
         return ciFiscalCodeList;
     }
 
-    public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode){
+    public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(), ciFiscalCode);
+        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
 
-        if(ciBundle.isEmpty()){
+        if (ciBundle.isEmpty()) {
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
 
@@ -168,15 +245,19 @@ public class BundleService {
                 .build();
     }
 
-    public Bundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
+    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
         var bundleList = ciBundleRepository
                 .findByCiFiscalCode(fiscalCode)
                 .parallelStream()
-                .map(ciBundle -> bundleRepository.findById(ciBundle.getIdBundle()))
-                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .map(ciBundle -> {
+                    Bundle bundle = bundleRepository.findById(ciBundle.getIdBundle()).orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, ciBundle.getIdBundle()));
+                    CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
+                    ciBundleInfo.setIdCiBundle(ciBundle.getId());
+                    return ciBundleInfo;
+                })
                 .collect(Collectors.toList());
 
-        return Bundles.builder()
+        return CiBundles.builder()
                 .bundleDetailsList(bundleList)
                 .build();
     }
@@ -190,6 +271,13 @@ public class BundleService {
         return modelMapper.map(bundle, BundleDetails.class);
     }
 
+    public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {
+        CiBundle ciBundle = ciBundleRepository.findById(idCiBundle, new PartitionKey(fiscalCode))
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_ID_NOT_FOUND, idCiBundle));
+
+        ciBundleRepository.delete(ciBundle);
+    }
+
     public BundleDetailsAttributes getBundleAttributesByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
@@ -200,6 +288,10 @@ public class BundleService {
         // bundle attribute should be created only for global bundle
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
+
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
 
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
@@ -242,6 +334,10 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
         }
@@ -265,6 +361,10 @@ public class BundleService {
     public void removeBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute) {
         // bundle attribute should be removed only for global and public bundles
         Bundle bundle = getBundle(idBundle);
+
+        if (bundle.getValidityDateTo() != null) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
 
         if (bundle.getType().equals(BundleType.PRIVATE)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global or public.", idBundle));
@@ -326,10 +426,11 @@ public class BundleService {
         return bundle.get();
     }
 
-    /** Retrieve a bundle by id and partition key
+    /**
+     * Retrieve a bundle by id and partition key
      *
      * @param idBundle Bundle identifier
-     * @param idPsp PSP identifier
+     * @param idPsp    PSP identifier
      * @return bundle
      */
     private Bundle getBundle(String idBundle, String idPsp) {

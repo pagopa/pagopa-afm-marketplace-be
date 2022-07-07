@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
@@ -48,7 +45,7 @@ public class CiController {
 
     @Operation(summary = "Get paginated list of bundles of a CI", tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -58,7 +55,7 @@ public class CiController {
             value = "/{cifiscalcode}/bundles",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public Bundles getBundlesByFiscalCode(
+    public CiBundles getBundlesByFiscalCode(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
@@ -82,6 +79,25 @@ public class CiController {
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
         return bundleService.getBundleByFiscalCode(fiscalCode, idBundle);
+    }
+
+    @Operation(summary = "Remove a bundle of a CI", tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @DeleteMapping(
+            value = "/{cifiscalcode}/bundles/{idcibundle}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<Void> removeBundleByFiscalCode(
+            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
+            @Parameter(description = "CIBundle identifier", required = true) @PathVariable("idcibundle") String idCiBundle) {
+        bundleService.removeBundleByFiscalCode(fiscalCode, idCiBundle);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Get attributes of a bundle of a CI", tags = {"CI",})

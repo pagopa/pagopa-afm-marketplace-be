@@ -15,11 +15,14 @@ import java.util.Optional;
 public interface BundleRepository extends CosmosRepository<Bundle, String> {
     Optional<Bundle> findById(String idBundle);
     Optional<Bundle> findById(String idBundle, PartitionKey idPsp);
-
-    Optional<Bundle> findByName(String name, PartitionKey idPsp);
     Page<Bundle> findById(String idBundle, Pageable pageable);
 
+    List<Bundle> findByName(String name);
+    Optional<Bundle> findByName(String name, PartitionKey idPsp);
+
     List<Bundle> findByIdPsp(String idPsp);
+
+    List<Bundle> findByValidityDateToIsNullAndTypeIn(List<String> types);
 
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
 

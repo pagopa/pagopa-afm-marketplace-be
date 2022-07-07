@@ -18,6 +18,8 @@ public interface BundleRequestRepository extends CosmosRepository<BundleRequest,
 
     List<BundleRequest> findByIdPsp(String idPsp);
 
+    List<BundleRequest> findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(String idBundle, String idPsp);
+
     Optional<BundleRequest> findByIdAndIdPsp(String id, String idPsp);
 
     List<BundleRequest> findByCiFiscalCode(String fiscalCode);

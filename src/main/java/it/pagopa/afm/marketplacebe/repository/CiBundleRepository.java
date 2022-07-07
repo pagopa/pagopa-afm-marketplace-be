@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.repository;
 
+import com.azure.cosmos.models.PartitionKey;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,7 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
     List<CiBundle> findByIdBundle(String idBundle);
     List<CiBundle> findByCiFiscalCode(String ciFiscalCode);
 
+    Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode);
     Optional<CiBundle> findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(String idBundle, String ciFiscalCode);
 
 }
