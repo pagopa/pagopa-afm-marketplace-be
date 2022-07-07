@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,8 +46,8 @@ public class Bundle {
 
     private List<String> transferCategoryList;
 
-    private LocalDateTime validityDateFrom;
-    private LocalDateTime validityDateTo;
+    private LocalDate validityDateFrom;
+    private LocalDate validityDateTo;
 
     @CreatedDate
     private LocalDateTime insertedDate;

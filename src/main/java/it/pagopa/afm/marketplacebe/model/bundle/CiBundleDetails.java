@@ -2,7 +2,7 @@ package it.pagopa.afm.marketplacebe.model.bundle;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -11,6 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class CiBundleDetails {
-    private LocalDateTime validityDateTo;
+    private LocalDate validityDateTo;
     private List<CiBundleAttribute> attributes;
 }

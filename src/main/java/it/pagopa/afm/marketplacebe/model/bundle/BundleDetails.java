@@ -3,6 +3,7 @@ package it.pagopa.afm.marketplacebe.model.bundle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,8 +26,8 @@ public class BundleDetails {
     private String touchpoint;
     private String type;
     private List<String> transferCategoryList;
-    private LocalDateTime validityDateFrom;
-    private LocalDateTime validityDateTo;
+    private LocalDate validityDateFrom;
+    private LocalDate validityDateTo;
     private LocalDateTime insertedDate;
     private LocalDateTime lastUpdatedDate;
 

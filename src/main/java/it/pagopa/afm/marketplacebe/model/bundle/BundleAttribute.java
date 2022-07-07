@@ -5,7 +5,7 @@ import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -24,9 +24,9 @@ public class BundleAttribute {
 
     private TransferCategoryRelation transferCategoryRelation;
 
-    private LocalDateTime validityDateTo;
+    private LocalDate validityDateTo;
 
     @NotNull
-    private LocalDateTime insertedDate;
+    private LocalDate insertedDate;
 
 }

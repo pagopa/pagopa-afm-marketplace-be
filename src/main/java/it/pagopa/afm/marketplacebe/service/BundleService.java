@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +65,9 @@ public class BundleService {
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
 
-        LocalDateTime validityDateFrom = bundleRequest.getValidityDateFrom() != null ? bundleRequest.getValidityDateFrom() : LocalDateTime.now();
-        if (bundleRequest.getValidityDateTo() != null && bundleRequest.getValidityDateTo().isBefore(validityDateFrom)) {
+        LocalDate validityDateFrom = bundleRequest.getValidityDateFrom() != null ? bundleRequest.getValidityDateFrom().toLocalDate() : LocalDate.now();
+        LocalDate validityDateTo = bundleRequest.getValidityDateTo() != null ? bundleRequest.getValidityDateTo().toLocalDate() : null;
+        if (bundleRequest.getValidityDateTo() != null && bundleRequest.getValidityDateTo().isBefore(validityDateFrom.atStartOfDay())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
         }
 
@@ -86,7 +88,7 @@ public class BundleService {
                 .type(BundleType.valueOf(bundleRequest.getType()))
                 .transferCategoryList(bundleRequest.getTransferCategoryList())
                 .validityDateFrom(validityDateFrom)
-                .validityDateTo(bundleRequest.getValidityDateTo())
+                .validityDateTo(validityDateTo)
                 .insertedDate(now)
                 .lastUpdatedDate(now)
                 .build();
@@ -114,8 +116,8 @@ public class BundleService {
         bundle.setTouchpoint(Touchpoint.valueOf(bundleRequest.getTouchpoint()));
         bundle.setType(BundleType.valueOf(bundleRequest.getType()));
         bundle.setTransferCategoryList(bundleRequest.getTransferCategoryList());
-        bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
-        bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
+        bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom().toLocalDate());
+        bundle.setValidityDateTo(bundleRequest.getValidityDateTo().toLocalDate());
         bundle.setLastUpdatedDate(LocalDateTime.now());
 
         return bundleRepository.save(bundle);
@@ -123,7 +125,11 @@ public class BundleService {
 
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
-        bundleRepository.delete(bundle);
+        // TODO: Delete from main collection and store into archive
+        // bundleRepository.delete(bundle);
+
+        bundle.setValidityDateTo(LocalDate.now());
+        bundleRepository.save(bundle);
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP){
@@ -152,7 +158,7 @@ public class BundleService {
         }
 
         return CiBundleDetails.builder()
-                .validityDateTo(ciBundle.get().getValidityDateTo())
+                .validityDateTo(ciBundle.get().getValidityDateTo().toLocalDate())
                 .attributes(
                         ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
                                 ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
