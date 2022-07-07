@@ -106,13 +106,26 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
-        // verify validityDateFrom, if null set to now
+        // verify validityDateFrom, if null set to now +1
         if (bundleRequest.getValidityDateFrom() == null) {
-            bundleRequest.setValidityDateFrom(LocalDateTime.now());
+            bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(1));
         }
-        // check it is before validityDateTo
-        if (bundleRequest.getValidityDateTo() != null && bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom");
+
+        // verify if validityDateFrom is equal or after now
+        if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
+        }
+
+        if (bundleRequest.getValidityDateTo() != null) {
+            // verify if validityDateTo is after now
+            if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
+            }
+
+            // check it is before validityDateTo
+            if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom");
+            }
         }
 
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
@@ -123,17 +136,17 @@ public class BundleService {
         List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
             // verify payment amount range validity
-            if (!isValidPaymentAmountRange(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount())) {
+            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount())) {
                 // verify if validityDateFrom is acceptable
-                if (!isValidValidityDateFrom(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                if (!isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                     throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
                 }
             }
 
             // verify transfer category list overlapping
-            if (!isValidTransferCategoryList(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList())) {
+            if (!isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList())) {
                 // verify if validityDateFrom is acceptable
-                if (!isValidValidityDateFrom(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                if (!isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                     throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
                 }
             }
@@ -169,8 +182,14 @@ public class BundleService {
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        if (bundle.getValidityDateTo() != null) {
+        // check if validityDateTo is after now
+        if (bundle.getValidityDateTo() != null && LocalDateTime.now().isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        }
+
+        // verify validityDateFrom, if it is null set to now
+        if (bundleRequest.getValidityDateFrom() == null) {
+            bundleRequest.setValidityDateFrom(LocalDateTime.now());
         }
 
         Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
@@ -472,7 +491,7 @@ public class BundleService {
      * @param maxPaymentAmountTarget
      * @return
      */
-    private boolean isValidPaymentAmountRange(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
+    private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
         return !(minPaymentAmount >= minPaymentAmountTarget &&
                 minPaymentAmount <= maxPaymentAmountTarget &&
                 maxPaymentAmount >= minPaymentAmountTarget &&
@@ -485,8 +504,19 @@ public class BundleService {
      * @param transferCategoryListTarget
      * @return
      */
-    private boolean isValidTransferCategoryList(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
+    private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
         return transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains);
+    }
+
+    /**
+     * Verify if date is equal or after now
+     * @param date date to check
+     * @param equal true if check equal
+     * @return
+     */
+    private boolean isDateAcceptable(LocalDateTime date, boolean equal) {
+        LocalDateTime now = LocalDateTime.now();
+        return equal ? date.isEqual(now) || date.isAfter(now) : date.isAfter(now);
     }
 
     /**
@@ -495,11 +525,8 @@ public class BundleService {
      * @param validityDateToTarget
      * @return
      */
-    private boolean isValidValidityDateFrom(LocalDateTime validityDateFrom, LocalDateTime validityDateToTarget) {
-        if (validityDateToTarget == null || validityDateFrom.isBefore(validityDateToTarget) || validityDateFrom.isEqual(validityDateToTarget)) {
-            return false;
-        }
-        return true;
+    private boolean isValidityDateFromValid(LocalDateTime validityDateFrom, LocalDateTime validityDateToTarget) {
+        return validityDateToTarget != null && !validityDateFrom.isBefore(validityDateToTarget) && !validityDateFrom.isEqual(validityDateToTarget);
     }
 
 }

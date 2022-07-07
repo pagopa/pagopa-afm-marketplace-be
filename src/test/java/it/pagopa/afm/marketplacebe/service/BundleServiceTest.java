@@ -137,8 +137,8 @@ class BundleServiceTest {
     void createBundle_ok_3() {
         // same (payment method, touchpoint, type, transferCategoryList, payment amount range), different validityDate
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
-        bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(8));
-        bundleRequest.setValidityDateTo(LocalDateTime.now().plusDays(10));
+        bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(9));
+        bundleRequest.setValidityDateTo(LocalDateTime.now().plusDays(12));
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
         when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
@@ -155,8 +155,8 @@ class BundleServiceTest {
     void createBundle_ok_4() {
         // same (payment method, touchpoint, type, transferCategoryList), different payment amount range and validityDate
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
-        bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(8));
-        bundleRequest.setValidityDateTo(LocalDateTime.now().plusDays(10));
+        bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(9));
+        bundleRequest.setValidityDateTo(LocalDateTime.now().plusDays(12));
         List<Bundle> bundles = TestUtil.getMockBundleSameConfigurationDifferentPaymentAmountRange();
 
         when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
@@ -255,6 +255,34 @@ class BundleServiceTest {
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
 
         createBundle_ko(TestUtil.getMockBundleRequest(), HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void createBundle_ko_7() {
+        // validityDateFrom before now
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setValidityDateFrom(LocalDateTime.now().minusDays(1));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_8() {
+        // validityDateTo before now
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setValidityDateTo(LocalDateTime.now());
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_9() {
+        // validityDateTo before validityDateFrom
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(8));
+        bundleRequest.setValidityDateTo(LocalDateTime.now().plusDays(7));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {

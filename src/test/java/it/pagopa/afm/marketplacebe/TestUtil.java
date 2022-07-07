@@ -54,8 +54,8 @@ public class TestUtil {
                 .touchpoint(Touchpoint.IO)
                 .type(BundleType.GLOBAL)
                 .transferCategoryList(transferCategoryList)
-                .validityDateFrom(LocalDateTime.now())
-                .validityDateTo(LocalDateTime.now().plusDays(7))
+                .validityDateFrom(LocalDateTime.now().plusDays(1))
+                .validityDateTo(LocalDateTime.now().plusDays(8))
                 .build();
     }
 
