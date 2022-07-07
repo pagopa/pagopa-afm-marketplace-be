@@ -48,9 +48,9 @@ public class BundleService {
 
     public Bundles getBundles(List<BundleType> bundleTypes, Integer pageNumber, Integer limit) {
         List<String> types = bundleTypes.stream().map(Enum::toString).collect(Collectors.toList());
-        List<BundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
+        List<PspBundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -67,10 +67,10 @@ public class BundleService {
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-        List<BundleDetails> bundleList = bundleRepository
+        List<PspBundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -84,10 +84,10 @@ public class BundleService {
                 .build();
     }
 
-    public BundleDetails getBundleById(String idBundle, String idPsp) {
+    public PspBundleDetails getBundleById(String idBundle, String idPsp) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        return modelMapper.map(bundle, BundleDetails.class);
+        return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
     public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
@@ -276,13 +276,13 @@ public class BundleService {
                 .build();
     }
 
-    public BundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+    public PspBundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
         var bundle = bundleRepository.findById(ciBundle.getIdBundle())
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
 
-        return modelMapper.map(bundle, BundleDetails.class);
+        return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
     public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {

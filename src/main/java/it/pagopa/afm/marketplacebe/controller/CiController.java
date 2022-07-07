@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
@@ -68,7 +68,7 @@ public class CiController {
 
     @Operation(summary = "Get a bundle of a CI", tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetails.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspBundleDetails.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -78,7 +78,7 @@ public class CiController {
             value = "/{cifiscalcode}/bundles/{idbundle}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public BundleDetails getBundleByFiscalCode(
+    public PspBundleDetails getBundleByFiscalCode(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
         return bundleService.getBundleByFiscalCode(fiscalCode, idBundle);

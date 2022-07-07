@@ -20,7 +20,7 @@ public class Bundles {
     @Schema(required = true)
     @NotNull
     @Valid
-    private List<BundleDetails> bundleDetailsList;
+    private List<PspBundleDetails> bundleDetailsList;
 
 
     @Schema(required = true)
