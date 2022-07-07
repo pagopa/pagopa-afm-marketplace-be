@@ -78,7 +78,8 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }
 
-        List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null && ciBundleSubscriptionRequest.getCiBundleAttributeModelList().size() > 0) ?
+        List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null
+                && !ciBundleSubscriptionRequest.getCiBundleAttributeModelList().isEmpty()) ?
          ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
                 .stream()
                 .map(attribute ->

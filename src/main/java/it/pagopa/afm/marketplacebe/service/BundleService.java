@@ -190,18 +190,14 @@ public class BundleService {
             ciBundle.setValidityDateTo(now);
             @Valid List<CiBundleAttribute> attributes = ciBundle.getAttributes();
             if (attributes != null) {
-                attributes.forEach(attribute -> {
-                    attribute.setValidityDateTo(now);
-                });
+                attributes.forEach(attribute -> attribute.setValidityDateTo(now));
             }
         });
         ciBundleRepository.saveAll(ciBundleList);
 
         // bundle requests
-        List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
-        requests.forEach(request -> {
-            request.setRejectionDate(now);
-        });
+        var requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
+        requests.forEach(request -> request.setRejectionDate(now));
         bundleRequestRepository.saveAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
