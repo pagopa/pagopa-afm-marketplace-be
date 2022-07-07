@@ -285,6 +285,43 @@ class BundleServiceTest {
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void updateBundle_ok_1() {
+        Bundle bundle = TestUtil.getMockBundle();
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
+
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
+        assertNotNull(result);
+    }
+
+    @Test
+    void updateBundle_ko_1() {
+        // bundle name conflict
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setId("cbfbc9c6-6c0b-429e-83ca-30ef453504fa");
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
+
+        try {
+            bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(),TestUtil.getMockBundleRequest());
+            fail();
+        } catch (AppException e) {
+            assertEquals(HttpStatus.CONFLICT, e.getHttpStatus());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
         try {
             bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);

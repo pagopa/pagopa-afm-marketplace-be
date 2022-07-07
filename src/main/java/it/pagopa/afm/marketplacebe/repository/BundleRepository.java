@@ -23,6 +23,8 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     List<Bundle> findByName(String name);
     Optional<Bundle> findByName(String name, PartitionKey idPsp);
 
+    Optional<Bundle> findByNameAndIdNot(String name, String id, PartitionKey idPsp);
+
     List<Bundle> findByIdPsp(String idPsp);
 
     List<Bundle> findByValidityDateToIsNullAndTypeIn(List<String> types);

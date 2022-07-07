@@ -106,53 +106,20 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
-        // verify validityDateFrom, if null set to now +1
-        if (bundleRequest.getValidityDateFrom() == null) {
-            bundleRequest.setValidityDateFrom(LocalDateTime.now().plusDays(1));
-        }
+        // verify validityDateFrom, if null set to now +1d
+        bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
-        // verify if validityDateFrom is equal or after now
-        if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
-        }
-
-        if (bundleRequest.getValidityDateTo() != null) {
-            // verify if validityDateTo is after now
-            if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
-            }
-
-            // check it is before validityDateTo
-            if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom");
-            }
-        }
+        // verify validityDateFrom and validityDateTo
+        analyzeValidityDate(bundleRequest);
 
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
+        analyzeBundlesOverlapping(bundleRequest);
 
-        List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
-        bundles.forEach(bundle -> {
-            // verify payment amount range validity
-            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount())) {
-                // verify if validityDateFrom is acceptable
-                if (!isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
-                }
-            }
-
-            // verify transfer category list overlapping
-            if (!isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList())) {
-                // verify if validityDateFrom is acceptable
-                if (!isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
-                }
-            }
-        });
-
-        if(bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()){
+        // verify no bundle exists with the same name
+        if (bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -187,14 +154,21 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
-        // verify validityDateFrom, if it is null set to now
-        if (bundleRequest.getValidityDateFrom() == null) {
-            bundleRequest.setValidityDateFrom(LocalDateTime.now());
-        }
+        // verify validityDateFrom, if it is null set to now +1d
+        bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
-        Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
+        // verify validityDateFrom and validityDateTo
+        analyzeValidityDate(bundleRequest);
 
-        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)) {
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
+        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if there is overlapping transferCategoryList
+        analyzeBundlesOverlapping(bundleRequest);
+
+        // verify the only other bundle with the same name is the bundle I want to modify
+        Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdNot(bundleRequest.getName(), idBundle, new PartitionKey(idPsp));
+        if (duplicateBundle.isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -205,7 +179,6 @@ public class BundleService {
         bundle.setMaxPaymentAmount(bundleRequest.getMaxPaymentAmount());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
         bundle.setTouchpoint(bundleRequest.getTouchpoint());
-        bundle.setType(bundleRequest.getType());
         bundle.setTransferCategoryList(bundleRequest.getTransferCategoryList());
         bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
@@ -527,6 +500,72 @@ public class BundleService {
      */
     private boolean isValidityDateFromValid(LocalDateTime validityDateFrom, LocalDateTime validityDateToTarget) {
         return validityDateToTarget != null && !validityDateFrom.isBefore(validityDateToTarget) && !validityDateFrom.isEqual(validityDateToTarget);
+    }
+
+    /**
+     * If date is null, returns the next acceptable date
+     * @param date
+     * @return date
+     */
+    private LocalDateTime getNextAcceptableDate(LocalDateTime date) {
+        // verify date: if null set to now +1
+        if (date == null) {
+            date = LocalDateTime.now().plusDays(1);
+        }
+        return date;
+    }
+
+    /**
+     * Verify if bundleRequest has got acceptable validityDateFrom and validityDateFrom
+     * @param bundleRequest
+     */
+    private void analyzeValidityDate(BundleRequest bundleRequest) {
+        // verify if validityDateFrom is equal or after now
+        if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
+        }
+
+        if (bundleRequest.getValidityDateTo() != null) {
+            // verify if validityDateTo is after now
+            if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
+            }
+
+            // check it is before validityDateTo
+            if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom");
+            }
+        }
+    }
+
+    /**
+     * Verify if the request could be accepted according to the existent bundles
+     * @param bundleRequest
+     */
+    private void analyzeBundlesOverlapping(BundleRequest bundleRequest) {
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
+        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if there is overlapping transferCategoryList
+
+        List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
+        bundles.forEach(bundle -> {
+            // verify payment amount range validity
+            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount())) {
+                // verify if validityDateFrom is acceptable
+                if (!isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+                }
+            }
+
+            // verify transfer category list overlapping
+            if (!isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList())) {
+                // verify if validityDateFrom is acceptable
+                if (!isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+                }
+            }
+        });
     }
 
 }
