@@ -406,6 +406,17 @@ class BundleRequestServiceTest {
     }
 
     @Test
+    void createBundleRequest_ok_4() {
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setType(BundleType.PUBLIC);
+        bundle.setValidityDateTo(null);
+        when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
+
+        BundleRequestId result = bundleRequestService.createBundleRequest(TestUtil.getMockCiFiscalCode(), TestUtil.getCiBundleSubscriptionRequest());
+        assertNotNull(result);
+    }
+
+    @Test
     void createBundleRequest_ko_1() {
         // request for a global bundle
         Bundle bundle = TestUtil.getMockBundle();
