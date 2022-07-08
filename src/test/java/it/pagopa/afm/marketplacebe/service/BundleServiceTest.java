@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
@@ -375,5 +376,109 @@ class BundleServiceTest {
                 .getBundleAttributesByFiscalCode(ciBundle.getCiFiscalCode(), ciBundle.getIdBundle());
 
         assertEquals(ciBundle.getAttributes().get(0).getId(), bundleDetailsAttributes.getAttributes().get(0).getId());
+    }
+
+    @Test
+    void shouldCreateBundleAttributesByCi(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        bundle.setType(BundleType.GLOBAL);
+        ciBundle.setIdBundle(bundle.getId());
+
+        Mockito.when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        Mockito.when(ciBundleRepository.save(Mockito.any()))
+                .thenReturn(ciBundle);
+
+        BundleAttributeResponse response = bundleService.createBundleAttributesByCi(
+                ciBundle.getCiFiscalCode(),
+                bundle.getId(),
+                getMockBundleAttributeModel()
+                );
+
+        verify(ciBundleRepository, times(1)).save(Mockito.any());
+    }
+
+    @Test
+    void shouldUpdateBundleAttributesByCi(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        bundle.setType(BundleType.GLOBAL);
+        ciBundle.setIdBundle(bundle.getId());
+
+        Mockito.when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        Mockito.when(ciBundleRepository.save(Mockito.any()))
+                .thenReturn(ciBundle);
+
+        bundleService.updateBundleAttributesByCi(
+                ciBundle.getCiFiscalCode(),
+                bundle.getId(),
+                ciBundle.getAttributes().get(0).getId(),
+                getMockBundleAttributeModel()
+        );
+
+        verify(ciBundleRepository, times(1)).save(Mockito.any());
+    }
+
+    @Test
+    void shouldRaiseNotFoundUpdateBundleAttributesByCi(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        bundle.setType(BundleType.GLOBAL);
+        ciBundle.setIdBundle(bundle.getId());
+
+        Mockito.when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        Mockito.when(ciBundleRepository.save(Mockito.any()))
+                .thenReturn(ciBundle);
+
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.updateBundleAttributesByCi(
+                ciBundle.getCiFiscalCode(),
+                bundle.getId(),
+                UUID.randomUUID().toString(),
+                getMockBundleAttributeModel())
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, appException.getHttpStatus());
+    }
+
+    @Test
+    public void shouldRemoveBundleAttributesByCi(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        bundle.setType(BundleType.GLOBAL);
+        ciBundle.setIdBundle(bundle.getId());
+
+        Mockito.when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        Mockito.when(ciBundleRepository.save(Mockito.any()))
+                .thenReturn(ciBundle);
+
+        bundleService.removeBundleAttributesByCi(
+                ciBundle.getCiFiscalCode(),
+                bundle.getId(),
+                ciBundle.getAttributes().get(0).getId()
+        );
+
+        verify(ciBundleRepository, times(1)).delete(ciBundle);
     }
 }
