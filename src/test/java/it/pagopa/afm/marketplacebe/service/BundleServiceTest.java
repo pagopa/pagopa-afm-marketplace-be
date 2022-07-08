@@ -271,6 +271,24 @@ class BundleServiceTest {
     }
 
     @Test
+    void updateBundle_ok_2() {
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setValidityDateFrom(LocalDate.now().minusDays(7));
+        bundle.setValidityDateTo(LocalDate.now());
+
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
+
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
+        assertNotNull(result);
+    }
+
+    @Test
     void updateBundle_ko_1() {
         // bundle name conflict
         Bundle bundle = TestUtil.getMockBundle();
@@ -282,17 +300,18 @@ class BundleServiceTest {
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
 
-        String idPsp = TestUtil.getMockIdPsp();
-        String idBundle = bundle.getId();
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        updateBundle_ko(bundle, HttpStatus.CONFLICT);
+    }
 
-        try {
-            bundleService.updateBundle(idPsp, idBundle, bundleRequest);
-        } catch (AppException e) {
-            assertEquals(HttpStatus.CONFLICT, e.getHttpStatus());
-        } catch (Exception e) {
-            fail();
-        }
+    @Test
+    void updateBundle_ko_2() {
+        // validityDateTo is expired
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setId("cbfbc9c6-6c0b-429e-83ca-30ef453504fa");
+        bundle.setValidityDateTo(LocalDate.now().minusDays(1));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        updateBundle_ko(bundle, HttpStatus.BAD_REQUEST);
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
@@ -301,6 +320,20 @@ class BundleServiceTest {
         try {
             bundleService.createBundle(idPsp, bundleRequest);
             fail();
+        } catch (AppException e) {
+            assertEquals(status, e.getHttpStatus());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    private void updateBundle_ko(Bundle bundle, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+        String idBundle = bundle.getId();
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+
+        try {
+            bundleService.updateBundle(idPsp, idBundle, bundleRequest);
         } catch (AppException e) {
             assertEquals(status, e.getHttpStatus());
         } catch (Exception e) {
