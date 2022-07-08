@@ -5,8 +5,7 @@ import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
@@ -17,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
@@ -53,7 +52,12 @@ class BundleServiceTest {
 
     @Captor
     ArgumentCaptor<Bundle> bundleArgumentCaptor = ArgumentCaptor.forClass(Bundle.class);
+    @Captor
+    ArgumentCaptor<CiBundle> ciBundleArgumentCaptor = ArgumentCaptor.forClass(CiBundle.class);
 
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Test
     void shouldGetBundles() {
@@ -75,7 +79,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldGetBundlesByIdPsp(){
+    void shouldGetBundlesByIdPsp() {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
 
@@ -93,7 +97,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldGetBundleById(){
+    void shouldGetBundleById() {
         var bundle = getMockBundle();
 
         // Precondition
@@ -107,7 +111,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseNotFoundException(){
+    void shouldRaiseNotFoundException() {
         var bundle = getMockBundle();
 
         // Precondition
@@ -122,7 +126,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldCreateBundle(){
+    void shouldCreateBundle() {
         var bundleRequest = getMockBundleModelRequest();
         Bundle bundle = getMockBundle();
         String idPsp = "test_id_psp";
@@ -142,7 +146,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestWithInvalidDateBundle(){
+    void shouldRaiseBadRequestWithInvalidDateBundle() {
         var bundleRequest = getMockBundleModelRequest();
 
         // Setup invalid validity date to
@@ -158,7 +162,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBundleNameConflict(){
+    void shouldRaiseBundleNameConflict() {
         var bundleRequest = getMockBundleModelRequest();
         String idPsp = "test_id_psp";
 
@@ -174,7 +178,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldUpdateBundle(){
+    void shouldUpdateBundle() {
         var bundleRequest = getMockBundleModelRequest();
         Bundle bundle = getMockBundle();
         String idPsp = "test";
@@ -183,7 +187,7 @@ class BundleServiceTest {
         // Avoid duplicate
 
         Mockito.when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
-                        .thenReturn(Optional.of(bundle));
+                .thenReturn(Optional.of(bundle));
         Mockito.when(bundleRepository.findByName(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(bundle));
 
@@ -217,7 +221,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldGetCIs(){
+    void shouldGetCIs() {
         List<CiBundle> ciBundles = List.of(getMockCiBundle());
         Bundle bundle = getMockBundle();
 
@@ -233,7 +237,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseConflictWhenGetCIs(){
+    void shouldRaiseConflictWhenGetCIs() {
         List<CiBundle> ciBundles = List.of(getMockCiBundle());
         Bundle bundle = getMockBundle();
 
@@ -248,6 +252,128 @@ class BundleServiceTest {
         );
 
         assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+    }
 
+    @Test
+    void shouldGetCIDetails() {
+        Bundle bundle = getMockBundle();
+        CiBundle ciBundle = getMockCiBundle();
+
+        // Preconditions
+        Mockito.when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCode(
+                bundle.getId(), ciBundle.getCiFiscalCode()
+        )).thenReturn(Optional.of(ciBundle));
+
+        CiBundleDetails ciBundleDetails = bundleService.getCIDetails(
+                bundle.getId(),
+                bundle.getIdPsp(),
+                ciBundle.getCiFiscalCode()
+        );
+
+        assertEquals(ciBundle.getAttributes().size(), ciBundleDetails.getAttributes().size());
+        assertEquals(ciBundle.getAttributes().get(0).getMaxPaymentAmount(),
+                ciBundleDetails.getAttributes().get(0).getMaxPaymentAmount());
+    }
+
+    @Test
+    void shouldRaiseNotFoundGetCIDetails() {
+        Bundle bundle = getMockBundle();
+        CiBundle ciBundle = getMockCiBundle();
+
+        // Preconditions
+        Mockito.when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCode(
+                bundle.getId(), ciBundle.getCiFiscalCode()
+        )).thenReturn(Optional.empty());
+
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.getCIDetails(
+                        bundle.getId(),
+                        bundle.getIdPsp(),
+                        ciBundle.getCiFiscalCode()
+                )
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, appException.getHttpStatus());
+    }
+
+    @Test
+    void shouldGetBundlesByFiscalCode(){
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        Mockito.when(ciBundleRepository.findByCiFiscalCode(mockCIBundle.getCiFiscalCode()))
+                .thenReturn(ciBundles);
+
+        Mockito.when(bundleRepository.findById(mockCIBundle.getIdBundle()))
+                .thenReturn(Optional.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(), 100, 0
+        );
+
+
+        assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
+        assertEquals(mockCIBundle.getIdBundle(),
+                ciBundlesResult.getBundleDetailsList().get(0).getId());
+    }
+
+    @Test
+    void shouldGetBundleByFiscalCode(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        ciBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                        ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+        Mockito.when(bundleRepository.findById(bundle.getId()))
+                        .thenReturn(Optional.of(bundle));
+
+        BundleDetails bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
+
+        assertEquals(bundle.getIdPsp(), bundleDetails.getIdPsp());
+        assertEquals(bundle.getId(), bundleDetails.getId());
+    }
+
+    @Test
+    void shouldRemoveByFiscalCode(){
+        CiBundle ciBundle = getMockCiBundle();
+
+        // Preconditions
+        Mockito.when(ciBundleRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(ciBundle));
+
+        bundleService.removeBundleByFiscalCode(ciBundle.getCiFiscalCode(),
+                ciBundle.getIdBundle());
+
+        verify(ciBundleRepository).delete(ciBundleArgumentCaptor.capture());
+
+        assertEquals(ciBundle.getId(), ciBundleArgumentCaptor.getValue().getId());
+    }
+
+    @Test
+    void shouldGetBundleAttributeByFiscalCode(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        ciBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        BundleDetailsAttributes bundleDetailsAttributes = bundleService
+                .getBundleAttributesByFiscalCode(ciBundle.getCiFiscalCode(), ciBundle.getIdBundle());
+
+        assertEquals(ciBundle.getAttributes().get(0).getId(), bundleDetailsAttributes.getAttributes().get(0).getId());
     }
 }
