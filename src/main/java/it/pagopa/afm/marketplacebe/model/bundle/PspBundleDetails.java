@@ -12,11 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class BundleDetails {
+public class PspBundleDetails {
 
     @JsonProperty("idBundle")
     private String id;
-    private String idPsp;
     private String name;
     private String description;
     private Long paymentAmount;
