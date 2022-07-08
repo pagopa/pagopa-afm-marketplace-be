@@ -314,6 +314,13 @@ class BundleServiceTest {
         updateBundle_ko(bundle, HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void updateBundle_ko_3() {
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
+
+        updateBundle_ko(TestUtil.getMockBundle(), HttpStatus.NOT_FOUND);
+    }
+
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
         String idPsp = TestUtil.getMockIdPsp();
 
