@@ -1,5 +1,13 @@
 package it.pagopa.afm.marketplacebe;
 
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
@@ -43,6 +51,19 @@ public class TestUtil {
                 .validityDateTo(LocalDate.now().plusDays(8))
                 .build();
     }
+
+    public static BundleRequestEntity getMockBundleRequestEntity() {
+        return BundleRequestEntity.builder()
+                .id("112")
+                .idPsp("test_psp")
+                .ciFiscalCode("ABCD")
+                .idBundle(UUID.randomUUID().toString())
+                .insertedDate(LocalDateTime.now())
+                .validityDateFrom(LocalDate.now().plusDays(1))
+                .validityDateTo(LocalDate.now().plusDays(8))
+                .build();
+    }
+
 
     public static Bundle getMockBundle() {
         ModelMapper modelMapper = new ModelMapper();
@@ -101,8 +122,8 @@ public class TestUtil {
                 .build();
     }
 
-    public static it.pagopa.afm.marketplacebe.entity.BundleRequest getMockBundleRequestE() {
-        return it.pagopa.afm.marketplacebe.entity.BundleRequest.builder()
+    public static BundleRequestEntity getMockBundleRequestE() {
+        return BundleRequestEntity.builder()
                 .ciFiscalCode(getMockCiFiscalCode())
                 .idPsp(getMockIdPsp())
                 .idBundle(UUID.randomUUID().toString())

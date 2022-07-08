@@ -26,7 +26,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BundleRequest {
+public class BundleRequestEntity {
 
     @Id
     @GeneratedValue

@@ -3,6 +3,7 @@ package it.pagopa.afm.marketplacebe.service;
 import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
@@ -211,7 +212,7 @@ public class BundleService {
         ciBundleRepository.saveAll(ciBundleList);
 
         // bundle requests
-        List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
+        List<BundleRequestEntity> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
 
         requests.forEach(request -> request.setRejectionDate(LocalDateTime.now()));
         bundleRequestRepository.saveAll(requests);
