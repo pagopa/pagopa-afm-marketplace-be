@@ -46,7 +46,7 @@ public class BundleService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public Bundles getBundles(List<BundleType> bundleTypes, Integer pageNumber, Integer limit) {
+    public Bundles getBundles(List<BundleType> bundleTypes) {
         List<String> types = bundleTypes.stream().map(Enum::toString).collect(Collectors.toList());
         List<PspBundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
                 .stream()
@@ -64,8 +64,6 @@ public class BundleService {
                 .build();
     }
 
-    // TODO: add pagination
-    // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
         List<PspBundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
@@ -194,7 +192,6 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
         }
 
-        // TODO: Delete from main collection and store into archive
         // set validityDateTo=now in order to invalidate the bundle (logical delete)
         LocalDateTime now = LocalDateTime.now();
         bundle.setValidityDateTo(LocalDate.now());

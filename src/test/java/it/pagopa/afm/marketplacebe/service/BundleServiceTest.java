@@ -67,7 +67,7 @@ class BundleServiceTest {
 
         Bundles bundles = bundleService.getBundles(requiredTypes.stream()
                 .map(BundleType::valueOf)
-                .collect(Collectors.toList()), 0, 100);
+                .collect(Collectors.toList()));
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -460,7 +460,7 @@ class BundleServiceTest {
     }
 
     @Test
-    public void shouldRemoveBundleAttributesByCi(){
+    void shouldRemoveBundleAttributesByCi(){
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
