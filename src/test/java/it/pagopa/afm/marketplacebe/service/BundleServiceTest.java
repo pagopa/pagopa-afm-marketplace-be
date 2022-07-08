@@ -282,9 +282,12 @@ class BundleServiceTest {
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
 
+        String idPsp = TestUtil.getMockIdPsp();
+        String idBundle = bundle.getId();
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+
         try {
-            bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(),TestUtil.getMockBundleRequest());
-            fail();
+            bundleService.updateBundle(idPsp, idBundle, bundleRequest);
         } catch (AppException e) {
             assertEquals(HttpStatus.CONFLICT, e.getHttpStatus());
         } catch (Exception e) {
@@ -293,8 +296,10 @@ class BundleServiceTest {
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+
         try {
-            bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+            bundleService.createBundle(idPsp, bundleRequest);
             fail();
         } catch (AppException e) {
             assertEquals(status, e.getHttpStatus());
