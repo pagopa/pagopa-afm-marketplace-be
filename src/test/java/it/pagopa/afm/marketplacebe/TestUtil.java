@@ -1,13 +1,6 @@
 package it.pagopa.afm.marketplacebe;
 
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleRequest;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
-import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
+import it.pagopa.afm.marketplacebe.entity.*;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 
@@ -56,6 +49,23 @@ public class TestUtil {
                 .insertedDate(LocalDateTime.now())
                 .transferCategory("E")
                 .transferCategoryRelation(TransferCategoryRelation.EQUAL)
+                .build();
+    }
+
+    static public it.pagopa.afm.marketplacebe.model.bundle.BundleRequest getMockBundleModelRequest(){
+        return it.pagopa.afm.marketplacebe.model.bundle.BundleRequest
+                .builder()
+                .description("test")
+                .maxPaymentAmount(100L)
+                .minPaymentAmount(10L)
+                .name("test_name")
+                .paymentAmount(100L)
+                .paymentMethod("PO")
+                .touchpoint("IO")
+                .type("PRIVATE")
+                .validityDateTo(LocalDateTime.now())
+                .validityDateFrom(LocalDateTime.now())
+                .transferCategoryList(List.of("TEST"))
                 .build();
     }
 
