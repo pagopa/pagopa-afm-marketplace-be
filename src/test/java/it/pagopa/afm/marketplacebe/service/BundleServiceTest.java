@@ -56,7 +56,6 @@ class BundleServiceTest {
     @Captor
     ArgumentCaptor<CiBundle> ciBundleArgumentCaptor = ArgumentCaptor.forClass(CiBundle.class);
 
-
     @Autowired
     private ModelMapper modelMapper;
 

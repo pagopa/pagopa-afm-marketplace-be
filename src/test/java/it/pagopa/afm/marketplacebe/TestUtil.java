@@ -2,6 +2,7 @@ package it.pagopa.afm.marketplacebe;
 
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 
@@ -85,6 +86,18 @@ public class TestUtil {
                 .maxPaymentAmount(100L)
                 .transferCategory("PO")
                 .transferCategoryRelation(TransferCategoryRelation.EQUAL)
+                .build();
+    }
+
+    static public CiBundleSubscriptionRequest getMockCiBundleSubscriptionRequest(){
+        return CiBundleSubscriptionRequest.builder()
+                .idBundle(UUID.randomUUID().toString())
+                .ciBundleAttributeModelList(List.of(
+                        CiBundleAttributeModel.builder()
+                                .maxPaymentAmount(100L)
+                                .transferCategory("PO")
+                                .transferCategoryRelation(TransferCategoryRelation.EQUAL)
+                                .build()))
                 .build();
     }
 
