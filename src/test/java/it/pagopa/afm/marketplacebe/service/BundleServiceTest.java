@@ -3,9 +3,11 @@ package it.pagopa.afm.marketplacebe.service;
 import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
@@ -170,6 +173,27 @@ class BundleServiceTest {
         assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
     }
 
+    @Test
+    void shouldUpdateBundle(){
+        var bundleRequest = getMockBundleModelRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test";
+
+        // Preconditions
+        // Avoid duplicate
+
+        Mockito.when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
+                        .thenReturn(Optional.of(bundle));
+        Mockito.when(bundleRepository.findByName(Mockito.any(), Mockito.any()))
+                .thenReturn(Optional.of(bundle));
+
+        Mockito.when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
+
+        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest);
+
+        assertEquals(bundleRequest.getName(), updatedBundle.getName());
+    }
 
 
     @Test
@@ -190,5 +214,40 @@ class BundleServiceTest {
 
         assertEquals(LocalDate.now(), bundleArgumentCaptor.getValue().getValidityDateTo());
         assertEquals(bundle.getId(), bundleArgumentCaptor.getValue().getId());
+    }
+
+    @Test
+    void shouldGetCIs(){
+        List<CiBundle> ciBundles = List.of(getMockCiBundle());
+        Bundle bundle = getMockBundle();
+
+        Mockito.when(ciBundleRepository.findByIdBundle(bundle.getId()))
+                .thenReturn(ciBundles);
+        Mockito.when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
+                .thenReturn(Optional.of(bundle));
+
+        CiFiscalCodeList ciFiscalCodeList = bundleService.getCIs(bundle.getId(), bundle.getIdPsp());
+
+        assertEquals(ciBundles.size(), ciFiscalCodeList.getCiFiscalCodeList().size());
+        assertEquals(ciBundles.get(0).getCiFiscalCode(), ciFiscalCodeList.getCiFiscalCodeList().get(0));
+    }
+
+    @Test
+    void shouldRaiseConflictWhenGetCIs(){
+        List<CiBundle> ciBundles = List.of(getMockCiBundle());
+        Bundle bundle = getMockBundle();
+
+        Mockito.when(ciBundleRepository.findByIdBundle(bundle.getId()))
+                .thenReturn(ciBundles);
+        Mockito.when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
+                .thenReturn(Optional.empty());
+
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.getCIs(bundle.getId(), bundle.getIdPsp())
+        );
+
+        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+
     }
 }
