@@ -150,7 +150,7 @@ public class BundleService {
         Bundle bundle = getBundle(idBundle, idPsp);
 
         // check if validityDateTo is after now
-        if (bundle.getValidityDateTo() != null && LocalDateTime.now().isAfter(bundle.getValidityDateTo())) {
+        if (bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
@@ -214,7 +214,7 @@ public class BundleService {
         ciBundleRepository.saveAll(ciBundleList);
 
         // bundle requests
-        var requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
+        List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
         requests.forEach(request -> request.setRejectionDate(now));
         bundleRequestRepository.saveAll(requests);
 
@@ -487,8 +487,8 @@ public class BundleService {
      * @param equal true if check equal
      * @return
      */
-    private boolean isDateAcceptable(LocalDateTime date, boolean equal) {
-        LocalDateTime now = LocalDateTime.now();
+    private boolean isDateAcceptable(LocalDate date, boolean equal) {
+        LocalDate now = LocalDate.now();
         return equal ? date.isEqual(now) || date.isAfter(now) : date.isAfter(now);
     }
 
@@ -498,7 +498,7 @@ public class BundleService {
      * @param validityDateToTarget
      * @return
      */
-    private boolean isValidityDateFromValid(LocalDateTime validityDateFrom, LocalDateTime validityDateToTarget) {
+    private boolean isValidityDateFromValid(LocalDate validityDateFrom, LocalDate validityDateToTarget) {
         return validityDateToTarget != null && !validityDateFrom.isBefore(validityDateToTarget) && !validityDateFrom.isEqual(validityDateToTarget);
     }
 
@@ -507,10 +507,10 @@ public class BundleService {
      * @param date
      * @return date
      */
-    private LocalDateTime getNextAcceptableDate(LocalDateTime date) {
+    private LocalDate getNextAcceptableDate(LocalDate date) {
         // verify date: if null set to now +1
         if (date == null) {
-            date = LocalDateTime.now().plusDays(1);
+            date = LocalDate.now().plusDays(1);
         }
         return date;
     }

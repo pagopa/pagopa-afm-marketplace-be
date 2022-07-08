@@ -1,37 +1,16 @@
 package it.pagopa.afm.marketplacebe;
 
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleRequest;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
-import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
-import lombok.experimental.UtilityClass;
-import org.assertj.core.util.Lists;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import lombok.experimental.UtilityClass;
+import org.assertj.core.util.Lists;
 import org.modelmapper.ModelMapper;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.UUID;
 
 
 @UtilityClass
@@ -39,6 +18,9 @@ public class TestUtil {
 
     public static String getMockIdPsp() {
         return "1234567890";
+    }
+    public static String getMockCiFiscalCode() {
+        return "fiscalCode";
     }
 
     public static BundleRequest getMockBundleRequest() {
@@ -54,8 +36,8 @@ public class TestUtil {
                 .touchpoint(Touchpoint.IO)
                 .type(BundleType.GLOBAL)
                 .transferCategoryList(transferCategoryList)
-                .validityDateFrom(LocalDateTime.now().plusDays(1))
-                .validityDateTo(LocalDateTime.now().plusDays(8))
+                .validityDateFrom(LocalDate.now().plusDays(1))
+                .validityDateTo(LocalDate.now().plusDays(8))
                 .build();
     }
 
@@ -93,6 +75,37 @@ public class TestUtil {
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
         return List.of(bundle);
+    }
+
+    public static CiBundle getMockCiBundle() {
+        return CiBundle.builder()
+                .id(UUID.randomUUID().toString())
+                .ciFiscalCode("ABCD")
+                .validityDateTo(LocalDateTime.now())
+                .insertedDate(LocalDateTime.now())
+                .idBundle(UUID.randomUUID().toString())
+                .attributes(Lists.newArrayList(getMockCiBundleAttribute()))
+                .build();
+    }
+
+    private static CiBundleAttribute getMockCiBundleAttribute() {
+        return CiBundleAttribute.builder()
+                .id(UUID.randomUUID().toString())
+                .maxPaymentAmount(100L)
+                .insertedDate(LocalDateTime.now())
+                .transferCategory("E")
+                .transferCategoryRelation(TransferCategoryRelation.EQUAL)
+                .build();
+    }
+
+    public static it.pagopa.afm.marketplacebe.entity.BundleRequest getMockBundleRequestE() {
+        return it.pagopa.afm.marketplacebe.entity.BundleRequest.builder()
+                .ciFiscalCode(getMockCiFiscalCode())
+                .idPsp(getMockIdPsp())
+                .idBundle(UUID.randomUUID().toString())
+                .insertedDate(LocalDateTime.now())
+                .ciBundleAttributes(Lists.newArrayList(getMockCiBundleAttribute()))
+                .build();
     }
 
 
