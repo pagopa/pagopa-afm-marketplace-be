@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,9 @@ public class BundleService {
 
     public Bundles getBundles(List<BundleType> bundleTypes, Integer pageNumber, Integer limit) {
         List<String> types = bundleTypes.stream().map(Enum::toString).collect(Collectors.toList());
-        List<BundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
+        List<PspBundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -66,10 +67,10 @@ public class BundleService {
     // TODO: add pagination
     // TODO: add filter
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-        List<BundleDetails> bundleList = bundleRepository
+        List<PspBundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, BundleDetails.class))
+                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
 
         PageInfo pageInfo = PageInfo.builder()
@@ -83,10 +84,10 @@ public class BundleService {
                 .build();
     }
 
-    public BundleDetails getBundleById(String idBundle, String idPsp) {
+    public PspBundleDetails getBundleById(String idBundle, String idPsp) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        return modelMapper.map(bundle, BundleDetails.class);
+        return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
     public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
@@ -105,13 +106,20 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
+        // verify validityDateFrom, if null set to now +1d
+        bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
-        LocalDateTime validityDateFrom = bundleRequest.getValidityDateFrom() != null ? bundleRequest.getValidityDateFrom() : LocalDateTime.now();
-        if (bundleRequest.getValidityDateTo() != null && bundleRequest.getValidityDateTo().isBefore(validityDateFrom)) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is null or before ValidityDateFrom");
-        }
+        // verify validityDateFrom and validityDateTo
+        analyzeValidityDate(bundleRequest);
 
-        if(bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()){
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
+        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if there is overlapping transferCategoryList
+        analyzeBundlesOverlapping(bundleRequest);
+
+        // verify no bundle exists with the same name
+        if (bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -123,11 +131,11 @@ public class BundleService {
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
-                .paymentMethod(PaymentMethod.valueOf(bundleRequest.getPaymentMethod()))
-                .touchpoint(Touchpoint.valueOf(bundleRequest.getTouchpoint()))
-                .type(BundleType.valueOf(bundleRequest.getType()))
+                .paymentMethod(bundleRequest.getPaymentMethod())
+                .touchpoint(bundleRequest.getTouchpoint())
+                .type(bundleRequest.getType())
                 .transferCategoryList(bundleRequest.getTransferCategoryList())
-                .validityDateFrom(validityDateFrom)
+                .validityDateFrom(bundleRequest.getValidityDateFrom())
                 .validityDateTo(bundleRequest.getValidityDateTo())
                 .insertedDate(now)
                 .lastUpdatedDate(now)
@@ -141,13 +149,26 @@ public class BundleService {
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        if (bundle.getValidityDateTo() != null) {
+        // check if validityDateTo is after now
+        if (bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
-        Optional<Bundle> duplicateBundle = bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp));
+        // verify validityDateFrom, if it is null set to now +1d
+        bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
-        if(duplicateBundle.isPresent() && !duplicateBundle.get().getId().equals(idBundle)) {
+        // verify validityDateFrom and validityDateTo
+        analyzeValidityDate(bundleRequest);
+
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
+        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if there is overlapping transferCategoryList
+        analyzeBundlesOverlapping(bundleRequest);
+
+        // verify the only other bundle with the same name is the bundle I want to modify
+        Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdNot(bundleRequest.getName(), idBundle, new PartitionKey(idPsp));
+        if (duplicateBundle.isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -157,8 +178,7 @@ public class BundleService {
         bundle.setMinPaymentAmount(bundleRequest.getMinPaymentAmount());
         bundle.setMaxPaymentAmount(bundleRequest.getMaxPaymentAmount());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
-        bundle.setTouchpoint(Touchpoint.valueOf(bundleRequest.getTouchpoint()));
-        bundle.setType(BundleType.valueOf(bundleRequest.getType()));
+        bundle.setTouchpoint(bundleRequest.getTouchpoint());
         bundle.setTransferCategoryList(bundleRequest.getTransferCategoryList());
         bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
@@ -174,9 +194,11 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
         }
 
+        // TODO: Delete from main collection and store into archive
         // set validityDateTo=now in order to invalidate the bundle (logical delete)
         LocalDateTime now = LocalDateTime.now();
-        bundle.setValidityDateTo(LocalDateTime.now());
+        bundle.setValidityDateTo(LocalDate.now());
+
         bundleRepository.save(bundle);
 
         // invalidate all references
@@ -186,18 +208,14 @@ public class BundleService {
             ciBundle.setValidityDateTo(now);
             @Valid List<CiBundleAttribute> attributes = ciBundle.getAttributes();
             if (attributes != null) {
-                attributes.forEach(attribute -> {
-                    attribute.setValidityDateTo(now);
-                });
+                attributes.forEach(attribute -> attribute.setValidityDateTo(now));
             }
         });
         ciBundleRepository.saveAll(ciBundleList);
 
         // bundle requests
         List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
-        requests.forEach(request -> {
-            request.setRejectionDate(now);
-        });
+        requests.forEach(request -> request.setRejectionDate(now));
         bundleRequestRepository.saveAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
@@ -231,7 +249,7 @@ public class BundleService {
         }
 
         return CiBundleDetails.builder()
-                .validityDateTo(ciBundle.get().getValidityDateTo())
+                .validityDateTo(ciBundle.get().getValidityDateTo().toLocalDate())
                 .attributes(
                         ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
                                 ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
@@ -258,13 +276,13 @@ public class BundleService {
                 .build();
     }
 
-    public BundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+    public PspBundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
         var bundle = bundleRepository.findById(ciBundle.getIdBundle())
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
 
-        return modelMapper.map(bundle, BundleDetails.class);
+        return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
     public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {
@@ -436,6 +454,114 @@ public class BundleService {
         }
 
         return bundle.get();
+    }
+
+    /**
+     * Verify if payment amount range overlaps the target one
+     * @param minPaymentAmount
+     * @param maxPaymentAmount
+     * @param minPaymentAmountTarget
+     * @param maxPaymentAmountTarget
+     * @return
+     */
+    private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
+        return !(minPaymentAmount >= minPaymentAmountTarget &&
+                minPaymentAmount <= maxPaymentAmountTarget &&
+                maxPaymentAmount >= minPaymentAmountTarget &&
+                maxPaymentAmount <= maxPaymentAmountTarget);
+    }
+
+    /**
+     * Verify if transferCategoryList overlaps the target one
+     * @param transferCategoryList
+     * @param transferCategoryListTarget
+     * @return
+     */
+    private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
+        return transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains);
+    }
+
+    /**
+     * Verify if date is equal or after now
+     * @param date date to check
+     * @param equal true if check equal
+     * @return
+     */
+    private boolean isDateAcceptable(LocalDate date, boolean equal) {
+        LocalDate now = LocalDate.now();
+        return equal ? date.isEqual(now) || date.isAfter(now) : date.isAfter(now);
+    }
+
+    /**
+     * Verify if validDateFrom is acceptable according to target validityDateTo
+     * @param validityDateFrom
+     * @param validityDateToTarget
+     * @return
+     */
+    private boolean isValidityDateFromValid(LocalDate validityDateFrom, LocalDate validityDateToTarget) {
+        return validityDateToTarget != null && !validityDateFrom.isBefore(validityDateToTarget) && !validityDateFrom.isEqual(validityDateToTarget);
+    }
+
+    /**
+     * If date is null, returns the next acceptable date
+     * @param date
+     * @return date
+     */
+    private LocalDate getNextAcceptableDate(LocalDate date) {
+        // verify date: if null set to now +1
+        if (date == null) {
+            date = LocalDate.now().plusDays(1);
+        }
+        return date;
+    }
+
+    /**
+     * Verify if bundleRequest has got acceptable validityDateFrom and validityDateFrom
+     * @param bundleRequest
+     */
+    private void analyzeValidityDate(BundleRequest bundleRequest) {
+        // verify if validityDateFrom is equal or after now
+        if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
+        }
+
+        if (bundleRequest.getValidityDateTo() != null) {
+            // verify if validityDateTo is after now
+            if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
+            }
+
+            // check it is before validityDateTo
+            if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom");
+            }
+        }
+    }
+
+    /**
+     * Verify if the request could be accepted according to the existent bundles
+     * @param bundleRequest
+     */
+    private void analyzeBundlesOverlapping(BundleRequest bundleRequest) {
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
+        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if there is overlapping transferCategoryList
+
+        List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
+        bundles.forEach(bundle -> {
+            // verify payment amount range validity and verify if validityDateFrom is acceptable
+            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
+                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+            }
+
+            // verify transfer category list overlapping and verify if validityDateFrom is acceptable
+            if (!isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+            }
+        });
     }
 
 }

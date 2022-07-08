@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class BundleDetailsAttributes {
 
-    private LocalDateTime validityDateTo;
+    private LocalDate validityDateTo;
 
     @NotNull
     private LocalDateTime insertedDate;
