@@ -8,6 +8,7 @@ import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BundleRequestService {
 
+    public static final String ALREADY_DELETED = "Bundle has been deleted.";
     @Autowired
     BundleRepository bundleRepository;
 
@@ -89,7 +91,7 @@ public class BundleRequestService {
         Bundle bundle = optBundle.get();
 
         if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         if (!bundle.getType().equals(BundleType.PUBLIC)) {
@@ -157,6 +159,10 @@ public class BundleRequestService {
                         .filter(Objects::nonNull)
                         .map(elem -> modelMapper.map(elem, PspBundleRequest.class))
                         .collect(Collectors.toList()))
+                .pageInfo(PageInfo.builder()
+                        .page(pageNumber)
+                        .limit(limit)
+                        .build())
                 .build();
     }
 

@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 public class BundleOfferService {
 
+    public static final String ALREADY_DELETED = "Bundle has been deleted.";
     @Autowired
     BundleRepository bundleRepository;
 
@@ -78,7 +79,7 @@ public class BundleOfferService {
         Bundle bundle = getBundle(idBundle, idPsp);
 
         if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         // verify bundle is private
@@ -219,7 +220,7 @@ public class BundleOfferService {
         if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         } else if (bundle.get().getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
     }
 

@@ -81,4 +81,34 @@ class BundleRequestEntityServiceTest {
             fail();
         }
     }
+
+    @Test
+    void rejectRequestOk() {
+        var mockBundleRequestEntity = getMockBundleRequestEntity();
+        when(bundleRequestRepository.findByIdAndIdPsp(anyString(), anyString())).thenReturn(Optional.of(mockBundleRequestEntity));
+
+        bundleRequestService.rejectRequest("123", "1");
+
+        verify(bundleRequestRepository, times(1)).delete(any(BundleRequestEntity.class));
+        verify(archivedBundleRequestRepository, times(1)).save(any(ArchivedBundleRequest.class));
+        verify(ciBundleRepository, times(0)).save(argument.capture());
+    }
+
+    @Test
+    void rejectRequestError() {
+        var mockBundleRequestEntity = getMockBundleRequestEntity();
+        mockBundleRequestEntity.setRejectionDate(LocalDateTime.now());
+        when(bundleRequestRepository.findByIdAndIdPsp(anyString(), anyString())).thenReturn(Optional.of(mockBundleRequestEntity));
+
+        try {
+            bundleRequestService.rejectRequest("123", "1");
+        }
+        catch (AppException e){
+            assertEquals(HttpStatus.CONFLICT, e.getHttpStatus());
+            assertEquals(AppError.REQUEST_ALREADY_REJECTED.title, e.getTitle());
+        }
+        catch (Exception e){
+            fail();
+        }
+    }
 }

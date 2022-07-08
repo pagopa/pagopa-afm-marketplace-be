@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 @Service
 public class BundleService {
 
+    public static final String ALREADY_DELETED = "Bundle has been deleted.";
+
     @Autowired
     private BundleRepository bundleRepository;
 
@@ -65,6 +67,8 @@ public class BundleService {
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
                 .totalPages(1)
+                .page(pageNumber)
+                .limit(limit)
                 .build();
 
         return Bundles.builder()
@@ -83,6 +87,8 @@ public class BundleService {
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
                 .totalPages(1)
+                .limit(limit)
+                .page(pageNumber)
                 .build();
 
         return Bundles.builder()
@@ -157,7 +163,7 @@ public class BundleService {
 
         // check if validityDateTo is after now
         if (bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         // verify validityDateFrom, if it is null set to now +1d
@@ -272,6 +278,10 @@ public class BundleService {
 
         return CiBundles.builder()
                 .bundleDetailsList(bundleList)
+                .pageInfo(PageInfo.builder()
+                        .limit(limit)
+                        .page(pageNumber)
+                        .build())
                 .build();
     }
 
@@ -303,7 +313,7 @@ public class BundleService {
         Bundle bundle = getBundle(idBundle);
 
         if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
@@ -348,7 +358,7 @@ public class BundleService {
         Bundle bundle = getBundle(idBundle);
 
         if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
@@ -376,7 +386,7 @@ public class BundleService {
         Bundle bundle = getBundle(idBundle);
 
         if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         if (bundle.getType().equals(BundleType.PRIVATE)) {
@@ -395,7 +405,7 @@ public class BundleService {
             ciBundleRepository.save(ciBundle);
             // if bundle is global and there are no attributes -> remove ci-bundle relationship
             // in order to maintain logical relationship instead of physical one
-            if (bundle.getType().equals(BundleType.GLOBAL) && ciBundle.getAttributes().size() == 0) {
+            if (bundle.getType().equals(BundleType.GLOBAL) && ciBundle.getAttributes().isEmpty()) {
                 ciBundleRepository.delete(ciBundle);
             }
         }
