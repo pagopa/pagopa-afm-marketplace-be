@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -370,12 +371,13 @@ class BundleRequestServiceTest {
         assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
     }
 
+    @Test
     void createBundleRequest_ok_1() {
         Bundle bundle = TestUtil.getMockBundle();
         bundle.setType(BundleType.PUBLIC);
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
 
-        BundleRequestId result = bundleRequestService.createBundleRequest(TestUtil.getMockCiFiscalCode(), TestUtil.getCiBundleSubscriptionRequest());
+        BundleRequestId result = bundleRequestService.createBundleRequest(TestUtil.getMockCiFiscalCode(), TestUtil.getMockCiBundleSubscriptionRequest());
         assertNotNull(result);
     }
 
@@ -385,7 +387,7 @@ class BundleRequestServiceTest {
         Bundle bundle = TestUtil.getMockBundle();
         bundle.setType(BundleType.PUBLIC);
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
-        CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getCiBundleSubscriptionRequest();
+        CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getMockCiBundleSubscriptionRequest();
         ciBundleSubscriptionRequest.setCiBundleAttributeModelList(Collections.emptyList());
         BundleRequestId result = bundleRequestService.createBundleRequest(TestUtil.getMockCiFiscalCode(), ciBundleSubscriptionRequest);
         assertNotNull(result);
@@ -397,7 +399,7 @@ class BundleRequestServiceTest {
         Bundle bundle = TestUtil.getMockBundle();
         bundle.setType(BundleType.PUBLIC);
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
-        CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getCiBundleSubscriptionRequest();
+        CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getMockCiBundleSubscriptionRequest();
         ciBundleSubscriptionRequest.setCiBundleAttributeModelList(null);
         BundleRequestId result = bundleRequestService.createBundleRequest(TestUtil.getMockCiFiscalCode(), ciBundleSubscriptionRequest);
         assertNotNull(result);
@@ -409,7 +411,7 @@ class BundleRequestServiceTest {
         Bundle bundle = TestUtil.getMockBundle();
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
 
-        createBundleRequest_ko(TestUtil.getCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
+        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
     }
 
     @ParameterizedTest
@@ -420,13 +422,24 @@ class BundleRequestServiceTest {
         bundle.setType(BundleType.fromValue(bundleType));
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
 
-        createBundleRequest_ko(TestUtil.getCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
+        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
     void createBundleRequest_ko_3() {
         when(bundleRepository.findById(anyString())).thenReturn(Optional.empty());
-        createBundleRequest_ko(TestUtil.getCiBundleSubscriptionRequest(), HttpStatus.NOT_FOUND);
+        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void createBundleRequest_ko_4() {
+        // request for a global bundle
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setValidityDateFrom(LocalDate.now().minusDays(7));
+        bundle.setValidityDateTo(LocalDate.now());
+        when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
+
+        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
     }
 
 
