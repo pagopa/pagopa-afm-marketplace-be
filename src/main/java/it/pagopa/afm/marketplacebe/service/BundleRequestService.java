@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,7 +70,8 @@ public class BundleRequestService {
 
         Bundle bundle = optBundle.get();
 
-        if (bundle.getValidityDateTo() != null) {
+        // a bundle request is acceptable if validityDateTo is after now
+        if (!isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
@@ -79,17 +81,17 @@ public class BundleRequestService {
 
         List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null
                 && !ciBundleSubscriptionRequest.getCiBundleAttributeModelList().isEmpty()) ?
-         ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
-                .stream()
-                .map(attribute ->
-                        CiBundleAttribute.builder()
-                                .id(idBundle + "-" + UUID.randomUUID())
-                                .insertedDate(LocalDateTime.now())
-                                .maxPaymentAmount(attribute.getMaxPaymentAmount())
-                                .transferCategory(attribute.getTransferCategory())
-                                .transferCategoryRelation(attribute.getTransferCategoryRelation())
-                                .build()
-                ).collect(Collectors.toList()) : new ArrayList<>();
+                ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
+                        .stream()
+                        .map(attribute ->
+                                CiBundleAttribute.builder()
+                                        .id(idBundle + "-" + UUID.randomUUID())
+                                        .insertedDate(LocalDateTime.now())
+                                        .maxPaymentAmount(attribute.getMaxPaymentAmount())
+                                        .transferCategory(attribute.getTransferCategory())
+                                        .transferCategoryRelation(attribute.getTransferCategoryRelation())
+                                        .build()
+                        ).collect(Collectors.toList()) : new ArrayList<>();
 
         BundleRequest request = BundleRequest.builder()
                 .idBundle(bundle.getId())
@@ -101,7 +103,6 @@ public class BundleRequestService {
         bundleRequestRepository.save(request);
 
         return BundleRequestId.builder().idBundleRequest(request.getId()).build();
-
     }
 
     public void removeBundleRequest(String ciFiscalCode, String idBundleRequest) {
@@ -200,5 +201,20 @@ public class BundleRequestService {
                 .idBundle(entity.getIdBundle())
                 .attributes(entity.getCiBundleAttributes())
                 .build();
+    }
+
+
+    /**
+     * Verify if validityDateTo is after now
+     * @param validityDateTo
+     * @return
+     */
+    private boolean isValidityDateToAcceptable(LocalDate validityDateTo) {
+        LocalDate now = LocalDate.now();
+        if (validityDateTo != null && (validityDateTo.isEqual(now) || validityDateTo.isBefore(now))) {
+            return false;
+        }
+
+        return true;
     }
 }
