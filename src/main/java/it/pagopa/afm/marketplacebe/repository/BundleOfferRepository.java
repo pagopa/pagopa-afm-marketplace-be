@@ -15,8 +15,11 @@ public interface BundleOfferRepository extends CosmosRepository<BundleOffer, Str
     Optional<BundleOffer> findById(String idBundleOffer, PartitionKey ciFiscalCode);
 
     List<BundleOffer> findByIdPsp(String idPsp);
+
     List<BundleOffer> findByIdPsp(String idPsp, PartitionKey ciFiscalCode);
+
     Page<BundleOffer> findByIdPsp(String idPsp, Pageable pageable);
+
     List<BundleOffer> findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(String idPsp, String idBundle);
 
     List<BundleOffer> findByCiFiscalCode(String ciFiscalCode);

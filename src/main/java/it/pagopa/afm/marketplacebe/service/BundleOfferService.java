@@ -8,7 +8,13 @@ import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.offer.*;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleOffer;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
@@ -186,7 +192,7 @@ public class BundleOfferService {
 
     /**
      * @param idBundleOffer Bundle Offer identifier
-     * @param ciFiscalCode    CI identifier
+     * @param ciFiscalCode  CI identifier
      * @return the entity if exist
      * @throws AppException if not found
      */
@@ -204,6 +210,7 @@ public class BundleOfferService {
 
     /**
      * Verify bundle consistency
+     *
      * @param idBundle
      * @param idPsp
      */
@@ -211,8 +218,7 @@ public class BundleOfferService {
         Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
         if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-        else if (bundle.get().getValidityDateTo() != null) {
+        } else if (bundle.get().getValidityDateTo() != null) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
     }

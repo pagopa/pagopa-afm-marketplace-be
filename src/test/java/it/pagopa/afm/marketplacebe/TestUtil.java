@@ -1,7 +1,6 @@
 package it.pagopa.afm.marketplacebe;
 
 import it.pagopa.afm.marketplacebe.entity.*;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttribute;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
@@ -22,6 +21,7 @@ public class TestUtil {
     public static String getMockIdPsp() {
         return "1234567890";
     }
+
     public static String getMockCiFiscalCode() {
         return "fiscalCode";
     }
@@ -60,7 +60,7 @@ public class TestUtil {
     }
 
     public static List<Bundle> getMockBundleSameConfigurationDifferentPaymentAmountRange() {
-        List<String> transferCategoryList = Arrays.asList("taxonomy1");
+        List<String> transferCategoryList = List.of("taxonomy1");
 
         Bundle bundle1 = getMockBundle();
         bundle1.setMinPaymentAmount(10001L);

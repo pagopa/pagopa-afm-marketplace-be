@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,17 +18,20 @@ import java.util.Optional;
 @Repository
 public interface BundleRepository extends CosmosRepository<Bundle, String> {
     Optional<Bundle> findById(String idBundle);
+
     Optional<Bundle> findById(String idBundle, PartitionKey idPsp);
+
     Page<Bundle> findById(String idBundle, Pageable pageable);
 
     List<Bundle> findByName(String name);
+
     Optional<Bundle> findByName(String name, PartitionKey idPsp);
 
     Optional<Bundle> findByNameAndIdNot(String name, String id, PartitionKey idPsp);
 
     List<Bundle> findByIdPsp(String idPsp);
 
-    List<Bundle> findByValidityDateToIsNullAndTypeIn(List<String> types);
+    List<Bundle> findByValidityDateToIsNullAndTypeIn(List<BundleType> types);
 
     List<Bundle> findByTypeAndPaymentMethodAndTouchpoint(BundleType type, PaymentMethod paymentMethod, Touchpoint touchpoint);
 

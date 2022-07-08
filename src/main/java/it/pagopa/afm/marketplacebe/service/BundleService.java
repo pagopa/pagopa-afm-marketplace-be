@@ -1,13 +1,23 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
@@ -18,7 +28,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,8 +56,7 @@ public class BundleService {
     private ModelMapper modelMapper;
 
     public Bundles getBundles(List<BundleType> bundleTypes) {
-        List<String> types = bundleTypes.stream().map(Enum::toString).collect(Collectors.toList());
-        List<PspBundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(types)
+        List<PspBundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(bundleTypes)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
@@ -90,13 +98,12 @@ public class BundleService {
 
     public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
         var bundle = bundleRepository.findById(idBundle)
-                .orElseThrow(()-> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
         var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
-        if (BundleType.GLOBAL.equals(bundle.getType())){
+        if (BundleType.GLOBAL.equals(bundle.getType())) {
             ciBundleRepository.delete(ciBundle);
-        }
-        else {
+        } else {
             ciBundleRepository.save(ciBundle.toBuilder()
                     .validityDateTo(LocalDate.now())
                     .build());
@@ -383,8 +390,7 @@ public class BundleService {
                 .removeIf(attribute -> idAttribute.equals(attribute.getId()));
         if (!result) {
             throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
-        }
-        else {
+        } else {
             ciBundleRepository.save(ciBundle);
             // if bundle is global and there are no attributes -> remove ci-bundle relationship
             // in order to maintain logical relationship instead of physical one
@@ -407,17 +413,19 @@ public class BundleService {
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
     }
 
-    /** Check ciBundle consistency
+    /**
+     * Check ciBundle consistency
      *
      * @param ciBundle CI Bundle
-     * @param idPSP PSP identifier
+     * @param idPSP    PSP identifier
      * @return check if the bundle referenced in ciBundle exists and is linked to the same PSP
      */
-    private boolean checkCiBundle(CiBundle ciBundle, String idPSP){
+    private boolean checkCiBundle(CiBundle ciBundle, String idPSP) {
         return bundleRepository.findById(ciBundle.getIdBundle(), new PartitionKey(idPSP)).isPresent();
     }
 
-    /** Retrieve a bundle by id
+    /**
+     * Retrieve a bundle by id
      *
      * @param idBundle Bundle identifier
      * @return bundle
@@ -449,6 +457,7 @@ public class BundleService {
 
     /**
      * Verify if payment amount range overlaps the target one
+     *
      * @param minPaymentAmount
      * @param maxPaymentAmount
      * @param minPaymentAmountTarget
@@ -464,6 +473,7 @@ public class BundleService {
 
     /**
      * Verify if transferCategoryList overlaps the target one
+     *
      * @param transferCategoryList
      * @param transferCategoryListTarget
      * @return
@@ -474,9 +484,10 @@ public class BundleService {
 
     /**
      * Verify if date is equal or after now
-     * @param date date to check
+     *
+     * @param date  date to check
      * @param equal true if check equal
-     * @return
+     * @return true if {@code date} is after now
      */
     private boolean isDateAcceptable(LocalDate date, boolean equal) {
         LocalDate now = LocalDate.now();
@@ -485,6 +496,7 @@ public class BundleService {
 
     /**
      * Verify if validDateFrom is acceptable according to target validityDateTo
+     *
      * @param validityDateFrom
      * @param validityDateToTarget
      * @return
@@ -495,6 +507,7 @@ public class BundleService {
 
     /**
      * If date is null, returns the next acceptable date
+     *
      * @param date
      * @return date
      */
@@ -508,6 +521,7 @@ public class BundleService {
 
     /**
      * Verify if bundleRequest has got acceptable validityDateFrom and validityDateFrom
+     *
      * @param bundleRequest
      */
     private void analyzeValidityDate(BundleRequest bundleRequest) {
@@ -531,6 +545,7 @@ public class BundleService {
 
     /**
      * Verify if the request could be accepted according to the existent bundles
+     *
      * @param bundleRequest
      */
     private void analyzeBundlesOverlapping(BundleRequest bundleRequest) {
@@ -544,7 +559,7 @@ public class BundleService {
             // verify payment amount range validity and verify if validityDateFrom is acceptable
             if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
 
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
