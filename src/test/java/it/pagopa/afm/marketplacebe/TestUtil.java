@@ -84,7 +84,7 @@ public class TestUtil {
         return CiBundle.builder()
                 .id(UUID.randomUUID().toString())
                 .ciFiscalCode("ABCD")
-                .validityDateTo(LocalDateTime.now())
+                .validityDateTo(LocalDate.now())
                 .insertedDate(LocalDateTime.now())
                 .idBundle(UUID.randomUUID().toString())
                 .attributes(Lists.newArrayList(getMockCiBundleAttribute()))

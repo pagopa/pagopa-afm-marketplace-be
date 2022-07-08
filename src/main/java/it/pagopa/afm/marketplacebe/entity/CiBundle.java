@@ -39,7 +39,7 @@ public class CiBundle {
 
     private LocalDate validityDateFrom;
 
-    private LocalDateTime validityDateTo;
+    private LocalDate validityDateTo;
 
     @CreatedDate
     private LocalDateTime insertedDate;

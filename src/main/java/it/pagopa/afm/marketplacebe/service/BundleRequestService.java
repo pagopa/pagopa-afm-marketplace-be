@@ -6,7 +6,6 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequest;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -198,7 +198,7 @@ public class BundleRequestService {
     private void createCiBundleRelation(BundleRequest bundleRequest) {
         Optional<CiBundle> optCiBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundleRequest.getIdBundle(), bundleRequest.getCiFiscalCode());
         if (optCiBundle.isEmpty()) {
-            ciBundleRepository.save(buildCiBundle(bundleRequest));
+            ciBundleRepository.save(mapCiBundle(bundleRequest));
         } else {
             CiBundle ciBundle = optCiBundle.get();
             ciBundle.setAttributes(bundleRequest.getCiBundleAttributes());
@@ -217,12 +217,24 @@ public class BundleRequestService {
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest));
     }
 
-    private CiBundle buildCiBundle(BundleRequest entity) {
+    private CiBundle mapCiBundle(BundleRequest entity) {
+        var startDate = entity.getValidityDateFrom() != null ?
+                entity.getValidityDateFrom()
+                : LocalDate.now().plusDays(1);
+        var endDate = entity.getValidityDateTo();
+        // check date: startDate must be >= now()+1day and endDate (if set) must be >= startDate+1day
+        if (startDate.isBefore(LocalDate.now().plusDays(1))) {
+            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, entity.getValidityDateFrom());
+        }
+        if (entity.getValidityDateTo() != null && endDate.isBefore(startDate.plusDays(1))) {
+            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, entity.getValidityDateTo());
+        }
         return CiBundle.builder()
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .idBundle(entity.getIdBundle())
                 .attributes(entity.getCiBundleAttributes())
-//                .validityDateFrom()
+                .validityDateFrom(startDate)
+                .validityDateTo(endDate)
                 .build();
     }
 

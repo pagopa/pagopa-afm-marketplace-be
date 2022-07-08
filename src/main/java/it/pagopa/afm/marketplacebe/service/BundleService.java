@@ -98,7 +98,7 @@ public class BundleService {
         }
         else {
             ciBundleRepository.save(ciBundle.toBuilder()
-                    .validityDateTo(LocalDateTime.now())
+                    .validityDateTo(LocalDate.now())
                     .build());
         }
     }
@@ -193,7 +193,6 @@ public class BundleService {
         }
 
         // set validityDateTo=now in order to invalidate the bundle (logical delete)
-        LocalDateTime now = LocalDateTime.now();
         bundle.setValidityDateTo(LocalDate.now());
 
         bundleRepository.save(bundle);
@@ -201,19 +200,13 @@ public class BundleService {
         // invalidate all references
         // ci-bundles
         List<CiBundle> ciBundleList = ciBundleRepository.findByIdBundle(idBundle);
-        ciBundleList.forEach(ciBundle -> {
-            ciBundle.setValidityDateTo(now);
-            @Valid List<CiBundleAttribute> attributes = ciBundle.getAttributes();
-            if (attributes != null) {
-                attributes.forEach(attribute -> attribute.setValidityDateTo(now));
-            }
-        });
+        ciBundleList.forEach(ciBundle -> ciBundle.setValidityDateTo(LocalDate.now()));
         ciBundleRepository.saveAll(ciBundleList);
 
         // bundle requests
         List<it.pagopa.afm.marketplacebe.entity.BundleRequest> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
 
-        requests.forEach(request -> request.setRejectionDate(now));
+        requests.forEach(request -> request.setRejectionDate(LocalDateTime.now()));
         bundleRequestRepository.saveAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
@@ -247,7 +240,7 @@ public class BundleService {
         }
 
         return CiBundleDetails.builder()
-                .validityDateTo(ciBundle.get().getValidityDateTo().toLocalDate())
+                .validityDateTo(ciBundle.get().getValidityDateTo())
                 .attributes(
                         ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
                                 ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
