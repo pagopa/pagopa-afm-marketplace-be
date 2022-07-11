@@ -1,7 +1,6 @@
 package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
-import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +25,6 @@ import java.util.List;
 public class ArchivedBundleRequest {
 
     @Id
-    @GeneratedValue
     @NotNull
     private String id;
 
@@ -47,4 +45,7 @@ public class ArchivedBundleRequest {
     private LocalDateTime acceptedDate;
 
     private LocalDateTime rejectionDate;
+
+    @NotNull
+    private LocalDateTime insertedDate;
 }
