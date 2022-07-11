@@ -49,7 +49,7 @@ class BundleRequestServiceTest {
     private BundleRequestService bundleRequestService;
 
     @Test
-    void shouldGetRequestsByCI(){
+    void shouldGetRequestsByCI() {
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         Bundle bundle = TestUtil.getMockBundle();
         List<BundleRequest> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
@@ -72,7 +72,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldGetRequestsByCIWithoutIdPSP(){
+    void shouldGetRequestsByCIWithoutIdPSP() {
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         List<BundleRequest> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
 
@@ -94,7 +94,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldCreateBundleRequest(){
+    void shouldCreateBundleRequest() {
         CiBundle ciBundle = TestUtil.getMockCiBundle();
                 Bundle bundle = TestUtil.getMockBundle();
         bundle.setValidityDateTo(null);
@@ -112,8 +112,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldRaiseExceptionBundleTypeCreateBundleRequest(){
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
+    void shouldRaiseExceptionBundleTypeCreateBundleRequest() {
         Bundle bundle = TestUtil.getMockBundle();
         bundle.setType(BundleType.PRIVATE);
 
@@ -124,16 +123,11 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRepository.findById(bundle.getId()))
                 .thenReturn(Optional.of(bundle));
 
-        AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.createBundleRequest(ciBundle.getCiFiscalCode(), ciBundleSubscriptionRequest)
-        );
-
-        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+        createBundleRequest_ko(ciBundleSubscriptionRequest, HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    void shouldRaiseExceptionBundleNotFoundCreateBundleRequest(){
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
+    void shouldRaiseExceptionBundleNotFoundCreateBundleRequest() {
         Bundle bundle = TestUtil.getMockBundle();
         bundle.setType(BundleType.PRIVATE);
 
@@ -144,15 +138,11 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRepository.findById(bundle.getId()))
                 .thenReturn(Optional.empty());
 
-        AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.createBundleRequest(ciBundle.getCiFiscalCode(), ciBundleSubscriptionRequest)
-        );
-
-        assertEquals(HttpStatus.NOT_FOUND, appException.getHttpStatus());
+        createBundleRequest_ko(ciBundleSubscriptionRequest, HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void shouldRemoveBundleRequest(){
+    void shouldRemoveBundleRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
 
         // Preconditions
@@ -164,7 +154,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestFiscalCodeBundleRequest(){
+    void shouldRaiseBadRequestFiscalCodeBundleRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
         String ciFiscalCode = "ABC";
 
@@ -172,32 +162,22 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
                 .thenReturn(Optional.of(bundleRequest));
 
-       AppException appException = assertThrows(
-               AppException.class,
-               () -> bundleRequestService.removeBundleRequest(ciFiscalCode, bundleRequest.getId())
-       );
-
-       assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+        removeBundleRequest_ko(bundleRequest.getId(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    void shouldRaiseBadRequestNoRequest(){
+    void shouldRaiseBadRequestNoRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
 
         // Preconditions
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
                 .thenReturn(Optional.empty());
 
-        AppException appException = assertThrows(
-                AppException.class,
-                () -> bundleRequestService.removeBundleRequest(bundleRequest.getCiFiscalCode(), bundleRequest.getId())
-        );
-
-        assertEquals(HttpStatus.NOT_FOUND, appException.getHttpStatus());
+        removeBundleRequest_ko(bundleRequest.getId(), HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void shouldRaiseBadRequestAcceptedRequest(){
+    void shouldRaiseBadRequestAcceptedRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
 
         bundleRequest.setAcceptedDate(LocalDateTime.now().minusDays(4));
@@ -205,16 +185,11 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
                 .thenReturn(Optional.of(bundleRequest));
 
-        AppException appException = assertThrows(
-                AppException.class,
-                () -> bundleRequestService.removeBundleRequest(bundleRequest.getCiFiscalCode(), bundleRequest.getId())
-        );
-
-        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+        removeBundleRequest_ko(bundleRequest.getId(), HttpStatus.CONFLICT);
     }
 
     @Test
-    void shouldGetRequestsByPsp(){
+    void shouldGetRequestsByPsp() {
         List<BundleRequest> bundleRequests = List.of(TestUtil.getMockBundleRequestE());
 
         Mockito.when(bundleRequestRepository.findByIdPsp(bundleRequests.get(0).getIdPsp()))
@@ -228,7 +203,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldAcceptRequest(){
+    void shouldAcceptRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         ciBundle.setIdBundle(bundleRequest.getIdBundle());
@@ -247,7 +222,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionAlreadyAcceptedRequest(){
+    void shouldThrowExceptionAlreadyAcceptedRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
         bundleRequest.setAcceptedDate(LocalDateTime.now());
 
@@ -262,15 +237,11 @@ class BundleRequestServiceTest {
                 ))
                 .thenReturn(Optional.of(ciBundle));
 
-        AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.acceptRequest(bundleRequest.getIdPsp(), bundleRequest.getId())
-        );
-
-        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+        acceptBundleRequest_ko(bundleRequest.getId(), HttpStatus.CONFLICT);
     }
 
     @Test
-    void shouldThrowExceptionAlreadyRejectedRequest(){
+    void shouldThrowExceptionAlreadyRejectedRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
         bundleRequest.setRejectionDate(LocalDateTime.now());
 
@@ -285,15 +256,11 @@ class BundleRequestServiceTest {
                 ))
                 .thenReturn(Optional.of(ciBundle));
 
-        AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.acceptRequest(bundleRequest.getIdPsp(), bundleRequest.getId())
-        );
-
-        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+        acceptBundleRequest_ko(bundleRequest.getId(), HttpStatus.CONFLICT);
     }
 
     @Test
-    void shouldRejectRequest(){
+    void shouldRejectRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         ciBundle.setIdBundle(bundleRequest.getIdBundle());
@@ -312,7 +279,7 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionAlreadyRejectAcceptedRequest(){
+    void shouldThrowExceptionAlreadyRejectAcceptedRequest() {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
         bundleRequest.setAcceptedDate(LocalDateTime.now());
 
@@ -327,11 +294,7 @@ class BundleRequestServiceTest {
                 ))
                 .thenReturn(Optional.of(ciBundle));
 
-        AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.rejectRequest(bundleRequest.getIdPsp(), bundleRequest.getId())
-        );
-
-        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+        rejectBundleRequest_ko(bundleRequest.getId(), HttpStatus.CONFLICT);
     }
 
     @Test
@@ -350,11 +313,7 @@ class BundleRequestServiceTest {
                 ))
                 .thenReturn(Optional.of(ciBundle));
 
-        AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.rejectRequest(bundleRequest.getIdPsp(), bundleRequest.getId())
-        );
-
-        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
+        rejectBundleRequest_ko(bundleRequest.getId(), HttpStatus.CONFLICT);
     }
 
     @Test
@@ -440,7 +399,6 @@ class BundleRequestServiceTest {
     }
 
 
-
     void createBundleRequest_ko(CiBundleSubscriptionRequest ciBundleSubscriptionRequest, HttpStatus status) {
         String fiscalCode = TestUtil.getMockCiFiscalCode();
         try {
@@ -451,5 +409,33 @@ class BundleRequestServiceTest {
         } catch (Exception e) {
             fail();
         }
+    }
+
+    void removeBundleRequest_ko(String bundleRequestId, HttpStatus status) {
+        String fiscalCode = TestUtil.getMockCiFiscalCode();
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleRequestService.removeBundleRequest(fiscalCode, bundleRequestId)
+        );
+
+        assertEquals(status, appException.getHttpStatus());
+    }
+
+    void acceptBundleRequest_ko(String bundleRequestId, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleRequestService.acceptRequest(idPsp, bundleRequestId)
+        );
+
+        assertEquals(status, appException.getHttpStatus());
+    }
+
+    void rejectBundleRequest_ko(String bundleRequestId, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleRequestService.rejectRequest(idPsp, bundleRequestId)
+        );
+
+        assertEquals(status, appException.getHttpStatus());
     }
 }
