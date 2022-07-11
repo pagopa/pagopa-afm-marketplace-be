@@ -39,8 +39,6 @@ entity cibundleattributes {
   * maxPaymentAmount
   transferCategory
   * transferCategoryRelation
-  validityDateFrom
-  validityDateTo
   insertedDate
 }
 
@@ -73,7 +71,7 @@ entity bundleoffers {
   insertedDate
 }
 
-entity archiviedbundles {
+entity archivedbundles {
   * id
   --
   * idPsp (partitionKey)
@@ -89,12 +87,13 @@ entity archiviedbundles {
   validateDateTo
 }
 
-entity archiviedcibundles {
+entity archivedcibundles {
   * id
   --
   * idBundle
   * ciFiscalCode  (partitionKey)
   attributes
+  validityDateFrom
   validityDateTo
 }
 
@@ -104,7 +103,7 @@ entity cibundlerequestattributes {
   * transferCategoryRelation
 }
 
-entity archiviedbundleoffers {
+entity archivedbundleoffers {
   * id
   --
   * idPsp
@@ -114,7 +113,7 @@ entity archiviedbundleoffers {
   rejectionDate
 }
 
-entity archiviedbundlerequests {
+entity archivedbundlerequests {
   * id
   --
   * idPsp (partitionKey)
