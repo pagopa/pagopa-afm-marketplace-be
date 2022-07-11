@@ -7,12 +7,14 @@ import it.pagopa.afm.marketplacebe.model.request.*;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,7 +71,8 @@ public class BundleRequestService {
 
         Bundle bundle = optBundle.get();
 
-        if (bundle.getValidityDateTo() != null) {
+        // a bundle request is acceptable if validityDateTo is after now
+        if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
@@ -79,17 +82,17 @@ public class BundleRequestService {
 
         List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null
                 && !ciBundleSubscriptionRequest.getCiBundleAttributeModelList().isEmpty()) ?
-         ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
-                .stream()
-                .map(attribute ->
-                        CiBundleAttribute.builder()
-                                .id(idBundle + "-" + UUID.randomUUID())
-                                .insertedDate(LocalDateTime.now())
-                                .maxPaymentAmount(attribute.getMaxPaymentAmount())
-                                .transferCategory(attribute.getTransferCategory())
-                                .transferCategoryRelation(attribute.getTransferCategoryRelation())
-                                .build()
-                ).collect(Collectors.toList()) : new ArrayList<>();
+                ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
+                        .stream()
+                        .map(attribute ->
+                                CiBundleAttribute.builder()
+                                        .id(idBundle + "-" + UUID.randomUUID())
+                                        .insertedDate(LocalDateTime.now())
+                                        .maxPaymentAmount(attribute.getMaxPaymentAmount())
+                                        .transferCategory(attribute.getTransferCategory())
+                                        .transferCategoryRelation(attribute.getTransferCategoryRelation())
+                                        .build()
+                        ).collect(Collectors.toList()) : new ArrayList<>();
 
         BundleRequest request = BundleRequest.builder()
                 .idBundle(bundle.getId())
@@ -101,7 +104,6 @@ public class BundleRequestService {
         bundleRequestRepository.save(request);
 
         return BundleRequestId.builder().idBundleRequest(request.getId()).build();
-
     }
 
     public void removeBundleRequest(String ciFiscalCode, String idBundleRequest) {
@@ -201,4 +203,6 @@ public class BundleRequestService {
                 .attributes(entity.getCiBundleAttributes())
                 .build();
     }
+
+
 }
