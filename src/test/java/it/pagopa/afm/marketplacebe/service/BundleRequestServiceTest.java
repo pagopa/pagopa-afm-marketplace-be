@@ -162,7 +162,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
                 .thenReturn(Optional.of(bundleRequest));
 
-        removeBundleRequest_ko(bundleRequest.getId(), HttpStatus.BAD_REQUEST);
+        removeBundleRequest_ko(ciFiscalCode, bundleRequest.getId(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -173,7 +173,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
                 .thenReturn(Optional.empty());
 
-        removeBundleRequest_ko(bundleRequest.getId(), HttpStatus.NOT_FOUND);
+        removeBundleRequest_ko(TestUtil.getMockCiFiscalCode(), bundleRequest.getId(), HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -185,7 +185,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
                 .thenReturn(Optional.of(bundleRequest));
 
-        removeBundleRequest_ko(bundleRequest.getId(), HttpStatus.CONFLICT);
+        removeBundleRequest_ko(TestUtil.getMockCiFiscalCode(), bundleRequest.getId(), HttpStatus.CONFLICT);
     }
 
     @Test
@@ -411,8 +411,7 @@ class BundleRequestServiceTest {
         }
     }
 
-    void removeBundleRequest_ko(String bundleRequestId, HttpStatus status) {
-        String fiscalCode = TestUtil.getMockCiFiscalCode();
+    void removeBundleRequest_ko(String fiscalCode, String bundleRequestId, HttpStatus status) {
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleRequestService.removeBundleRequest(fiscalCode, bundleRequestId)
