@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -19,6 +18,5 @@ public class CiBundleAttribute {
     private Long maxPaymentAmount;
     private String transferCategory;
     private TransferCategoryRelation transferCategoryRelation;
-    private LocalDate validityDateTo;
     private LocalDateTime insertedDate;
 }

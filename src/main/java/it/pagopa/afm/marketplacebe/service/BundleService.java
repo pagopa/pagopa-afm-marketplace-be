@@ -250,7 +250,9 @@ public class BundleService {
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
 
+        // TODO use model mapper
         return CiBundleDetails.builder()
+                .validityDateFrom(ciBundle.get().getValidityDateFrom())
                 .validityDateTo(ciBundle.get().getValidityDateTo())
                 .attributes(
                         ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()

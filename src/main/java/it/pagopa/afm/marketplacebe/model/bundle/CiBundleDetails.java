@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class CiBundleDetails {
+    private LocalDate validityDateFrom;
     private LocalDate validityDateTo;
     private List<CiBundleAttribute> attributes;
 }
