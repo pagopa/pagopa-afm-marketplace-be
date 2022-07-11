@@ -1,5 +1,5 @@
 # pagopa-afm-marketplace-be
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa-afm-marketplacebe-be&metric=alert_status)](https://sonarcloud.io/dashboard?id=pagopa-afm-marketplacebe-be)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-afm-marketplace-be&metric=alert_status)](https://sonarcloud.io/project/overview?id=pagopa_pagopa-afm-marketplace-be)
 Spring Boot backend for Advanced Fee Management marketplace
 
 - [pagopa-afm-marketplace-be](#pagopa-afm-marketplace-be)
