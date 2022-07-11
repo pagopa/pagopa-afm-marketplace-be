@@ -10,6 +10,7 @@ import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import lombok.experimental.UtilityClass;
@@ -55,8 +56,8 @@ public class TestUtil {
     public static BundleRequestEntity getMockBundleRequestEntity() {
         return BundleRequestEntity.builder()
                 .id("112")
-                .idPsp("test_psp")
-                .ciFiscalCode("ABCD")
+                .idPsp(getMockIdPsp())
+                .ciFiscalCode(getMockCiFiscalCode())
                 .idBundle(UUID.randomUUID().toString())
                 .insertedDate(LocalDateTime.now())
                 .validityDateFrom(LocalDate.now().plusDays(1))
@@ -104,7 +105,7 @@ public class TestUtil {
     public static CiBundle getMockCiBundle() {
         return CiBundle.builder()
                 .id(UUID.randomUUID().toString())
-                .ciFiscalCode("ABCD")
+                .ciFiscalCode(getMockCiFiscalCode())
                 .validityDateTo(LocalDate.now())
                 .insertedDate(LocalDateTime.now())
                 .idBundle(UUID.randomUUID().toString())
@@ -152,4 +153,9 @@ public class TestUtil {
     }
 
 
+    public static CiFiscalCodeList getMockCiFiscalCodeList() {
+        return CiFiscalCodeList.builder()
+                .ciFiscalCodeList(Lists.newArrayList(getMockCiFiscalCode()))
+                .build();
+    }
 }

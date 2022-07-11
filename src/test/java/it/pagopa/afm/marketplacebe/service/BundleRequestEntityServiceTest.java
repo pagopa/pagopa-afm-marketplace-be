@@ -9,11 +9,9 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,12 +70,10 @@ class BundleRequestEntityServiceTest {
 
         try {
             bundleRequestService.acceptRequest("123", "1");
-        }
-        catch (AppException e){
+        } catch (AppException e) {
             assertEquals(HttpStatus.CONFLICT, e.getHttpStatus());
             assertEquals(AppError.REQUEST_ALREADY_ACCEPTED.title, e.getTitle());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             fail();
         }
     }
@@ -102,12 +98,10 @@ class BundleRequestEntityServiceTest {
 
         try {
             bundleRequestService.rejectRequest("123", "1");
-        }
-        catch (AppException e){
+        } catch (AppException e) {
             assertEquals(HttpStatus.CONFLICT, e.getHttpStatus());
             assertEquals(AppError.REQUEST_ALREADY_REJECTED.title, e.getTitle());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             fail();
         }
     }

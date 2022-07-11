@@ -231,7 +231,6 @@ public class BundleService {
     public CiFiscalCodeList getCIs(String idBundle, String idPSP) {
         List<CiBundle> subscriptions = ciBundleRepository.findByIdBundle(idBundle);
         List<String> ciList = new ArrayList<>();
-        CiFiscalCodeList ciFiscalCodeList = new CiFiscalCodeList();
 
         for (CiBundle ciBundle : subscriptions) {
             if (!checkCiBundle(ciBundle, idPSP)) {
@@ -239,9 +238,9 @@ public class BundleService {
             }
             ciList.add(ciBundle.getCiFiscalCode());
         }
-        ciFiscalCodeList.setCiFiscalCodeList(ciList);
-
-        return ciFiscalCodeList;
+        return CiFiscalCodeList.builder()
+                .ciFiscalCodeList(ciList)
+                .build();
     }
 
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode) {
