@@ -95,6 +95,6 @@ public class HomeController {
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
             @Parameter(description = "Bundle type. Default = GLOBAL") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types) {
-        return bundleService.getBundles(types, limit, page);
+        return bundleService.getBundles(types);
     }
 }
