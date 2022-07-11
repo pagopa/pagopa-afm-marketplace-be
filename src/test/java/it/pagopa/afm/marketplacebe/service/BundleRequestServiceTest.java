@@ -442,8 +442,9 @@ class BundleRequestServiceTest {
 
 
     void createBundleRequest_ko(CiBundleSubscriptionRequest ciBundleSubscriptionRequest, HttpStatus status) {
+        String fiscalCode = TestUtil.getMockCiFiscalCode();
         try {
-            bundleRequestService.createBundleRequest(TestUtil.getMockCiFiscalCode(), ciBundleSubscriptionRequest);
+            bundleRequestService.createBundleRequest(fiscalCode, ciBundleSubscriptionRequest);
             fail();
         } catch (AppException e) {
             assertEquals(status, e.getHttpStatus());
