@@ -25,7 +25,7 @@ public class TestUtil {
     public static String getMockCiFiscalCode() {
         return "fiscalCode";
     }
-    public static String getMockIdBundle() { return "cbfbc9c6-6c0b-429e-83ca-30ef453504f8"; }
+    public final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8"; }
 
     public static BundleRequest getMockBundleRequest() {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
