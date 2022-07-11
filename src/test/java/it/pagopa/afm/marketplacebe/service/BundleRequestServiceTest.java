@@ -29,17 +29,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundleSubscriptionRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BundleRequestServiceTest {
@@ -60,7 +60,7 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByCI() {
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         Bundle bundle = TestUtil.getMockBundle();
-        List<BundleRequest> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
+        List<BundleRequestEntity> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
 
         // Precondition
         Mockito.when(bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciBundle.getCiFiscalCode(), bundle.getIdPsp()))
