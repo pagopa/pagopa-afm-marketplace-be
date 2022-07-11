@@ -8,7 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -20,7 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -72,9 +84,9 @@ public class PspController {
     /**
      * GET /psps/:idpsp/bundle/:idbundle : Get a bundle
      *
-     * @param idPsp : PSP identifier
+     * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
-     * @return
+     * @return the bundle details
      */
     @Operation(summary = "Get a bundle", tags = {"PSP",})
     @ApiResponses(value = {
@@ -90,20 +102,20 @@ public class PspController {
     )
     public ResponseEntity<PspBundleDetails> getBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
         return ResponseEntity.ok(bundleService.getBundleById(idBundle, idPsp));
     }
 
     /**
      * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions : Get CIs subscribed to a bundle
      *
-     * @param idPsp : PSP identifier
+     * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
-     * @return
+     * @return list of CI
      */
     @Operation(summary = "Get paginated list of CI subscribed to a bundle", tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiFiscalCodeList.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -115,24 +127,23 @@ public class PspController {
     )
     public ResponseEntity<CiFiscalCodeList> getBundleCreditorInstitutions(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle){
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
         // TODO: return pagination
         return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp));
     }
 
     /**
      * GET /psps/:idpsp/bundle/:idbundle/creditorInstitutions/:cifiscalcode : Get details of a relationship between a bundle and a creditor institution
-     * institution
      *
-     * @param idPsp : PSP identifier
-     * @param idBundle : Bundle identifier
+     * @param idPsp        : PSP identifier
+     * @param idBundle     : Bundle identifier
      * @param ciFiscalCode : Creditor Institution fiscal code
-     * @return
+     * @return the bundle details
      */
     @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", tags = {"PSP",})
     @ApiResponses(value = {
             // TODO: update schema - 200
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE , schema = @Schema(implementation = CiBundleDetails.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundleDetails.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -154,7 +165,7 @@ public class PspController {
      * POST /psps/:idpsp/bundles : Create a bundle
      *
      * @param idPsp : PSP identifier
-     * @return
+     * @return the bundle created
      */
     @Operation(summary = "Create a new bundle", tags = {"PSP",})
     @ApiResponses(value = {
@@ -179,7 +190,7 @@ public class PspController {
      *
      * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
-     * @return
+     * @return the bundle updated
      */
     @Operation(summary = "Update a bundle", tags = {"PSP",})
     @ApiResponses(value = {
@@ -206,7 +217,6 @@ public class PspController {
      *
      * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
-     * @return
      */
     @Operation(summary = "Delete the bundle with the given id", tags = {"PSP",})
     @ApiResponses(value = {

@@ -29,6 +29,9 @@ import java.util.stream.Collectors;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -40,7 +43,6 @@ class BundleServiceTest {
 
     @MockBean
     private CiBundleRepository ciBundleRepository;
-
     @MockBean
     private BundleRequestRepository bundleRequestRepository;
     @Autowired
@@ -59,15 +61,13 @@ class BundleServiceTest {
     void shouldGetBundles() {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
-        List<String> requiredTypes = List.of("PRIVATE");
+        List<BundleType> requiredTypes = List.of(BundleType.PRIVATE);
 
         // Precondition
         when(bundleRepository.findByValidityDateToIsNullAndTypeIn(requiredTypes))
                 .thenReturn(bundleList);
 
-        Bundles bundles = bundleService.getBundles(requiredTypes.stream()
-                .map(BundleType::valueOf)
-                .collect(Collectors.toList()));
+        Bundles bundles = bundleService.getBundles(requiredTypes);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -338,7 +338,7 @@ class BundleServiceTest {
                         .thenReturn(Optional.of(bundle));
 
         PspBundleDetails bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
-;
+
         assertEquals(bundle.getId(), bundleDetails.getId());
     }
 

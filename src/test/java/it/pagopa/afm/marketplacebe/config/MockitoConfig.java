@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.config;
 
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
@@ -35,4 +36,13 @@ public class MockitoConfig {
     public CiBundleRepository ciBundleRepository() {
         return Mockito.mock(CiBundleRepository.class);
     }
+
+
+    @Bean
+    @Primary
+    public ArchivedBundleRequestRepository archivedBundleRequestRepository() {
+        return Mockito.mock(ArchivedBundleRequestRepository.class);
+    }
+
+
 }

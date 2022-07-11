@@ -14,7 +14,7 @@ public enum Touchpoint {
 
     private final String value;
 
-    Touchpoint (final String touchpoint) {
+    Touchpoint(final String touchpoint) {
         this.value = touchpoint;
     }
 

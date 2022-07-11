@@ -2,7 +2,7 @@ package it.pagopa.afm.marketplacebe.service;
 
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleRequest;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppException;
@@ -29,9 +29,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BundleRequestServiceTest {
@@ -52,7 +60,7 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByCI() {
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         Bundle bundle = TestUtil.getMockBundle();
-        List<BundleRequest> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
+        List<BundleRequestEntity> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
 
         // Precondition
         Mockito.when(bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciBundle.getCiFiscalCode(), bundle.getIdPsp()))
@@ -74,7 +82,7 @@ class BundleRequestServiceTest {
     @Test
     void shouldGetRequestsByCIWithoutIdPSP() {
         CiBundle ciBundle = TestUtil.getMockCiBundle();
-        List<BundleRequest> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
+        List<BundleRequestEntity> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
 
         // Precondition
         Mockito.when(bundleRequestRepository.findByCiFiscalCode(ciBundle.getCiFiscalCode()))
@@ -95,8 +103,9 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldCreateBundleRequest() {
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
-                Bundle bundle = TestUtil.getMockBundle();
+        CiBundle ciBundle = getMockCiBundle();
+        List<BundleRequestEntity> bundleRequest = List.of(getMockBundleRequestE());
+        Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
         bundle.setType(BundleType.PUBLIC);
         CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getMockCiBundleSubscriptionRequest();
@@ -143,7 +152,7 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldRemoveBundleRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
 
         // Preconditions
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
@@ -155,7 +164,7 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldRaiseBadRequestFiscalCodeBundleRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
         String ciFiscalCode = "ABC";
 
         // Preconditions
@@ -167,7 +176,7 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldRaiseBadRequestNoRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
 
         // Preconditions
         Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
@@ -176,21 +185,11 @@ class BundleRequestServiceTest {
         removeBundleRequest_ko(TestUtil.getMockCiFiscalCode(), bundleRequest.getId(), HttpStatus.NOT_FOUND);
     }
 
-    @Test
-    void shouldRaiseBadRequestAcceptedRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
 
-        bundleRequest.setAcceptedDate(LocalDateTime.now().minusDays(4));
-        // Preconditions
-        Mockito.when(bundleRequestRepository.findById(bundleRequest.getId()))
-                .thenReturn(Optional.of(bundleRequest));
-
-        removeBundleRequest_ko(TestUtil.getMockCiFiscalCode(), bundleRequest.getId(), HttpStatus.CONFLICT);
-    }
 
     @Test
     void shouldGetRequestsByPsp() {
-        List<BundleRequest> bundleRequests = List.of(TestUtil.getMockBundleRequestE());
+        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
 
         Mockito.when(bundleRequestRepository.findByIdPsp(bundleRequests.get(0).getIdPsp()))
                 .thenReturn(bundleRequests);
@@ -204,8 +203,8 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldAcceptRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
+        CiBundle ciBundle = getMockCiBundle();
         ciBundle.setIdBundle(bundleRequest.getIdBundle());
 
         // Preconditions
@@ -223,7 +222,7 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldThrowExceptionAlreadyAcceptedRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
         bundleRequest.setAcceptedDate(LocalDateTime.now());
 
         CiBundle ciBundle = TestUtil.getMockCiBundle();
@@ -242,7 +241,7 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldThrowExceptionAlreadyRejectedRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
         bundleRequest.setRejectionDate(LocalDateTime.now());
 
         CiBundle ciBundle = TestUtil.getMockCiBundle();
@@ -261,8 +260,8 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldRejectRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
+        CiBundle ciBundle = getMockCiBundle();
         ciBundle.setIdBundle(bundleRequest.getIdBundle());
 
         // Preconditions
@@ -275,12 +274,12 @@ class BundleRequestServiceTest {
 
         bundleRequestService.rejectRequest(bundleRequest.getIdPsp(), bundleRequest.getId());
 
-        verify(bundleRequestRepository, times(1)).save(Mockito.any());
+        verify(bundleRequestRepository, times(1)).delete(Mockito.any());
     }
 
     @Test
     void shouldThrowExceptionAlreadyRejectAcceptedRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
         bundleRequest.setAcceptedDate(LocalDateTime.now());
 
         CiBundle ciBundle = TestUtil.getMockCiBundle();
@@ -299,14 +298,16 @@ class BundleRequestServiceTest {
 
     @Test
     void shouldThrowExceptionRejectAlreadyRejectedRequest() {
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequestE();
+        BundleRequestEntity bundleRequest = getMockBundleRequestE();
         bundleRequest.setRejectionDate(LocalDateTime.now());
 
         CiBundle ciBundle = TestUtil.getMockCiBundle();
         ciBundle.setIdBundle(bundleRequest.getIdBundle());
 
         // Preconditions
-        Mockito.when(bundleRequestRepository.findByIdAndIdPsp(bundleRequest.getId(), bundleRequest.getIdPsp()))
+        String idPsp = bundleRequest.getIdPsp();
+        String requestId = bundleRequest.getId();
+        Mockito.when(bundleRequestRepository.findByIdAndIdPsp(requestId, idPsp))
                 .thenReturn(Optional.of(bundleRequest));
         Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
                         bundleRequest.getIdBundle(), bundleRequest.getCiFiscalCode()

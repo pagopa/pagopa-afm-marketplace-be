@@ -1,9 +1,21 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.ArchivedBundleRequest;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.request.*;
+import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
+import it.pagopa.afm.marketplacebe.model.request.CiRequests;
+import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
@@ -16,18 +28,26 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class BundleRequestService {
 
+    public static final String ALREADY_DELETED = "Bundle has been deleted.";
     @Autowired
     BundleRepository bundleRepository;
 
     @Autowired
     BundleRequestRepository bundleRequestRepository;
+
+    @Autowired
+    ArchivedBundleRequestRepository archivedBundleRequestRepository;
 
     @Autowired
     CiBundleRepository ciBundleRepository;
@@ -47,7 +67,7 @@ public class BundleRequestService {
     public CiRequests getRequestsByCI(String ciFiscalCode, Integer size, String cursor, String idPsp) {
         // TODO: pageable
 
-        List<BundleRequest> requests = (idPsp == null) ?
+        List<BundleRequestEntity> requests = (idPsp == null) ?
                 bundleRequestRepository.findByCiFiscalCode(ciFiscalCode) :
                 bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciFiscalCode, idPsp);
 
@@ -94,7 +114,7 @@ public class BundleRequestService {
                                         .build()
                         ).collect(Collectors.toList()) : new ArrayList<>();
 
-        BundleRequest request = BundleRequest.builder()
+        BundleRequestEntity request = BundleRequestEntity.builder()
                 .idBundle(bundle.getId())
                 .idPsp(bundle.getIdPsp())
                 .ciFiscalCode(ciFiscalCode)
@@ -109,10 +129,10 @@ public class BundleRequestService {
     public void removeBundleRequest(String ciFiscalCode, String idBundleRequest) {
         // find bundle request by id
         // check the related ciFiscalCode
-        // check removal validity
+        // archive the bundle request
         // remove bundle request
 
-        Optional<BundleRequest> bundleRequest = bundleRequestRepository.findById(idBundleRequest);
+        Optional<BundleRequestEntity> bundleRequest = bundleRequestRepository.findById(idBundleRequest);
 
         if (bundleRequest.isEmpty()) {
             throw new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest);
@@ -122,17 +142,14 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundleRequest, String.format("ciFiscalCode=%s", ciFiscalCode));
         }
 
-        if (bundleRequest.get().getAcceptedDate() != null || bundleRequest.get().getRejectionDate() != null) {
-            throw new AppException(AppError.BUNDLE_REQUEST_CONFLICT, idBundleRequest, "Request already elaborated by PSP");
-        }
-
-        bundleRequestRepository.delete(bundleRequest.get());
+        archiveBundleRequest(bundleRequest.get(), null);
     }
+
 
     public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode) {
         // TODO: pageable
 
-        List<BundleRequest> result;
+        List<BundleRequestEntity> result;
         if (ciFiscalCode != null) {
             result = bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciFiscalCode, idPsp);
         } else {
@@ -143,45 +160,56 @@ public class BundleRequestService {
                         .filter(Objects::nonNull)
                         .map(elem -> modelMapper.map(elem, PspBundleRequest.class))
                         .collect(Collectors.toList()))
+                .pageInfo(PageInfo.builder()
+                        .page(pageNumber)
+                        .limit(limit)
+                        .build())
                 .build();
     }
 
 
     public void acceptRequest(String idPsp, String idBundleRequest) {
-        var entity = getBundleRequest(idPsp, idBundleRequest);
-        if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-            bundleRequestRepository.save(entity.toBuilder()
-                    .acceptedDate(LocalDateTime.now())
-                    .build());
+        var bundleRequest = getBundleRequest(idPsp, idBundleRequest);
+        if (bundleRequest.getAcceptedDate() == null && bundleRequest.getRejectionDate() == null) {
+            // archive the bundle request
+            archiveBundleRequest(bundleRequest, true);
 
             // verify if it is a new relation or should be updated an existent relationship
-            Optional<CiBundle> optCiBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(entity.getIdBundle(), entity.getCiFiscalCode());
-            if (optCiBundle.isEmpty()) {
-                ciBundleRepository.save(buildCiBundle(entity));
-            } else {
-                CiBundle ciBundle = optCiBundle.get();
-                ciBundle.setAttributes(entity.getCiBundleAttributes());
-                ciBundleRepository.save(ciBundle);
-            }
-        } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
-            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, entity.getRejectionDate());
+            createCiBundleRelation(bundleRequest);
+        } else if (bundleRequest.getAcceptedDate() == null && bundleRequest.getRejectionDate() != null) {
+            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, bundleRequest.getRejectionDate());
         } else {
-            throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, entity.getAcceptedDate());
+            throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, bundleRequest.getAcceptedDate());
         }
     }
 
 
     public void rejectRequest(String idPsp, String idBundleRequest) {
-        var entity = getBundleRequest(idPsp, idBundleRequest);
-        if (entity.getRejectionDate() == null && entity.getAcceptedDate() == null) {
-            bundleRequestRepository.save(entity.toBuilder()
-                    .rejectionDate(LocalDateTime.now())
-                    .build());
+        var bundleRequest = getBundleRequest(idPsp, idBundleRequest);
+        if (bundleRequest.getRejectionDate() == null && bundleRequest.getAcceptedDate() == null) {
+            // archive the bundle request
+            archiveBundleRequest(bundleRequest, false);
 
-        } else if (entity.getAcceptedDate() != null && entity.getRejectionDate() == null) {
-            throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, entity.getAcceptedDate());
+        } else if (bundleRequest.getAcceptedDate() != null && bundleRequest.getRejectionDate() == null) {
+            throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, bundleRequest.getAcceptedDate());
         } else {
-            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, entity.getAcceptedDate());
+            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, bundleRequest.getAcceptedDate());
+        }
+    }
+
+    /**
+     * verifies if it is a new relation or should be updated an existent relationship
+     *
+     * @param bundleRequestEntity entity of {@link BundleRequestEntity}
+     */
+    private void createCiBundleRelation(BundleRequestEntity bundleRequestEntity) {
+        Optional<CiBundle> optCiBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundleRequestEntity.getIdBundle(), bundleRequestEntity.getCiFiscalCode());
+        if (optCiBundle.isEmpty()) {
+            ciBundleRepository.save(mapCiBundle(bundleRequestEntity));
+        } else {
+            CiBundle ciBundle = optCiBundle.get();
+            ciBundle.setAttributes(bundleRequestEntity.getCiBundleAttributes());
+            ciBundleRepository.save(ciBundle);
         }
     }
 
@@ -191,18 +219,53 @@ public class BundleRequestService {
      * @return the entity if exist
      * @throws AppException if not found
      */
-    private BundleRequest getBundleRequest(String idPsp, String idBundleRequest) {
+    private BundleRequestEntity getBundleRequest(String idPsp, String idBundleRequest) {
         return bundleRequestRepository.findByIdAndIdPsp(idBundleRequest, idPsp)
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_REQUEST_NOT_FOUND, idBundleRequest));
     }
 
-    private CiBundle buildCiBundle(BundleRequest entity) {
+    private CiBundle mapCiBundle(BundleRequestEntity entity) {
+        var startDate = entity.getValidityDateFrom() != null ?
+                entity.getValidityDateFrom()
+                : LocalDate.now().plusDays(1);
+        var endDate = entity.getValidityDateTo();
+        // check date: startDate must be >= now()+1day and endDate (if set) must be >= startDate+1day
+        if (startDate.isBefore(LocalDate.now().plusDays(1))) {
+            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, entity.getValidityDateFrom());
+        }
+        if (entity.getValidityDateTo() != null && endDate.isBefore(startDate.plusDays(1))) {
+            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, entity.getValidityDateTo());
+        }
         return CiBundle.builder()
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .idBundle(entity.getIdBundle())
                 .attributes(entity.getCiBundleAttributes())
+                .validityDateFrom(startDate)
+                .validityDateTo(endDate)
                 .build();
     }
 
+    /**
+     * Archives a bundle request.
+     * Create a new {@link ArchivedBundleRequest} entity and deletes the {@link BundleRequestEntity} entity.
+     *
+     * @param bundleRequestEntity an entity of {@link BundleRequestEntity}
+     * @param accepted      true = request is accepted, false = not accepted, null = deleted
+     */
+    private void archiveBundleRequest(BundleRequestEntity bundleRequestEntity, Boolean accepted) {
+        var requestToArchive = bundleRequestEntity;
+        if (Boolean.TRUE.equals(accepted)) {
+            requestToArchive = requestToArchive.toBuilder()
+                    .acceptedDate(LocalDateTime.now())
+                    .build();
+        }
+        if (Boolean.FALSE.equals(accepted)) {
+            requestToArchive = requestToArchive.toBuilder()
+                    .rejectionDate(LocalDateTime.now())
+                    .build();
+        }
 
+        archivedBundleRequestRepository.save(modelMapper.map(requestToArchive, ArchivedBundleRequest.class));
+        bundleRequestRepository.delete(bundleRequestEntity);
+    }
 }

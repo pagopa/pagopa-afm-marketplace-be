@@ -3,7 +3,12 @@ package it.pagopa.afm.marketplacebe.entity;
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
-import lombok.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 
@@ -11,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,7 +26,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BundleRequest {
+public class BundleRequestEntity {
 
     @Id
     @GeneratedValue
@@ -40,6 +46,12 @@ public class BundleRequest {
 
     @Valid
     private List<CiBundleAttribute> ciBundleAttributes;
+
+    @Schema(description = "the start date of the bundle if accepted")
+    private LocalDate validityDateFrom;
+
+    @Schema(description = "the end date of the bundle if accepted")
+    private LocalDate validityDateTo;
 
     private LocalDateTime acceptedDate;
 

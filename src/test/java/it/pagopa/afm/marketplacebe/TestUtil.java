@@ -1,8 +1,16 @@
 package it.pagopa.afm.marketplacebe;
 
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.entity.*;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttribute;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import lombok.experimental.UtilityClass;
@@ -26,6 +34,7 @@ public class TestUtil {
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
     }
+
     public static String getMockCiFiscalCode() {
         return MOCK_CI_FISCAL_CODE;
     }
@@ -49,6 +58,19 @@ public class TestUtil {
                 .build();
     }
 
+    public static BundleRequestEntity getMockBundleRequestEntity() {
+        return BundleRequestEntity.builder()
+                .id("112")
+                .idPsp(getMockIdPsp())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .idBundle(UUID.randomUUID().toString())
+                .insertedDate(LocalDateTime.now())
+                .validityDateFrom(LocalDate.now().plusDays(1))
+                .validityDateTo(LocalDate.now().plusDays(8))
+                .build();
+    }
+
+
     public static Bundle getMockBundle() {
         ModelMapper modelMapper = new ModelMapper();
         Bundle bundle = modelMapper.map(getMockBundleRequest(), Bundle.class);
@@ -65,7 +87,7 @@ public class TestUtil {
     }
 
     public static List<Bundle> getMockBundleSameConfigurationDifferentPaymentAmountRange() {
-        List<String> transferCategoryList = Arrays.asList("taxonomy1");
+        List<String> transferCategoryList = List.of("taxonomy1");
 
         Bundle bundle1 = getMockBundle();
         bundle1.setMinPaymentAmount(10001L);
@@ -88,8 +110,8 @@ public class TestUtil {
     public static CiBundle getMockCiBundle() {
         return CiBundle.builder()
                 .id(UUID.randomUUID().toString())
-                .ciFiscalCode("ABCD")
-                .validityDateTo(LocalDateTime.now())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .validityDateTo(LocalDate.now())
                 .insertedDate(LocalDateTime.now())
                 .idBundle(UUID.randomUUID().toString())
                 .attributes(Lists.newArrayList(getMockCiBundleAttribute()))
@@ -106,8 +128,8 @@ public class TestUtil {
                 .build();
     }
 
-    public static it.pagopa.afm.marketplacebe.entity.BundleRequest getMockBundleRequestE() {
-        return it.pagopa.afm.marketplacebe.entity.BundleRequest.builder()
+    public static BundleRequestEntity getMockBundleRequestE() {
+        return BundleRequestEntity.builder()
                 .ciFiscalCode(getMockCiFiscalCode())
                 .idPsp(getMockIdPsp())
                 .idBundle(UUID.randomUUID().toString())
@@ -140,4 +162,9 @@ public class TestUtil {
     }
 
 
+    public static CiFiscalCodeList getMockCiFiscalCodeList() {
+        return CiFiscalCodeList.builder()
+                .ciFiscalCodeList(Lists.newArrayList(getMockCiFiscalCode()))
+                .build();
+    }
 }

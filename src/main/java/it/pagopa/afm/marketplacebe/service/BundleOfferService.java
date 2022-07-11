@@ -8,10 +8,17 @@ import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.offer.*;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleOffer;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class BundleOfferService {
 
+    public static final String ALREADY_DELETED = "Bundle has been deleted.";
     @Autowired
     BundleRepository bundleRepository;
 
@@ -72,7 +80,7 @@ public class BundleOfferService {
         Bundle bundle = getBundle(idBundle, idPsp);
 
         if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         // verify bundle is private
@@ -118,7 +126,7 @@ public class BundleOfferService {
         bundleOfferRepository.delete(bundleOffer.get());
     }
 
-    public BundleCiOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
+    public BundleCiOffers getCiOffers(String ciFiscalCode, String idPsp) {
 
         List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPsp(idPsp, new PartitionKey(ciFiscalCode));
         List<CiBundleOffer> bundleOfferList = offerList
@@ -186,7 +194,7 @@ public class BundleOfferService {
 
     /**
      * @param idBundleOffer Bundle Offer identifier
-     * @param ciFiscalCode    CI identifier
+     * @param ciFiscalCode  CI identifier
      * @return the entity if exist
      * @throws AppException if not found
      */
@@ -204,6 +212,7 @@ public class BundleOfferService {
 
     /**
      * Verify bundle consistency
+     *
      * @param idBundle
      * @param idPsp
      */
@@ -211,9 +220,8 @@ public class BundleOfferService {
         Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
         if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-        else if (bundle.get().getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+        } else if (!CommonUtil.isValidityDateToAcceptable(bundle.get().getValidityDateTo())) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
     }
 

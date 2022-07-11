@@ -65,7 +65,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        log.warn("Missing request parameter: {}", ex);
+        log.warn("Missing request parameter", ex);
         var errorResponse = ProblemJson.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .title(BAD_REQUEST)
