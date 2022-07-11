@@ -19,6 +19,7 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +91,9 @@ public class BundleRequestService {
 
         Bundle bundle = optBundle.get();
 
-        if (bundle.getValidityDateTo() != null) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
+        // a bundle request is acceptable if validityDateTo is after now
+        if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
         if (!bundle.getType().equals(BundleType.PUBLIC)) {
@@ -122,7 +124,6 @@ public class BundleRequestService {
         bundleRequestRepository.save(request);
 
         return BundleRequestId.builder().idBundleRequest(request.getId()).build();
-
     }
 
     public void removeBundleRequest(String ciFiscalCode, String idBundleRequest) {

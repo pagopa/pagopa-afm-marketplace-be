@@ -27,13 +27,18 @@ import java.util.UUID;
 @UtilityClass
 public class TestUtil {
 
+    private final static String MOCK_ID_PSP = "1234567890";
+    private final static String MOCK_CI_FISCAL_CODE = "fiscalCode";
+    private final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8";
+
     public static String getMockIdPsp() {
-        return "1234567890";
+        return MOCK_ID_PSP;
     }
 
     public static String getMockCiFiscalCode() {
-        return "fiscalCode";
+        return MOCK_CI_FISCAL_CODE;
     }
+    public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
 
     public static BundleRequest getMockBundleRequest() {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
@@ -69,7 +74,7 @@ public class TestUtil {
     public static Bundle getMockBundle() {
         ModelMapper modelMapper = new ModelMapper();
         Bundle bundle = modelMapper.map(getMockBundleRequest(), Bundle.class);
-        bundle.setId("cbfbc9c6-6c0b-429e-83ca-30ef453504f8");
+        bundle.setId(getMockIdBundle());
         bundle.setIdPsp(getMockIdPsp());
         bundle.setInsertedDate(LocalDateTime.now());
         bundle.setLastUpdatedDate(LocalDateTime.now());
@@ -141,14 +146,18 @@ public class TestUtil {
                 .build();
     }
 
-    public static CiBundleSubscriptionRequest getMockCiBundleSubscriptionRequest(){
-        return CiBundleSubscriptionRequest
-                .builder()
-                .idBundle(UUID.randomUUID().toString())
-                .ciBundleAttributeModelList(List.of(CiBundleAttributeModel.builder()
-                        .transferCategoryRelation(TransferCategoryRelation.EQUAL)
-                        .transferCategory("PO")
-                        .maxPaymentAmount(100L).build()))
+    public static CiBundleSubscriptionRequest getMockCiBundleSubscriptionRequest() {
+        return CiBundleSubscriptionRequest.builder()
+                .idBundle(getMockIdBundle())
+                .ciBundleAttributeModelList(List.of(getMockCiBundleAttributeModel()))
+                .build();
+    }
+
+    private static CiBundleAttributeModel getMockCiBundleAttributeModel() {
+        return CiBundleAttributeModel.builder()
+                .maxPaymentAmount(100L)
+                .transferCategory("taxonomy1")
+                .transferCategoryRelation(TransferCategoryRelation.EQUAL)
                 .build();
     }
 
