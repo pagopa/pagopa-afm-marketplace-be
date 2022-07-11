@@ -67,8 +67,6 @@ public class BundleService {
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
                 .totalPages(1)
-                .page(pageNumber)
-                .limit(limit)
                 .build();
 
         return Bundles.builder()
