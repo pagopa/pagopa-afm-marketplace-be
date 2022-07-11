@@ -4,6 +4,8 @@ import it.pagopa.afm.marketplacebe.model.PageInfo;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
+
 @UtilityClass
 public class CommonUtil {
 
@@ -20,4 +22,13 @@ public class CommonUtil {
                 .build();
     }
 
+    /**
+     * Verify if validityDateTo is after now
+     * @param validityDateTo
+     * @return
+     */
+    public boolean isValidityDateToAcceptable(LocalDate validityDateTo) {
+        LocalDate now = LocalDate.now();
+        return validityDateTo == null || !(validityDateTo.isEqual(now) && validityDateTo.isBefore(now));
+    }
 }

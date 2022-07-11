@@ -19,13 +19,17 @@ import java.util.UUID;
 @UtilityClass
 public class TestUtil {
 
+    private final static String MOCK_ID_PSP = "1234567890";
+    private final static String MOCK_CI_FISCAL_CODE = "fiscalCode";
+    private final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8";
+
     public static String getMockIdPsp() {
-        return "1234567890";
+        return MOCK_ID_PSP;
     }
     public static String getMockCiFiscalCode() {
-        return "fiscalCode";
+        return MOCK_CI_FISCAL_CODE;
     }
-    public final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8"; }
+    public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
 
     public static BundleRequest getMockBundleRequest() {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");

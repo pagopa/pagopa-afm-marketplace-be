@@ -7,6 +7,7 @@ import it.pagopa.afm.marketplacebe.model.request.*;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class BundleRequestService {
         Bundle bundle = optBundle.get();
 
         // a bundle request is acceptable if validityDateTo is after now
-        if (!isValidityDateToAcceptable(bundle.getValidityDateTo())) {
+        if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
         }
 
@@ -204,17 +205,4 @@ public class BundleRequestService {
     }
 
 
-    /**
-     * Verify if validityDateTo is after now
-     * @param validityDateTo
-     * @return
-     */
-    private boolean isValidityDateToAcceptable(LocalDate validityDateTo) {
-        LocalDate now = LocalDate.now();
-        if (validityDateTo != null && (validityDateTo.isEqual(now) || validityDateTo.isBefore(now))) {
-            return false;
-        }
-
-        return true;
-    }
 }
