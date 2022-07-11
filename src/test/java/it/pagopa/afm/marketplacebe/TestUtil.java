@@ -8,7 +8,6 @@ import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
-import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
@@ -171,11 +170,14 @@ public class TestUtil {
                 .build();
     }
 
-    public static Bundles getMockBundles() {
+    public static PspBundleDetails getMockPspBundleDetails() {
         Bundle bundle = getMockBundle();
         ModelMapper modelMapper = new ModelMapper();
-        PspBundleDetails pspBundle = modelMapper.map(bundle, PspBundleDetails.class);
-        List<PspBundleDetails> bundleList = List.of(pspBundle);
+        return modelMapper.map(bundle, PspBundleDetails.class);
+    }
+
+    public static Bundles getMockBundles() {
+        List<PspBundleDetails> bundleList = List.of(getMockPspBundleDetails());
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleList.size())
                 .totalPages(1)
