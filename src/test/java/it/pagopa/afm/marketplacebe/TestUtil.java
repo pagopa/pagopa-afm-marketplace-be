@@ -9,7 +9,10 @@ import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
@@ -165,6 +168,21 @@ public class TestUtil {
     public static CiFiscalCodeList getMockCiFiscalCodeList() {
         return CiFiscalCodeList.builder()
                 .ciFiscalCodeList(Lists.newArrayList(getMockCiFiscalCode()))
+                .build();
+    }
+
+    public static Bundles getMockBundles() {
+        Bundle bundle = getMockBundle();
+        ModelMapper modelMapper = new ModelMapper();
+        PspBundleDetails pspBundle = modelMapper.map(bundle, PspBundleDetails.class);
+        List<PspBundleDetails> bundleList = List.of(pspBundle);
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(bundleList.size())
+                .totalPages(1)
+                .build();
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(pageInfo)
                 .build();
     }
 }
