@@ -18,6 +18,7 @@ import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -219,7 +220,7 @@ public class BundleOfferService {
         Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
         if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        } else if (bundle.get().getValidityDateTo() != null) {
+        } else if (!CommonUtil.isValidityDateToAcceptable(bundle.get().getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
     }
