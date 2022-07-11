@@ -124,17 +124,6 @@ public class TestUtil {
                 .build();
     }
 
-//    public static CiBundleSubscriptionRequest getMockCiBundleSubscriptionRequest(){
-//        return CiBundleSubscriptionRequest
-//                .builder()
-//                .idBundle(UUID.randomUUID().toString())
-//                .ciBundleAttributeModelList(List.of(CiBundleAttributeModel.builder()
-//                        .transferCategoryRelation(TransferCategoryRelation.EQUAL)
-//                        .transferCategory("PO")
-//                        .maxPaymentAmount(100L).build()))
-//                .build();
-//    }
-
     public static CiBundleSubscriptionRequest getMockCiBundleSubscriptionRequest() {
         return CiBundleSubscriptionRequest.builder()
                 .idBundle(getMockIdBundle())
