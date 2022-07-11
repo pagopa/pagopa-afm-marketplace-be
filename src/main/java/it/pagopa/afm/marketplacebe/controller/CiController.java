@@ -292,7 +292,7 @@ public class CiController {
             @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
             @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
             @Parameter(description = "Filter by psp") @RequestParam(required = false) String idPsp) {
-        return ResponseEntity.ok(bundleOfferService.getCiOffers(ciFiscalCode, size, cursor, idPsp));
+        return ResponseEntity.ok(bundleOfferService.getCiOffers(ciFiscalCode, idPsp));
     }
 
     @Operation(summary = "The CI accepts an offer of a PSP", tags = {"CI",})

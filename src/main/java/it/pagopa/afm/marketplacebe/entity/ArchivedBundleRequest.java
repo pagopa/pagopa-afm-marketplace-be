@@ -35,11 +35,11 @@ public class ArchivedBundleRequest {
     @Size(max = 35)
     private String idPsp;
 
-    @NotBlank
-    private String idBundle;
-
     @NotNull
     private String ciFiscalCode;
+
+    @NotBlank
+    private String idBundle;
 
     @Valid
     private List<CiBundleAttribute> ciBundleAttributes;

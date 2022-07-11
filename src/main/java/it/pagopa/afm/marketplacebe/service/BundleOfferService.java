@@ -125,7 +125,7 @@ public class BundleOfferService {
         bundleOfferRepository.delete(bundleOffer.get());
     }
 
-    public BundleCiOffers getCiOffers(String ciFiscalCode, Integer size, String cursor, String idPsp) {
+    public BundleCiOffers getCiOffers(String ciFiscalCode, String idPsp) {
 
         List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPsp(idPsp, new PartitionKey(ciFiscalCode));
         List<CiBundleOffer> bundleOfferList = offerList

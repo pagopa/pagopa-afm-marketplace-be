@@ -5,7 +5,6 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.model.request.PspRequests;
@@ -24,7 +23,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.*;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundleSubscriptionRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
@@ -328,7 +330,9 @@ class BundleRequestServiceTest {
         ciBundle.setIdBundle(bundleRequest.getIdBundle());
 
         // Preconditions
-        Mockito.when(bundleRequestRepository.findByIdAndIdPsp(bundleRequest.getId(), bundleRequest.getIdPsp()))
+        String idPsp = bundleRequest.getIdPsp();
+        String requestId = bundleRequest.getId();
+        Mockito.when(bundleRequestRepository.findByIdAndIdPsp(requestId, idPsp))
                 .thenReturn(Optional.of(bundleRequest));
         Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
                         bundleRequest.getIdBundle(), bundleRequest.getCiFiscalCode()
@@ -336,7 +340,7 @@ class BundleRequestServiceTest {
                 .thenReturn(Optional.of(ciBundle));
 
         AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.rejectRequest(bundleRequest.getIdPsp(), bundleRequest.getId())
+                () -> bundleRequestService.rejectRequest(idPsp, requestId)
         );
 
         assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
