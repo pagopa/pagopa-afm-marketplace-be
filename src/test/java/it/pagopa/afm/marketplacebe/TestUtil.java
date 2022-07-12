@@ -1,5 +1,9 @@
 package it.pagopa.afm.marketplacebe;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
@@ -9,9 +13,7 @@ import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
-import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
@@ -36,11 +38,21 @@ public class TestUtil {
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
     }
-
     public static String getMockCiFiscalCode() {
         return MOCK_CI_FISCAL_CODE;
     }
     public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
+
+    /**
+     * @param object to map into the Json string
+     * @return object as Json string
+     * @throws JsonProcessingException if there is an error during the parsing of the object
+     */
+    public String toJson(Object object) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.writeValueAsString(object);
+    }
 
     public static BundleRequest getMockBundleRequest() {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
@@ -163,10 +175,20 @@ public class TestUtil {
                 .build();
     }
 
-
     public static CiFiscalCodeList getMockCiFiscalCodeList() {
         return CiFiscalCodeList.builder()
                 .ciFiscalCodeList(Lists.newArrayList(getMockCiFiscalCode()))
+                .build();
+    }
+
+    public static CiBundleDetails getMockCiBundleDetails() {
+        ModelMapper modelMapper = new ModelMapper();
+        CiBundleAttribute attributeE = getMockCiBundleAttribute();
+        it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute attributeM = modelMapper.map(attributeE, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class);
+        return CiBundleDetails.builder()
+                .validityDateFrom(LocalDate.now().minusDays(7))
+                .validityDateTo(LocalDate.now().plusDays(7))
+                .attributes(List.of(attributeM))
                 .build();
     }
 
@@ -185,6 +207,12 @@ public class TestUtil {
         return Bundles.builder()
                 .bundleDetailsList(bundleList)
                 .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static BundleResponse getMockBundleResponse() {
+        return BundleResponse.builder()
+                .idBundle(getMockIdBundle())
                 .build();
     }
 }
