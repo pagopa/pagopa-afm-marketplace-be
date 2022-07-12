@@ -1,12 +1,25 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
