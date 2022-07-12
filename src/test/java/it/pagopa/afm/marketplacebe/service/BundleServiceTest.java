@@ -337,7 +337,7 @@ class BundleServiceTest {
         when(bundleRepository.findById(bundle.getId()))
                         .thenReturn(Optional.of(bundle));
 
-        PspBundleDetails bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
+        BundleDetailsForCi bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
 
         assertEquals(bundle.getId(), bundleDetails.getId());
     }

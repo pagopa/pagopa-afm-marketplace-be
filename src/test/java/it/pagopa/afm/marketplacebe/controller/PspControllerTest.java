@@ -63,9 +63,10 @@ class PspControllerTest {
 
     @Test
     void getBundles_404() throws Exception {
-        when(bundleService.getBundlesByIdPsp(anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockBundles());
+        doThrow(exception).when(bundleService).getBundlesByIdPsp(anyString(), anyInt(), anyInt());
 
-        String url = String.format(BUNDLES, "");
+        String url = String.format(BUNDLES, TestUtil.getMockIdPsp());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
