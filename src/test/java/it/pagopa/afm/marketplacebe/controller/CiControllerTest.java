@@ -166,8 +166,7 @@ class CiControllerTest {
         mvc.perform(put(url)
                         .content(TestUtil.toJson(TestUtil.getMockCiBundleAttributeModel()))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isOk());
     }
 
     @Test
