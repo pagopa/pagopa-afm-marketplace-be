@@ -14,9 +14,14 @@ import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
+import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.PspRequests;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 import org.modelmapper.ModelMapper;
@@ -24,6 +29,7 @@ import org.modelmapper.ModelMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -177,7 +183,7 @@ public class TestUtil {
 
     public static CiFiscalCodeList getMockCiFiscalCodeList() {
         return CiFiscalCodeList.builder()
-                .ciFiscalCodeList(Lists.newArrayList(getMockCiFiscalCode()))
+                .ciFiscalCodeList(List.of(getMockCiFiscalCode()))
                 .build();
     }
 
@@ -213,6 +219,59 @@ public class TestUtil {
     public static BundleResponse getMockBundleResponse() {
         return BundleResponse.builder()
                 .idBundle(getMockIdBundle())
+                .build();
+    }
+
+    public static PspBundleOffer getMockPspBundleOffer() {
+        return PspBundleOffer.builder()
+                .id(UUID.randomUUID().toString())
+                .idBundle(getMockIdBundle())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .insertedDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static BundleOffers getMockBundleOffers() {
+        List<PspBundleOffer> offers = List.of(getMockPspBundleOffer());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(offers.size())
+                .totalPages(1)
+                .build();
+        return BundleOffers.builder()
+                .offers(offers)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static BundleOffered getMockBundleOffered() {
+        return BundleOffered.builder()
+                .ciFiscalCode(getMockCiFiscalCode())
+                .idBundleOffer(UUID.randomUUID().toString())
+                .build();
+    }
+
+    public static PspBundleRequest getMockPspBundleRequest() {
+        return PspBundleRequest.builder()
+                .id(UUID.randomUUID().toString())
+                .idBundle(getMockIdBundle())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .ciBundleAttributes(Collections.emptyList())
+                .build();
+    }
+    public static PspRequests getMockPspRequests() {
+        List<PspBundleRequest> list = List.of(getMockPspBundleRequest());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(list.size())
+                .totalPages(1)
+                .build();
+
+        return PspRequests.builder()
+                .requestsList(list)
+                .pageInfo(pageInfo)
                 .build();
     }
 }
