@@ -1,14 +1,19 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.offer.*;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleOffer;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
@@ -35,6 +40,9 @@ public class BundleOfferService {
 
     @Autowired
     CiBundleRepository ciBundleRepository;
+
+    @Autowired
+    ArchivedBundleOfferRepository archivedBundleOfferRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -117,7 +125,7 @@ public class BundleOfferService {
             throw new AppException(AppError.BUNDLE_OFFER_BAD_REQUEST, idBundle, String.format("idPSP=%s", idPsp));
         }
 
-        bundleOfferRepository.delete(bundleOffer.get());
+        archiveBundleOffer(bundleOffer.get(), null);
     }
 
     public BundleCiOffers getCiOffers(String ciFiscalCode, String idPsp) {
@@ -153,10 +161,7 @@ public class BundleOfferService {
         verifyBundle(entity.getIdBundle(), entity.getIdPsp());
 
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-            bundleOfferRepository.save(
-                    entity.toBuilder()
-                            .acceptedDate(LocalDateTime.now())
-                            .build());
+            archiveBundleOffer(entity, true);
 
             // create CI-Bundle relation
             return CiBundleId.builder()
@@ -175,10 +180,7 @@ public class BundleOfferService {
         verifyBundle(entity.getIdBundle(), entity.getIdPsp());
 
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-            bundleOfferRepository.save(
-                    entity.toBuilder()
-                            .rejectionDate(LocalDateTime.now())
-                            .build());
+            archiveBundleOffer(entity, false);
         } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
             throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
         } else {
@@ -217,6 +219,31 @@ public class BundleOfferService {
         } else if (!CommonUtil.isValidityDateToAcceptable(bundle.get().getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
+    }
+
+    /**
+     * Archives a bundle offer.
+     * Create a new {@link ArchivedBundleOffer} entity and deletes the {@link BundleOffer} entity.
+     *
+     * @param bundleOffer an entity of {@link BundleOffer}
+     * @param accepted      true = request is accepted, false = not accepted, null = deleted
+     */
+    private void archiveBundleOffer(BundleOffer bundleOffer, Boolean accepted) {
+        var offerToArchive = bundleOffer;
+
+        if (Boolean.TRUE.equals(accepted)) {
+            offerToArchive = offerToArchive.toBuilder()
+                    .acceptedDate(LocalDateTime.now())
+                    .build();
+        }
+        if (Boolean.FALSE.equals(accepted)) {
+            offerToArchive = offerToArchive.toBuilder()
+                    .rejectionDate(LocalDateTime.now())
+                    .build();
+        }
+
+        archivedBundleOfferRepository.save(modelMapper.map(offerToArchive, ArchivedBundleOffer.class));
+        bundleOfferRepository.delete(bundleOffer);
     }
 
 }
