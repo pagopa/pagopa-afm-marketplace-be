@@ -1,5 +1,8 @@
 package it.pagopa.afm.marketplacebe;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
@@ -8,11 +11,10 @@ import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
-import it.pagopa.afm.marketplacebe.entity.*;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
+import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.offer.*;
+import it.pagopa.afm.marketplacebe.model.request.*;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 import org.modelmapper.ModelMapper;
@@ -20,6 +22,7 @@ import org.modelmapper.ModelMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,11 +37,21 @@ public class TestUtil {
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
     }
-
     public static String getMockCiFiscalCode() {
         return MOCK_CI_FISCAL_CODE;
     }
     public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
+
+    /**
+     * @param object to map into the Json string
+     * @return object as Json string
+     * @throws JsonProcessingException if there is an error during the parsing of the object
+     */
+    public String toJson(Object object) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.writeValueAsString(object);
+    }
 
     public static BundleRequest getMockBundleRequest() {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
@@ -118,6 +131,28 @@ public class TestUtil {
                 .build();
     }
 
+    public static CiBundleInfo getMockCiBundleInfo() {
+        Bundle bundle = getMockBundle();
+        ModelMapper mapper = new ModelMapper();
+        CiBundleInfo ciBundleInfo = mapper.map(bundle, CiBundleInfo.class);
+        return CiBundleInfo.builder()
+                .build();
+    }
+
+    public static CiBundles getMockCiBundles() {
+        List<CiBundleInfo> list = List.of(getMockCiBundleInfo());
+
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(list.size())
+                .totalPages(1)
+                .build();
+
+        return CiBundles.builder()
+                .bundleDetailsList(list)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
     private static CiBundleAttribute getMockCiBundleAttribute() {
         return CiBundleAttribute.builder()
                 .id(UUID.randomUUID().toString())
@@ -153,7 +188,7 @@ public class TestUtil {
                 .build();
     }
 
-    private static CiBundleAttributeModel getMockCiBundleAttributeModel() {
+    public static CiBundleAttributeModel getMockCiBundleAttributeModel() {
         return CiBundleAttributeModel.builder()
                 .maxPaymentAmount(100L)
                 .transferCategory("taxonomy1")
@@ -161,10 +196,176 @@ public class TestUtil {
                 .build();
     }
 
-
     public static CiFiscalCodeList getMockCiFiscalCodeList() {
         return CiFiscalCodeList.builder()
-                .ciFiscalCodeList(Lists.newArrayList(getMockCiFiscalCode()))
+                .ciFiscalCodeList(List.of(getMockCiFiscalCode()))
                 .build();
     }
+
+    public static CiBundleDetails getMockCiBundleDetails() {
+        ModelMapper modelMapper = new ModelMapper();
+        CiBundleAttribute attributeE = getMockCiBundleAttribute();
+        it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute attributeM = modelMapper.map(attributeE, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class);
+        return CiBundleDetails.builder()
+                .validityDateFrom(LocalDate.now().minusDays(7))
+                .validityDateTo(LocalDate.now().plusDays(7))
+                .attributes(List.of(attributeM))
+                .build();
+    }
+
+    public static PspBundleDetails getMockPspBundleDetails() {
+        Bundle bundle = getMockBundle();
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(bundle, PspBundleDetails.class);
+    }
+
+    public static BundleDetailsForCi getMockBundleDetailsForCi() {
+        Bundle bundle = getMockBundle();
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(bundle, BundleDetailsForCi.class);
+    }
+
+    public static Bundles getMockBundles() {
+        List<PspBundleDetails> bundleList = List.of(getMockPspBundleDetails());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(bundleList.size())
+                .totalPages(1)
+                .build();
+        return Bundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static BundleResponse getMockBundleResponse() {
+        return BundleResponse.builder()
+                .idBundle(getMockIdBundle())
+                .build();
+    }
+
+    public static PspBundleOffer getMockPspBundleOffer() {
+        return PspBundleOffer.builder()
+                .id(UUID.randomUUID().toString())
+                .idBundle(getMockIdBundle())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .insertedDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static BundleOffers getMockBundleOffers() {
+        List<PspBundleOffer> offers = List.of(getMockPspBundleOffer());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(offers.size())
+                .totalPages(1)
+                .build();
+        return BundleOffers.builder()
+                .offers(offers)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static BundleOffered getMockBundleOffered() {
+        return BundleOffered.builder()
+                .ciFiscalCode(getMockCiFiscalCode())
+                .idBundleOffer(UUID.randomUUID().toString())
+                .build();
+    }
+
+    public static PspBundleRequest getMockPspBundleRequest() {
+        return PspBundleRequest.builder()
+                .id(UUID.randomUUID().toString())
+                .idBundle(getMockIdBundle())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .ciBundleAttributes(Collections.emptyList())
+                .build();
+    }
+    public static PspRequests getMockPspRequests() {
+        List<PspBundleRequest> list = List.of(getMockPspBundleRequest());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(list.size())
+                .totalPages(1)
+                .build();
+
+        return PspRequests.builder()
+                .requestsList(list)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static BundleDetailsAttributes getMockBundleDetailsAttributes() {
+        CiBundle ciBundle = getMockCiBundle();
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(ciBundle, BundleDetailsAttributes.class);
+    }
+
+    public static BundleAttributeResponse getMockBundleAttributeResponse() {
+        return BundleAttributeResponse.builder()
+                .idBundleAttribute(UUID.randomUUID().toString())
+                .build();
+    }
+
+    public static CiBundleRequest getMockCiBundleRequest() {
+        return CiBundleRequest.builder()
+                .id(UUID.randomUUID().toString())
+                .idBundle(getMockIdBundle())
+                .idPsp(getMockIdPsp())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .insertedDate(LocalDateTime.now())
+                .ciBundleAttributeModels(Collections.emptyList())
+                .build();
+    }
+
+    public static CiRequests getMockCiRequests() {
+        List<CiBundleRequest> list = List.of(getMockCiBundleRequest());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(list.size())
+                .totalPages(1)
+                .build();
+
+        return CiRequests.builder()
+                .requestsList(list)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static BundleRequestId getMockBundleRequestId() {
+        return BundleRequestId.builder()
+                .idBundleRequest(UUID.randomUUID().toString())
+                .build();
+    }
+
+    public static CiBundleOffer getMockCiBundleOffer() {
+        return CiBundleOffer.builder()
+                .idBundle(getMockIdBundle())
+                .idPsp(getMockIdPsp())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .insertedDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static BundleCiOffers getMockBundleCiOffers() {
+        List<CiBundleOffer> list = List.of(getMockCiBundleOffer());
+        PageInfo pageInfo = PageInfo.builder()
+                .itemsFound(list.size())
+                .totalPages(1)
+                .build();
+        return BundleCiOffers.builder()
+                .offers(list)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
+    public static CiBundleId getMockCiBundleId() {
+        return CiBundleId.builder()
+                .id(UUID.randomUUID().toString())
+                .build();
+    }
+
+
 }

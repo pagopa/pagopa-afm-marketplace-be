@@ -12,6 +12,7 @@ import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
@@ -284,13 +285,13 @@ public class BundleService {
                 .build();
     }
 
-    public PspBundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+    public BundleDetailsForCi getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
         var bundle = bundleRepository.findById(ciBundle.getIdBundle())
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
 
-        return modelMapper.map(bundle, PspBundleDetails.class);
+        return modelMapper.map(bundle, BundleDetailsForCi.class);
     }
 
     public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {

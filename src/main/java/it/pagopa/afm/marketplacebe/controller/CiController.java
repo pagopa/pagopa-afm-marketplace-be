@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
-import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
@@ -76,7 +76,7 @@ public class CiController {
 
     @Operation(summary = "Get a bundle of a CI", tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspBundleDetails.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetailsForCi.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -86,7 +86,7 @@ public class CiController {
             value = "/{cifiscalcode}/bundles/{idbundle}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public PspBundleDetails getBundleByFiscalCode(
+    public BundleDetailsForCi getBundleByFiscalCode(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
         return bundleService.getBundleByFiscalCode(fiscalCode, idBundle);
@@ -297,7 +297,7 @@ public class CiController {
 
     @Operation(summary = "The CI accepts an offer of a PSP", tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundleId.class))),
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundleId.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
