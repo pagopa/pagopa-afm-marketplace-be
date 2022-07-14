@@ -17,6 +17,9 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -33,6 +36,7 @@ import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -137,6 +141,67 @@ class BundleOfferServiceTest {
             fail();
         } catch (AppException e) {
             assertEquals(status, e.getHttpStatus());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    void removeBundleOffer_ok_1() {
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        when(bundleOfferRepository.findById(anyString())).thenReturn(Optional.of(bundleOffer));
+
+        String idPsp = TestUtil.getMockIdPsp();
+        String idBundle = TestUtil.getMockIdBundle();
+        try {
+            bundleOfferService.removeBundleOffer(idPsp, idBundle, bundleOffer.getId());
+            assertTrue(true);
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @Test
+    void removeBundleOffer_ko_1() {
+        when(bundleOfferRepository.findById(anyString())).thenReturn(Optional.empty());
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        removeBundleOffer_ko(bundleOffer, HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void removeBundleOffer_ko_2() {
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        bundleOffer.setIdPsp("UNKNOWN");
+        when(bundleOfferRepository.findById(anyString())).thenReturn(Optional.of(bundleOffer));
+        removeBundleOffer_ko(bundleOffer, HttpStatus.BAD_REQUEST);
+    }
+
+    void removeBundleOffer_ko(BundleOffer bundleOffer, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+        String idBundle = TestUtil.getMockIdBundle();
+
+        try {
+            bundleOfferService.removeBundleOffer(idPsp, idBundle, bundleOffer.getId());
+            fail();
+        } catch (AppException e) {
+            assertEquals(status, e.getHttpStatus());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
+    @ParameterizedTest
+    @NullSource    // pass a null value
+    @ValueSource(strings = {"1234567901"})
+    void getCiOffers_ok_1(String idPsp) {
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        when(bundleOfferRepository.findByCiFiscalCode(anyString())).thenReturn(List.of(bundleOffer));
+        when(bundleOfferRepository.findByIdPsp(anyString(), any(PartitionKey.class))).thenReturn(List.of(bundleOffer));
+
+        String ciFiscalCode = TestUtil.getMockCiFiscalCode();
+        try {
+            bundleOfferService.getCiOffers(ciFiscalCode, idPsp);
+            assertTrue(true);
         } catch (Exception e) {
             fail();
         }
