@@ -298,7 +298,7 @@ public class BundleService {
         CiBundle ciBundle = ciBundleRepository.findById(idCiBundle, new PartitionKey(fiscalCode))
                 .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_ID_NOT_FOUND, idCiBundle));
 
-        // set validityDateTo to now so it will be deleted by job at the next iteration
+        // set validityDateTo to now in order to be deleted by job at the next iteration
         ciBundle.setValidityDateTo(LocalDate.now());
         ciBundleRepository.save(ciBundle);
     }
