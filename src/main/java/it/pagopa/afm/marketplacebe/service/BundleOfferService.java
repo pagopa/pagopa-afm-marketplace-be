@@ -51,16 +51,6 @@ public class BundleOfferService {
     @Autowired
     ModelMapper modelMapper;
 
-//    public BundleOffers getPspOffers(String idPsp, Integer limit, Integer pageNumber) {
-//        Pageable pageable = PageRequest.of(pageNumber, limit);
-//        List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> bundleOfferList = new ArrayList<>();
-//        Page<BundleOffer> page = bundleOfferRepository.findByIdPsp(idPsp, pageable);
-//
-//        return BundleOffers.builder()
-//                .offers(getBundleOfferList(page))
-//                .pageInfo(CommonUtil.buildPageInfo(page))
-//                .build();
-//    }
 
     public BundleOffers getPspOffers(String idPsp) {
         List<PspBundleOffer> bundleOfferList = bundleOfferRepository.findByIdPsp(idPsp)

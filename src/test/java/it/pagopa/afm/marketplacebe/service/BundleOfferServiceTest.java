@@ -1,6 +1,11 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -17,11 +22,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -70,6 +77,14 @@ class BundleOfferServiceTest {
         assertEquals(mockCiFiscalCodeList.getCiFiscalCodeList().get(0), result.get(0).getCiFiscalCode());
         assertEquals(mockBundle.getIdPsp(), bundleOfferArgument.getValue().getIdPsp());
         assertEquals(mockBundle.getId(), bundleOfferArgument.getValue().getIdBundle());
+    }
+
+    @Test
+    void getPspOffers_ok() {
+        when(bundleOfferRepository.findByIdPsp(anyString())).thenReturn(List.of(TestUtil.getMockBundleOffer()));
+
+        BundleOffers result = bundleOfferService.getPspOffers(getMockIdPsp());
+        assertNotNull(result);
     }
 
     @Test
