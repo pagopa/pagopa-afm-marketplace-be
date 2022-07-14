@@ -132,6 +132,12 @@ class BundleOfferServiceTest {
         sendBundleOffer_ko(HttpStatus.CONFLICT);
     }
 
+    @Test
+    void sendBundleOffer_ko_3() {
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
+        sendBundleOffer_ko(HttpStatus.NOT_FOUND);
+    }
+
     void sendBundleOffer_ko(HttpStatus status) {
         String idPsp = TestUtil.getMockIdPsp();
         String idBundle = TestUtil.getMockIdBundle();
@@ -176,12 +182,20 @@ class BundleOfferServiceTest {
         removeBundleOffer_ko(bundleOffer, HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    void removeBundleOffer_ko_3() {
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        bundleOffer.setIdBundle("UNKNOWN");
+        when(bundleOfferRepository.findById(anyString())).thenReturn(Optional.of(bundleOffer));
+        removeBundleOffer_ko(bundleOffer, HttpStatus.BAD_REQUEST);
+    }
+
     void removeBundleOffer_ko(BundleOffer bundleOffer, HttpStatus status) {
         String idPsp = TestUtil.getMockIdPsp();
         String idBundle = TestUtil.getMockIdBundle();
-
+        String idBundleOffer = bundleOffer.getId();
         try {
-            bundleOfferService.removeBundleOffer(idPsp, idBundle, bundleOffer.getId());
+            bundleOfferService.removeBundleOffer(idPsp, idBundle, idBundleOffer);
             fail();
         } catch (AppException e) {
             assertEquals(status, e.getHttpStatus());
