@@ -16,6 +16,7 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -134,6 +135,15 @@ class BundleOfferServiceTest {
 
     @Test
     void sendBundleOffer_ko_3() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(LocalDate.now().minusDays(1));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        sendBundleOffer_ko(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void sendBundleOffer_ko_4() {
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
         sendBundleOffer_ko(HttpStatus.NOT_FOUND);
     }
