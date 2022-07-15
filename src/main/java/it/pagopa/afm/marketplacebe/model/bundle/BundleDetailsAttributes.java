@@ -15,6 +15,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class BundleDetailsAttributes {
 
+    private LocalDate validityDateFrom;
     private LocalDate validityDateTo;
 
     @NotNull
