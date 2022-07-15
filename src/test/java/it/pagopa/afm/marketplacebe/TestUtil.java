@@ -3,14 +3,8 @@ package it.pagopa.afm.marketplacebe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
-import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.*;
@@ -33,6 +27,8 @@ public class TestUtil {
     private final static String MOCK_ID_PSP = "1234567890";
     private final static String MOCK_CI_FISCAL_CODE = "fiscalCode";
     private final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8";
+
+    private final static String MOCK_ID_OFFER = "acfbc9c6-6c0b-429e-83ca-30ef453504f8";
 
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
@@ -266,6 +262,12 @@ public class TestUtil {
                 .build();
     }
 
+    public static List<BundleOffer> getMockBundleOfferList(){
+        return List.of(
+                getMockBundleOffer()
+        );
+    }
+
     public static BundleOffered getMockBundleOffered() {
         return BundleOffered.builder()
                 .ciFiscalCode(getMockCiFiscalCode())
@@ -367,5 +369,27 @@ public class TestUtil {
                 .build();
     }
 
+    public static String getMockBundleOfferId() {
+        return MOCK_ID_OFFER;
+    }
+
+    public static BundleOffer getMockBundleOffer(){
+        return BundleOffer.builder()
+                .id(MOCK_ID_OFFER)
+                .idBundle(getMockIdBundle())
+                .idPsp(getMockIdPsp())
+                .build();
+    }
+
+    public static ArchivedBundleOffer getMockArchivedBundleOffer(BundleOffer offer){
+        return ArchivedBundleOffer.builder()
+                .idBundle(offer.getIdBundle())
+                .idPsp(offer.getIdPsp())
+                .acceptedDate(offer.getAcceptedDate())
+                .rejectionDate(offer.getRejectionDate())
+                .ciFiscalCode(offer.getCiFiscalCode())
+                .id(offer.getId())
+                .build();
+    }
 
 }
