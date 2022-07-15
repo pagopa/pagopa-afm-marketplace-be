@@ -2,11 +2,7 @@ package it.pagopa.afm.marketplacebe.model.bundle;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;

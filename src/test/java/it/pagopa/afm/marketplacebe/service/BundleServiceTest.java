@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,13 +60,12 @@ class BundleServiceTest {
     void shouldGetBundles() {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
-        List<BundleType> requiredTypes = List.of(BundleType.PRIVATE);
 
         // Precondition
-        when(bundleRepository.findByValidityDateToIsNullAndTypeIn(requiredTypes))
+        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue()))
                 .thenReturn(bundleList);
 
-        Bundles bundles = bundleService.getBundles(requiredTypes);
+        Bundles bundles = bundleService.getBundles(List.of(BundleType.PRIVATE));
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());

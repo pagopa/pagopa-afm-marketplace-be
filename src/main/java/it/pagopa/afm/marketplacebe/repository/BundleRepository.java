@@ -42,8 +42,20 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     @Query(value = "SELECT * " +
             "FROM bundles b " +
             "WHERE (IS_NULL(b.validityDateTo) OR SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], "+
-            "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10)) AND b.type IN (@types)")
-    List<Bundle> findByValidityDateToIsNullAndTypeIn(@Param("types") List<BundleType> types);
+            "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10)) AND b.type IN (@type0)")
+    List<Bundle> getValidBundleByType(@Param("type0") String type0);
+
+    @Query(value = "SELECT * " +
+            "FROM bundles b " +
+            "WHERE (IS_NULL(b.validityDateTo) OR SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], "+
+            "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10)) AND b.type IN (@type0, @type1)")
+    List<Bundle> getValidBundleByType(@Param("type0") String type0, @Param("type1") String type1);
+
+    @Query(value = "SELECT * " +
+            "FROM bundles b " +
+            "WHERE (IS_NULL(b.validityDateTo) OR SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], "+
+            "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10)) AND b.type IN (@type0, @type1, @type2)")
+    List<Bundle> getValidBundleByType(@Param("type0") String type0, @Param("type1") String type1, @Param("type2") String type2);
 
     List<Bundle> findByTypeAndPaymentMethodAndTouchpoint(BundleType type, PaymentMethod paymentMethod, Touchpoint touchpoint);
 

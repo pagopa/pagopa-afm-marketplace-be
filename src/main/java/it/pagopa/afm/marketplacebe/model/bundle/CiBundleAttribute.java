@@ -1,11 +1,7 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 

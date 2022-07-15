@@ -3,11 +3,7 @@ package it.pagopa.afm.marketplacebe.model.bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
