@@ -2,6 +2,7 @@ package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
@@ -14,11 +15,13 @@ import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 
 import java.util.Optional;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -162,6 +165,8 @@ class BundleOfferServiceTest {
     void acceptOfferWithUpdateNoValidityDate(){
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
+        bundle.setValidityDateFrom(null);
+
         when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.of(getMockBundleOffer()));
         when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
@@ -197,6 +202,22 @@ class BundleOfferServiceTest {
 
         assertEquals(getMockBundleOffer().getId(), bundleOfferArgument.getValue().getId());
         assertEquals(getMockBundleOffer().getId(), archivedBundleOfferArgument.getValue().getId());
+    }
+
+    @Test
+    void sendOfferForPublicBundleKO(){
+        Bundle mockBundle = getMockBundle();
+        mockBundle.setId("test_bundle_1");
+        mockBundle.setValidityDateTo(null);
+        mockBundle.setType(BundleType.GLOBAL);
+        CiFiscalCodeList mockCiFiscalCodeList = getMockCiFiscalCodeList();
+
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(mockBundle));
+
+        var exc = assertThrows(AppException.class,
+            () -> bundleOfferService.sendBundleOffer(getMockIdPsp(), mockBundle.getId(), mockCiFiscalCodeList));
+
+        assertEquals(HttpStatus.CONFLICT, exc.getHttpStatus());
     }
 
 }
