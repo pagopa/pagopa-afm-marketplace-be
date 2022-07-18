@@ -1,12 +1,8 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -60,7 +56,7 @@ public class BundleService {
     private ModelMapper modelMapper;
 
     public Bundles getBundles(List<BundleType> bundleTypes) {
-        List<PspBundleDetails> bundleList = bundleRepository.findByValidityDateToIsNullAndTypeIn(bundleTypes)
+        List<PspBundleDetails> bundleList = getValidBundleByType(bundleTypes)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
@@ -76,6 +72,20 @@ public class BundleService {
                 .build();
     }
 
+    private List<Bundle> getValidBundleByType(List<BundleType> types){
+        switch (types.size()){
+            case 1:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue());
+            case 2:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue());
+            case 3:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue(),
+                        types.get(2).getValue());
+            default:
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST);
+
+        }
+    }
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
         List<PspBundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
