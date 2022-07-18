@@ -2,21 +2,19 @@ package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
-import it.pagopa.afm.marketplacebe.entity.*;
-import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -33,19 +31,26 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.*;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockArchivedBundleOffer;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOffer;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOfferId;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOfferList;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCode;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCodeList;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdPsp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class BundleOfferServiceTest {
