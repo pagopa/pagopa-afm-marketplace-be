@@ -139,7 +139,7 @@ class BundleOfferServiceTest {
         bundle.setValidityDateTo(LocalDate.now().minusDays(1));
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        sendBundleOffer_ko(HttpStatus.CONFLICT);
+        sendBundleOffer_ko(HttpStatus.BAD_REQUEST);
     }
 
     @Test
