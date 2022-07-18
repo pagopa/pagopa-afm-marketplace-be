@@ -353,9 +353,9 @@ class BundleServiceTest {
         bundleService.removeBundleByFiscalCode(ciBundle.getCiFiscalCode(),
                 ciBundle.getIdBundle());
 
-        verify(ciBundleRepository).delete(ciBundleArgumentCaptor.capture());
+        verify(ciBundleRepository).save(ciBundleArgumentCaptor.capture());
 
-        assertEquals(ciBundle.getId(), ciBundleArgumentCaptor.getValue().getId());
+        assertEquals(LocalDate.now(), ciBundleArgumentCaptor.getValue().getValidityDateTo());
     }
 
     @Test
