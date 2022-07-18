@@ -214,8 +214,11 @@ class BundleOfferServiceTest {
 
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(mockBundle));
 
+        String idPsp = getMockIdPsp();
+        String idBundle = mockBundle.getId();
+
         var exc = assertThrows(AppException.class,
-            () -> bundleOfferService.sendBundleOffer(getMockIdPsp(), mockBundle.getId(), mockCiFiscalCodeList));
+            () -> bundleOfferService.sendBundleOffer(idPsp, idBundle, mockCiFiscalCodeList));
 
         assertEquals(HttpStatus.CONFLICT, exc.getHttpStatus());
     }
