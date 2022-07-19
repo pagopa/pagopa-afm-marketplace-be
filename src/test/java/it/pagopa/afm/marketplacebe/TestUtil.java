@@ -3,12 +3,41 @@ package it.pagopa.afm.marketplacebe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
-import it.pagopa.afm.marketplacebe.model.offer.*;
-import it.pagopa.afm.marketplacebe.model.request.*;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleOffer;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
+import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
+import it.pagopa.afm.marketplacebe.model.request.CiRequests;
+import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.PspRequests;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 import org.modelmapper.ModelMapper;
@@ -37,6 +66,8 @@ public class TestUtil {
         return MOCK_CI_FISCAL_CODE;
     }
     public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
+    public static String getMockBundleOfferId() { return MOCK_ID_OFFER; }
+
 
     /**
      * @param object to map into the Json string
@@ -250,6 +281,18 @@ public class TestUtil {
                 .build();
     }
 
+    public static BundleOffer getMockBundleOffer() {
+        return BundleOffer.builder()
+                .id(getMockBundleOfferId())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .idPsp(getMockIdPsp())
+                .idBundle(getMockIdBundle())
+                .acceptedDate(null)
+                .rejectionDate(null)
+                .insertedDate(LocalDateTime.now())
+                .build();
+    }
+
     public static BundleOffers getMockBundleOffers() {
         List<PspBundleOffer> offers = List.of(getMockPspBundleOffer());
         PageInfo pageInfo = PageInfo.builder()
@@ -366,18 +409,6 @@ public class TestUtil {
     public static CiBundleId getMockCiBundleId() {
         return CiBundleId.builder()
                 .id(UUID.randomUUID().toString())
-                .build();
-    }
-
-    public static String getMockBundleOfferId() {
-        return MOCK_ID_OFFER;
-    }
-
-    public static BundleOffer getMockBundleOffer(){
-        return BundleOffer.builder()
-                .id(MOCK_ID_OFFER)
-                .idBundle(getMockIdBundle())
-                .idPsp(getMockIdPsp())
                 .build();
     }
 

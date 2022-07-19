@@ -29,6 +29,6 @@ public class CommonUtil {
      */
     public boolean isValidityDateToAcceptable(LocalDate validityDateTo) {
         LocalDate now = LocalDate.now();
-        return validityDateTo == null || !(validityDateTo.isEqual(now) && validityDateTo.isBefore(now));
+        return validityDateTo == null || !(validityDateTo.isEqual(now) || validityDateTo.isBefore(now));
     }
 }

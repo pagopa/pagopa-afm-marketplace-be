@@ -51,16 +51,6 @@ public class BundleOfferService {
     @Autowired
     ModelMapper modelMapper;
 
-//    public BundleOffers getPspOffers(String idPsp, Integer limit, Integer pageNumber) {
-//        Pageable pageable = PageRequest.of(pageNumber, limit);
-//        List<it.pagopa.afm.marketplacebe.model.offer.BundleOffer> bundleOfferList = new ArrayList<>();
-//        Page<BundleOffer> page = bundleOfferRepository.findByIdPsp(idPsp, pageable);
-//
-//        return BundleOffers.builder()
-//                .offers(getBundleOfferList(page))
-//                .pageInfo(CommonUtil.buildPageInfo(page))
-//                .build();
-//    }
 
     public BundleOffers getPspOffers(String idPsp) {
         List<PspBundleOffer> bundleOfferList = bundleOfferRepository.findByIdPsp(idPsp)
@@ -81,11 +71,10 @@ public class BundleOfferService {
 
 
     public List<BundleOffered> sendBundleOffer(String idPsp, String idBundle, CiFiscalCodeList ciFiscalCodeList) {
-        // TODO verify idPsp and fiscal code
-
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        if (bundle.getValidityDateTo() != null) {
+        // verify if validityDateTo is after now
+        if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
@@ -151,17 +140,15 @@ public class BundleOfferService {
                 .build();
     }
 
-    private Bundle getBundle(String idBundle, String idPsp) {
-        Optional<Bundle> optBundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
-        if (optBundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-        return optBundle.get();
-    }
-
     public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
-        Bundle bundle = verifyAndGetBundle(entity.getIdBundle(), entity.getIdPsp());
+
+        Bundle bundle = getBundle(entity.getIdBundle(), entity.getIdPsp());
+
+        // verify if validityDateTo is after now
+        if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
+        }
 
         Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
                 entity.getIdBundle(),
@@ -201,7 +188,12 @@ public class BundleOfferService {
     public void rejectOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
 
-        verifyAndGetBundle(entity.getIdBundle(), entity.getIdPsp());
+        Bundle bundle = getBundle(entity.getIdBundle(), entity.getIdPsp());
+
+        // verify if validityDateTo is after now
+        if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
+        }
 
         if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
             archiveBundleOffer(entity, false);
@@ -276,20 +268,17 @@ public class BundleOfferService {
 
 
     /**
-     * Verify bundle consistency
-     *
+     * Retrieve bundle
      * @param idBundle
      * @param idPsp
+     * @return
      */
-    private Bundle verifyAndGetBundle(String idBundle, String idPsp) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
-        if (bundle.isEmpty()) {
+    private Bundle getBundle(String idBundle, String idPsp) {
+        Optional<Bundle> optBundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
+        if (optBundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        } else if (!CommonUtil.isValidityDateToAcceptable(bundle.get().getValidityDateTo())) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
-
-        return bundle.get();
+        return optBundle.get();
     }
 
     /**
