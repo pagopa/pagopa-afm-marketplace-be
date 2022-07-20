@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 public class BundleRequestService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
+
     @Autowired
     BundleRepository bundleRepository;
 
@@ -65,8 +66,6 @@ public class BundleRequestService {
      * @return
      */
     public CiRequests getRequestsByCI(String ciFiscalCode, Integer size, String cursor, String idPsp) {
-        // TODO: pageable
-
         List<BundleRequestEntity> requests = (idPsp == null) ?
                 bundleRequestRepository.findByCiFiscalCode(ciFiscalCode) :
                 bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciFiscalCode, idPsp);
@@ -83,17 +82,12 @@ public class BundleRequestService {
         // retrieve bundle by idBundle and check if it is public
 
         String idBundle = ciBundleSubscriptionRequest.getIdBundle();
-        Optional<Bundle> optBundle = bundleRepository.findById(idBundle);
 
-        if (optBundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-
-        Bundle bundle = optBundle.get();
+        Bundle bundle = getBundle(idBundle);
 
         // a bundle request is acceptable if validityDateTo is after now
         if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
-            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been deleted.");
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         if (!bundle.getType().equals(BundleType.PUBLIC)) {
@@ -267,5 +261,18 @@ public class BundleRequestService {
 
         archivedBundleRequestRepository.save(modelMapper.map(requestToArchive, ArchivedBundleRequest.class));
         bundleRequestRepository.delete(bundleRequestEntity);
+    }
+
+    /**
+     * Retrieve bundle
+     * @param idBundle
+     * @return
+     */
+    private Bundle getBundle(String idBundle) {
+        Optional<Bundle> optBundle = bundleRepository.findById(idBundle);
+        if (optBundle.isEmpty()) {
+            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
+        }
+        return optBundle.get();
     }
 }
