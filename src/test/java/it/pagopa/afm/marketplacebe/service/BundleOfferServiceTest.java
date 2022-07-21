@@ -25,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -306,6 +307,51 @@ class BundleOfferServiceTest {
     }
 
     @Test
+    void acceptOfferRejected() {
+        BundleOffer mockBundleOffer = getMockBundleOffer();
+        mockBundleOffer.setRejectionDate(LocalDateTime.now());
+        String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(mockBundleOffer));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(getMockBundle()));
+
+        when(ciBundleRepository.save(any())).thenReturn(getMockCiBundle());
+
+        String mockBundleOfferId = getMockBundleOfferId();
+        var exception = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getHttpStatus(), exception.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getTitle(), exception.getTitle());
+    }
+    @Test
+    void acceptOfferAccepted() {
+        BundleOffer mockBundleOffer = getMockBundleOffer();
+        mockBundleOffer.setAcceptedDate(LocalDateTime.now());
+        String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(mockBundleOffer));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(getMockBundle()));
+
+        when(ciBundleRepository.save(any())).thenReturn(getMockCiBundle());
+
+        String mockBundleOfferId = getMockBundleOfferId();
+        var exception = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
+    }
+
+    @Test
     void acceptOfferConflict() {
         when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.of(getMockBundleOffer()));
@@ -351,6 +397,33 @@ class BundleOfferServiceTest {
 
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
+    }
+
+    @Test
+    void acceptOfferConflict3() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(null);
+        bundle.setValidityDateFrom(null);
+
+        when(bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString()))
+                .thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(getMockBundleOffer()));
+        String mockCiFiscalCode = getMockCiFiscalCode();
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode))
+                .thenReturn(Optional.of(getMockCiBundle()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(bundle));
+
+        when(ciBundleRepository.save(any())).thenReturn(
+                getMockCiBundle()
+        );
+        String mockBundleOfferId = getMockBundleOfferId();
+        var exception = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+
+        assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getHttpStatus(), exception.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getTitle(), exception.getTitle());
     }
 
     @Test

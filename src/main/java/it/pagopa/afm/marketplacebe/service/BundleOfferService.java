@@ -231,37 +231,6 @@ public class BundleOfferService {
     }
 
     /**
-     * @param entity   the new offer that will be used to replace old CiBundle
-     * @param bundle   the bundle connected with the offer
-     * @param ciBundle the old CiBundle that will be replaced/invalidated
-     * @return the entity if exist
-     * @throws AppException if not found
-     */
-    private CiBundle invalidateAndBuildCiBundle(BundleOffer entity, Bundle bundle, CiBundle ciBundle) {
-        LocalDate buildTime = LocalDate.now();
-        ciBundle.setValidityDateTo(buildTime);
-        ciBundleRepository.save(ciBundle);
-
-        if (bundle.getValidityDateFrom() == null) {
-            return CiBundle.builder()
-                    .ciFiscalCode(entity.getCiFiscalCode())
-                    .idBundle(entity.getIdBundle())
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(buildTime)
-                    .build();
-        } else {
-            return CiBundle.builder()
-                    .ciFiscalCode(entity.getCiFiscalCode())
-                    .idBundle(entity.getIdBundle())
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(bundle.getValidityDateFrom().isBefore(buildTime.plusDays(1)) ?
-                            buildTime.plusDays(1) : bundle.getValidityDateFrom())
-                    .build();
-        }
-    }
-
-
-    /**
      * Retrieve bundle
      *
      * @param idBundle bundle identifier
