@@ -265,8 +265,8 @@ public class BundleRequestService {
 
     /**
      * Retrieve bundle
-     * @param idBundle
-     * @return
+     * @param idBundle bundle identifier
+     * @return bundle bundle or not found exception
      */
     private Bundle getBundle(String idBundle) {
         Optional<Bundle> optBundle = bundleRepository.findById(idBundle);
