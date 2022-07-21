@@ -73,14 +73,17 @@ public class BundleOfferService {
             throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Type not private");
         }
 
-        List<BundleOffered> bundleOfferedList = new ArrayList<>();
         ciFiscalCodeList.getCiFiscalCodeList().forEach(fiscalCode -> {
             // check if the bundle has already been offered
             var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode);
-            if (ciBundle.isPresent()) {
+            var offerBundle = bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, fiscalCode);
+            if (ciBundle.isPresent() || offerBundle.isPresent()) {
                 throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Bundle already offered to CI " + fiscalCode);
             }
+        });
 
+        List<BundleOffered> bundleOfferedList = new ArrayList<>();
+        ciFiscalCodeList.getCiFiscalCodeList().forEach(fiscalCode -> {
             // add offer
             BundleOffer bundleOffer = BundleOffer.builder()
                     .ciFiscalCode(fiscalCode)
@@ -138,46 +141,40 @@ public class BundleOfferService {
     }
 
     public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
-        BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
+        BundleOffer offer = getBundleOffer(idBundleOffer, ciFiscalCode);
 
-        Bundle bundle = getBundle(entity.getIdBundle(), entity.getIdPsp());
+        Bundle bundle = getBundle(offer.getIdBundle(), offer.getIdPsp());
 
         // verify if validityDateTo is after now
         if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
+        // check if the bundle has already been offered
+        var offerBundle = bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(bundle.getId(), ciFiscalCode);
+        if (offerBundle.isPresent()) {
+            throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, bundle.getId(), "Bundle already offered to CI " + ciFiscalCode);
+        }
+
         Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
-                entity.getIdBundle(),
+                offer.getIdBundle(),
                 ciFiscalCode
         );
 
-        // Update existing ciBundle
         if (ciBundle.isPresent()) {
-            if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-                archiveBundleOffer(entity, true);
-
-                // invalidate old CI-Bundle and create CI-Bundle relation
-                return CiBundleId.builder()
-                        .id(ciBundleRepository.save(invalidateAndBuildCiBundle(entity, bundle, ciBundle.get())).getId())
-                        .build();
-            } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
-            } else {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, entity.getAcceptedDate());
-            }
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
         } else {
-            if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-                archiveBundleOffer(entity, true);
+            if (offer.getAcceptedDate() == null && offer.getRejectionDate() == null) {
+                archiveBundleOffer(offer, true);
 
                 // create CI-Bundle relation
                 return CiBundleId.builder()
-                        .id(ciBundleRepository.save(buildCiBundle(entity, bundle)).getId())
+                        .id(ciBundleRepository.save(buildCiBundle(offer, bundle)).getId())
                         .build();
-            } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
+            } else if (offer.getAcceptedDate() == null && offer.getRejectionDate() != null) {
+                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, offer.getRejectionDate());
             } else {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, entity.getAcceptedDate());
+                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
             }
         }
     }
@@ -234,7 +231,7 @@ public class BundleOfferService {
     }
 
     /**
-     * @param entity   the new offer that will used to replace old CiBundle
+     * @param entity   the new offer that will be used to replace old CiBundle
      * @param bundle   the bundle connected with the offer
      * @param ciBundle the old CiBundle that will be replaced/invalidated
      * @return the entity if exist

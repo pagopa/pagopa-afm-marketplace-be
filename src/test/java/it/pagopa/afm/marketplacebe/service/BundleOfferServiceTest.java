@@ -306,10 +306,11 @@ class BundleOfferServiceTest {
     }
 
     @Test
-    void acceptOfferWithUpdateOk() {
+    void acceptOfferConflict() {
         when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.of(getMockBundleOffer()));
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+        String mockCiFiscalCode = getMockCiFiscalCode();
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode))
                 .thenReturn(Optional.of(getMockCiBundle()));
         when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.of(getMockBundle()));
@@ -318,23 +319,24 @@ class BundleOfferServiceTest {
                 getMockCiBundle()
         );
 
-        bundleOfferService.acceptOffer(getMockCiFiscalCode(), getMockBundleOfferId());
+        String mockBundleOfferId = getMockBundleOfferId();
+        var exception = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
 
-        verify(ciBundleRepository, times(2)).save(ciBundleArgument.capture());
-        verify(archivedBundleOfferRepository, times(1)).save(archivedBundleOfferArgument.capture());
-
-        assertEquals(getMockBundleOffer().getIdBundle(), archivedBundleOfferArgument.getValue().getIdBundle());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
     }
 
     @Test
-    void acceptOfferWithUpdateNoValidityDate() {
+    void acceptOfferConflict2() {
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
         bundle.setValidityDateFrom(null);
 
         when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.of(getMockBundleOffer()));
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+        String mockCiFiscalCode = getMockCiFiscalCode();
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode))
                 .thenReturn(Optional.of(getMockCiBundle()));
         when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.of(bundle));
@@ -343,12 +345,12 @@ class BundleOfferServiceTest {
                 getMockCiBundle()
         );
 
-        bundleOfferService.acceptOffer(getMockCiFiscalCode(), getMockBundleOfferId());
+        String mockBundleOfferId = getMockBundleOfferId();
+        var exception = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
 
-        verify(ciBundleRepository, times(2)).save(ciBundleArgument.capture());
-        verify(archivedBundleOfferRepository, times(1)).save(archivedBundleOfferArgument.capture());
-
-        assertEquals(getMockBundleOffer().getIdBundle(), archivedBundleOfferArgument.getValue().getIdBundle());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
     }
 
     @Test

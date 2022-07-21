@@ -237,8 +237,8 @@ public class BundleService {
         bundleRequestRepository.saveAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
-        List<BundleOffer> offers = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
-        bundleOfferRepository.deleteAll(offers);
+        BundleOffer offers = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
+        bundleOfferRepository.delete(offers);
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP) {
