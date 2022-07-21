@@ -1,21 +1,11 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
-import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
-import it.pagopa.afm.marketplacebe.model.offer.CiBundleOffer;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
+import it.pagopa.afm.marketplacebe.model.offer.*;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
@@ -83,8 +73,18 @@ public class BundleOfferService {
             throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Type not private");
         }
 
+        ciFiscalCodeList.getCiFiscalCodeList().forEach(fiscalCode -> {
+            // check if the bundle has already been offered
+            var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode);
+            var offerBundle = bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, fiscalCode);
+            if (ciBundle.isPresent() || offerBundle.isPresent()) {
+                throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Bundle already offered to CI " + fiscalCode);
+            }
+        });
+
         List<BundleOffered> bundleOfferedList = new ArrayList<>();
         ciFiscalCodeList.getCiFiscalCodeList().forEach(fiscalCode -> {
+            // add offer
             BundleOffer bundleOffer = BundleOffer.builder()
                     .ciFiscalCode(fiscalCode)
                     .idPsp(idPsp)
@@ -141,46 +141,40 @@ public class BundleOfferService {
     }
 
     public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
-        BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
+        BundleOffer offer = getBundleOffer(idBundleOffer, ciFiscalCode);
 
-        Bundle bundle = getBundle(entity.getIdBundle(), entity.getIdPsp());
+        Bundle bundle = getBundle(offer.getIdBundle(), offer.getIdPsp());
 
         // verify if validityDateTo is after now
         if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
+        // check if the bundle has already been offered
+        var offerBundle = bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(bundle.getId(), ciFiscalCode);
+        if (offerBundle.isPresent()) {
+            throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, bundle.getId(), "Bundle already offered to CI " + ciFiscalCode);
+        }
+
         Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
-                entity.getIdBundle(),
+                offer.getIdBundle(),
                 ciFiscalCode
         );
 
-        // Update existing ciBundle
-        if (ciBundle.isPresent()){
-            if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-                archiveBundleOffer(entity, true);
-
-                // invalidate old CI-Bundle and create CI-Bundle relation
-                return CiBundleId.builder()
-                        .id(ciBundleRepository.save(invalidateAndBuildCiBundle(entity, bundle, ciBundle.get())).getId())
-                        .build();
-            } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
-            } else {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, entity.getAcceptedDate());
-            }
+        if (ciBundle.isPresent()) {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
         } else {
-            if (entity.getAcceptedDate() == null && entity.getRejectionDate() == null) {
-                archiveBundleOffer(entity, true);
+            if (offer.getAcceptedDate() == null && offer.getRejectionDate() == null) {
+                archiveBundleOffer(offer, true);
 
                 // create CI-Bundle relation
                 return CiBundleId.builder()
-                        .id(ciBundleRepository.save(buildCiBundle(entity, bundle)).getId())
+                        .id(ciBundleRepository.save(buildCiBundle(offer, bundle)).getId())
                         .build();
-            } else if (entity.getAcceptedDate() == null && entity.getRejectionDate() != null) {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, entity.getRejectionDate());
+            } else if (offer.getAcceptedDate() == null && offer.getRejectionDate() != null) {
+                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, offer.getRejectionDate());
             } else {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, entity.getAcceptedDate());
+                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
             }
         }
     }
@@ -218,7 +212,7 @@ public class BundleOfferService {
     private CiBundle buildCiBundle(BundleOffer entity, Bundle bundle) {
         LocalDate buildTime = LocalDate.now();
 
-        if(bundle.getValidityDateFrom() == null){
+        if (bundle.getValidityDateFrom() == null) {
             return CiBundle.builder()
                     .ciFiscalCode(entity.getCiFiscalCode())
                     .idBundle(entity.getIdBundle())
@@ -237,41 +231,11 @@ public class BundleOfferService {
     }
 
     /**
-     * @param entity the new offer that will used to replace old CiBundle
-     * @param bundle the bundle connected with the offer
-     * @param ciBundle the old CiBundle that will be replaced/invalidated
-     * @return the entity if exist
-     * @throws AppException if not found
-     */
-    private CiBundle invalidateAndBuildCiBundle(BundleOffer entity, Bundle bundle, CiBundle ciBundle) {
-        LocalDate buildTime = LocalDate.now();
-        ciBundle.setValidityDateTo(buildTime);
-        ciBundleRepository.save(ciBundle);
-
-        if (bundle.getValidityDateFrom() == null){
-            return CiBundle.builder()
-                    .ciFiscalCode(entity.getCiFiscalCode())
-                    .idBundle(entity.getIdBundle())
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(buildTime)
-                    .build();
-        } else {
-            return CiBundle.builder()
-                    .ciFiscalCode(entity.getCiFiscalCode())
-                    .idBundle(entity.getIdBundle())
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(bundle.getValidityDateFrom().isBefore(buildTime.plusDays(1)) ?
-                            buildTime.plusDays(1) : bundle.getValidityDateFrom())
-                    .build();
-        }
-    }
-
-
-    /**
      * Retrieve bundle
-     * @param idBundle
-     * @param idPsp
-     * @return
+     *
+     * @param idBundle bundle identifier
+     * @param idPsp    PSP identifier
+     * @return the bundle if present
      */
     private Bundle getBundle(String idBundle, String idPsp) {
         Optional<Bundle> optBundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
@@ -286,7 +250,7 @@ public class BundleOfferService {
      * Create a new {@link ArchivedBundleOffer} entity and deletes the {@link BundleOffer} entity.
      *
      * @param bundleOffer an entity of {@link BundleOffer}
-     * @param accepted      true = request is accepted, false = not accepted, null = deleted
+     * @param accepted    true = request is accepted, false = not accepted, null = deleted
      */
     private void archiveBundleOffer(BundleOffer bundleOffer, Boolean accepted) {
         var offerToArchive = bundleOffer;
