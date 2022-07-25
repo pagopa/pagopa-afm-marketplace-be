@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,5 +61,14 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     List<Bundle> findByTypeAndPaymentMethodAndTouchpoint(BundleType type, PaymentMethod paymentMethod, Touchpoint touchpoint);
 
     Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
+
+    @Query(value = "SELECT * " +
+            "FROM bundles b " +
+            "WHERE (" +
+            "SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10)" +
+            " < " +
+            "SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0, 0, 0, 0), 0, 10)" +
+            ")")
+    List<Bundle> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
 
 }

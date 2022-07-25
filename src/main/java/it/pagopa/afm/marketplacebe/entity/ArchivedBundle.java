@@ -3,10 +3,6 @@ package it.pagopa.afm.marketplacebe.entity;
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import it.pagopa.afm.marketplacebe.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +11,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -29,10 +24,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Bundle {
+public class ArchivedBundle {
 
     @Id
-    @GeneratedValue
     private String id;
 
     @PartitionKey
@@ -56,10 +50,8 @@ public class Bundle {
     private List<String> transferCategoryList;
 
     private LocalDate validityDateFrom;
-
     private LocalDate validityDateTo;
 
-    @CreatedDate
     private LocalDateTime insertedDate;
 
     @LastModifiedDate
