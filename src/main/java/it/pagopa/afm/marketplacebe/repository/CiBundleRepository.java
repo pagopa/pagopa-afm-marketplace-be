@@ -2,7 +2,6 @@ package it.pagopa.afm.marketplacebe.repository;
 
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import com.azure.spring.data.cosmos.repository.Query;
-import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

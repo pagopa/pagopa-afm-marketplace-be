@@ -2,7 +2,6 @@ package it.pagopa.afm.marketplacebe.repository;
 
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import com.azure.spring.data.cosmos.repository.Query;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
