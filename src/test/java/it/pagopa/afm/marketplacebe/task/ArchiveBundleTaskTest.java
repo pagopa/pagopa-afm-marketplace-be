@@ -1,58 +1,96 @@
 package it.pagopa.afm.marketplacebe.task;
 
-
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@SpringBootTest
 class ArchiveBundleTaskTest {
 
     @MockBean
-    BundleTaskExecutor bundleTaskExecutor;
+    BundleOfferRepository bundleOfferRepository;
 
     @MockBean
-    BundleOfferTaskExecutor bundleOfferTaskExecutor;
+    ArchivedBundleOfferRepository archivedBundleOfferRepository;
 
     @MockBean
-    BundleRequestTaskExecutor bundleRequestTaskExecutor;
+    BundleRequestRepository bundleRequestRepository;
 
     @MockBean
-    CiBundleTaskExecutor ciBundleTaskExecutor;
+    ArchivedBundleRequestRepository archivedBundleRequestRepository;
+
+    @MockBean
+    BundleRepository bundleRepository;
+
+    @MockBean
+    ArchivedBundleRepository archivedBundleRepository;
+
+    @MockBean
+    CiBundleRepository ciBundleRepository;
+
+    @MockBean
+    ArchivedCiBundleRepository archivedCiBundleRepository;
 
     @Test
-    public void archiveBundleTask() throws InterruptedException {
-        TaskRunnable task = new TaskRunnable(bundleTaskExecutor);
-
-        ExecutorService executor = Executors.newCachedThreadPool();
-        executor.execute(task);
-//        executor.awaitTermination(60, TimeUnit.SECONDS);
-//        Mockito.verify(bundleTaskExecutor).execute();
+    public void archiveBundleTask() {
+        when(bundleRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockBundle()));
+        BundleTaskExecutor taskExecutor = spy(new BundleTaskExecutor(bundleRepository, archivedBundleRepository));
+        archiveTask(taskExecutor);
     }
 
     @Test
     public void archiveBundleOfferTask() {
-        TaskRunnable task = new TaskRunnable(bundleOfferTaskExecutor);
-
-        ExecutorService executor = Executors.newCachedThreadPool();
-        executor.execute(task);
+        when(bundleOfferRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockBundleOffer()));
+        BundleOfferTaskExecutor taskExecutor = spy(new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository));
+        archiveTask(taskExecutor);
     }
 
     @Test
     public void archiveBundleRequestTask() {
-        TaskRunnable task = new TaskRunnable(bundleRequestTaskExecutor);
-
-        ExecutorService executor = Executors.newCachedThreadPool();
-        executor.execute(task);
+        when(bundleRequestRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockBundleRequestE()));
+        BundleRequestTaskExecutor taskExecutor = spy(new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository));
+        archiveTask(taskExecutor);
     }
 
     @Test
     public void archiveCiBundleTask() {
-        TaskRunnable task = new TaskRunnable(ciBundleTaskExecutor);
-
-        ExecutorService executor = Executors.newCachedThreadPool();
-        executor.execute(task);
+        when(ciBundleRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockCiBundle()));
+        CiBundleTaskExecutor taskExecutor = spy(new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository));
+        archiveTask(taskExecutor);
     }
 
+    private void archiveTask(TaskExecutor taskExecutor) {
+        TaskRunnable task = new TaskRunnable(taskExecutor);
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.execute(task);
+        try {
+            executorService.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            fail();
+        }
+
+        verify(taskExecutor).execute();
+    }
 }
