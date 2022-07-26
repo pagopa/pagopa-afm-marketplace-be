@@ -1,60 +1,39 @@
 package it.pagopa.afm.marketplacebe.task;
 
 
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.time.LocalDate;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 class ArchiveBundleTaskTest {
 
     @MockBean
-    BundleRepository bundleRepository;
+    BundleTaskExecutor bundleTaskExecutor;
 
     @MockBean
-    BundleOfferRepository bundleOfferRepository;
+    BundleOfferTaskExecutor bundleOfferTaskExecutor;
 
     @MockBean
-    BundleRequestRepository bundleRequestRepository;
+    BundleRequestTaskExecutor bundleRequestTaskExecutor;
 
     @MockBean
-    CiBundleRepository ciBundleRepository;
-
-    @MockBean
-    ArchivedBundleRepository archivedBundleRepository;
-
-    @MockBean
-    ArchivedBundleOfferRepository archivedBundleOfferRepository;
-
-    @MockBean
-    ArchivedBundleRequestRepository archivedBundleRequestRepository;
-
-    @MockBean
-    ArchivedCiBundleRepository archivedCiBundleRepository;
+    CiBundleTaskExecutor ciBundleTaskExecutor;
 
     @Test
-    public void archiveBundleTask() {
-        LocalDate now = LocalDate.now();
-        ArchiveBundleTask task = new ArchiveBundleTask(bundleRepository, archivedBundleRepository, now);
+    public void archiveBundleTask() throws InterruptedException {
+        TaskRunnable task = new TaskRunnable(bundleTaskExecutor);
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(task);
+//        executor.awaitTermination(60, TimeUnit.SECONDS);
+//        Mockito.verify(bundleTaskExecutor).execute();
     }
 
     @Test
     public void archiveBundleOfferTask() {
-        LocalDate now = LocalDate.now();
-        ArchiveBundleOfferTask task = new ArchiveBundleOfferTask(bundleOfferRepository, archivedBundleOfferRepository, now);
+        TaskRunnable task = new TaskRunnable(bundleOfferTaskExecutor);
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(task);
@@ -62,8 +41,7 @@ class ArchiveBundleTaskTest {
 
     @Test
     public void archiveBundleRequestTask() {
-        LocalDate now = LocalDate.now();
-        ArchiveBundleRequestTask task = new ArchiveBundleRequestTask(bundleRequestRepository, archivedBundleRequestRepository, now);
+        TaskRunnable task = new TaskRunnable(bundleRequestTaskExecutor);
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(task);
@@ -71,8 +49,7 @@ class ArchiveBundleTaskTest {
 
     @Test
     public void archiveCiBundleTask() {
-        LocalDate now = LocalDate.now();
-        ArchiveCiBundleTask task = new ArchiveCiBundleTask(ciBundleRepository, archivedCiBundleRepository, now);
+        TaskRunnable task = new TaskRunnable(ciBundleTaskExecutor);
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(task);

@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Container(containerName = "cibundles")
+@Container(containerName = "archivedcibundles")
 @Getter
 @Setter
 @Builder(toBuilder = true)

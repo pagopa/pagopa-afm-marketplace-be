@@ -15,7 +15,6 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDate;
 
 @Component
 public class SchedulerTask {
@@ -56,17 +55,19 @@ public class SchedulerTask {
     @PostConstruct
     public void scheduleRunnableWithCronTrigger() {
 
+        BundleTaskExecutor bundleArchiver = new BundleTaskExecutor(bundleRepository, archivedBundleRepository);
+        BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
+        BundleRequestTaskExecutor bundleRequestArchiver = new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository);
+        CiBundleTaskExecutor ciBundleArchiver = new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository);
+        CalculatorTaskExecutor calculatorTaskExecutor = new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository);
+
         taskScheduler.schedule(new TaskManager(
-                bundleRepository,
-                bundleOfferRepository,
-                bundleRequestRepository,
-                ciBundleRepository,
-                archivedBundleRepository,
-                archivedBundleOfferRepository,
-                archivedBundleRequestRepository,
-                archivedCiBundleRepository,
-                LocalDate.now(),
-                calculatorService,
-                taskScheduler.getScheduledThreadPoolExecutor()), cronTrigger);
+                bundleArchiver,
+                bundleOfferArchiver,
+                bundleRequestArchiver,
+                ciBundleArchiver,
+                        calculatorTaskExecutor,
+                taskScheduler.getScheduledThreadPoolExecutor()),
+                cronTrigger);
     }
 }

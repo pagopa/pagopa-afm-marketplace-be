@@ -5,41 +5,33 @@ import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ArchiveCiBundleTask implements Runnable {
+public class CiBundleTaskExecutor extends TaskExecutor {
 
-    private CiBundleRepository ciBundleRepository;
+    private final CiBundleRepository ciBundleRepository;
 
-    private ArchivedCiBundleRepository archivedCiBundleRepository;
+    private final ArchivedCiBundleRepository archivedCiBundleRepository;
 
-    private ModelMapper modelMapper;
+    public CiBundleTaskExecutor(
+            CiBundleRepository ciBundleRepository,
+            ArchivedCiBundleRepository archivedCiBundleRepository) {
+        super();
 
-    private LocalDate now;
-
-    public ArchiveCiBundleTask(
-            CiBundleRepository cibundleRepository,
-            ArchivedCiBundleRepository archivedCiBundleRepository,
-            LocalDate now) {
-        this.ciBundleRepository = cibundleRepository;
+        this.ciBundleRepository = ciBundleRepository;
         this.archivedCiBundleRepository = archivedCiBundleRepository;
-        this.now = now;
-        this.modelMapper = new ModelMapper();
     }
 
     @Override
-    public void run() {
+    public void execute() {
         List<CiBundle> bundles = ciBundleRepository.findByValidityDateToBefore(now);
 
         List<ArchivedCiBundle> archivedBundles = bundles.parallelStream().map(b -> modelMapper.map(b, ArchivedCiBundle.class)).collect(Collectors.toList());
         archivedCiBundleRepository.saveAll(archivedBundles);
 
         ciBundleRepository.deleteAll(bundles);
-
     }
 }

@@ -5,35 +5,28 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ArchiveBundleRequestTask implements Runnable {
+public class BundleRequestTaskExecutor extends TaskExecutor {
 
-    private BundleRequestRepository bundleRequestRepository;
+    private final BundleRequestRepository bundleRequestRepository;
 
-    private ArchivedBundleRequestRepository archivedBundleRequestRepository;
+    private final ArchivedBundleRequestRepository archivedBundleRequestRepository;
 
-    private ModelMapper modelMapper;
-
-    private LocalDate now;
-
-    public ArchiveBundleRequestTask(
+    public BundleRequestTaskExecutor(
             BundleRequestRepository bundleRequestRepository,
-            ArchivedBundleRequestRepository archivedBundleRequestRepository,
-            LocalDate now) {
+            ArchivedBundleRequestRepository archivedBundleRequestRepository) {
+        super();
+
         this.bundleRequestRepository = bundleRequestRepository;
         this.archivedBundleRequestRepository = archivedBundleRequestRepository;
-        this.now = now;
-        this.modelMapper = new ModelMapper();
     }
 
     @Override
-    public void run() {
+    public void execute() {
         List<BundleRequestEntity> requests = bundleRequestRepository.findByValidityDateToBefore(now);
 
         List<ArchivedBundleRequest> archivedBundles = requests.parallelStream().map(b -> modelMapper.map(b, ArchivedBundleRequest.class)).collect(Collectors.toList());
