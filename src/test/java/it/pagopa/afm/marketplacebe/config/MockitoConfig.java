@@ -46,4 +46,16 @@ public class MockitoConfig {
         return Mockito.mock(ArchivedBundleOfferRepository.class);
     }
 
+    @Bean
+    @Primary
+    public ArchivedBundleRepository archivedBundleRepository() {
+        return Mockito.mock(ArchivedBundleRepository.class);
+    }
+
+    @Bean
+    @Primary
+    public ArchivedCiBundleRepository archivedCiBundleRepository() {
+        return Mockito.mock(ArchivedCiBundleRepository.class);
+    }
+
 }
