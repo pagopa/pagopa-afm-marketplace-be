@@ -8,10 +8,10 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.service.CalculatorService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -30,6 +30,8 @@ public class TaskManager implements Runnable {
     private CiBundleRepository ciBundleRepository;
     private ArchivedCiBundleRepository archivedCiBundleRepository;
 
+    private CalculatorService calculatorService;
+
     private LocalDate now;
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
@@ -43,7 +45,7 @@ public class TaskManager implements Runnable {
                        ArchivedBundleRequestRepository archivedBundleRequestRepository,
                        ArchivedCiBundleRepository archivedCiBundleRepository,
                        LocalDate now,
-                       ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
+                       CalculatorService calculatorService, ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
         this.bundleRepository = bundleRepository;
         this.archivedBundleRepository = archivedBundleRepository;
 
@@ -58,19 +60,18 @@ public class TaskManager implements Runnable {
 
         this.now = now;
 
+        this.calculatorService = calculatorService;
+
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
     @Override
     public void run() {
-        log.warn("SONO SCATTATO FUTURE" + LocalDateTime.now());
-
         CompletableFuture<Void> cf1 = CompletableFuture.runAsync(new ArchiveBundleTask(bundleRepository, archivedBundleRepository, now), scheduledThreadPoolExecutor);
         CompletableFuture<Void> cf2 = CompletableFuture.runAsync(new ArchiveBundleOfferTask(bundleOfferRepository, archivedBundleOfferRepository, now), scheduledThreadPoolExecutor);
         CompletableFuture<Void> cf3 = CompletableFuture.runAsync(new ArchiveBundleRequestTask(bundleRequestRepository, archivedBundleRequestRepository, now), scheduledThreadPoolExecutor);
         CompletableFuture<Void> cf4 = CompletableFuture.runAsync(new ArchiveCiBundleTask(ciBundleRepository, archivedCiBundleRepository, now), scheduledThreadPoolExecutor);
 
-        CompletableFuture.allOf(cf1, cf2, cf3, cf4).thenRunAsync(new TestTask("3"), scheduledThreadPoolExecutor);
-
+        CompletableFuture.allOf(cf1, cf2, cf3, cf4).thenRunAsync(new CalculatorTask(calculatorService, bundleRepository, ciBundleRepository), scheduledThreadPoolExecutor);
     }
 }

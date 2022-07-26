@@ -8,6 +8,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.service.CalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Component
 public class SchedulerTask {
@@ -48,6 +48,9 @@ public class SchedulerTask {
     private ArchivedCiBundleRepository archivedCiBundleRepository;
 
     @Autowired
+    private CalculatorService calculatorService;
+
+    @Autowired
     private CronTrigger cronTrigger;
 
     @PostConstruct
@@ -63,6 +66,7 @@ public class SchedulerTask {
                 archivedBundleRequestRepository,
                 archivedCiBundleRepository,
                 LocalDate.now(),
+                calculatorService,
                 taskScheduler.getScheduledThreadPoolExecutor()), cronTrigger);
     }
 }

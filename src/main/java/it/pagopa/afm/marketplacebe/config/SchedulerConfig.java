@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -9,6 +10,9 @@ import org.springframework.scheduling.support.CronTrigger;
 public class SchedulerConfig {
 
     int ARCHIVED_CONTAINERS = 4;
+
+    @Value("${scheduledTask.trigger}")
+    private String cronTrigger;
 
     @Bean
     public ThreadPoolTaskScheduler threadPoolTaskScheduler(){
@@ -20,7 +24,6 @@ public class SchedulerConfig {
 
     @Bean
     public CronTrigger cronTrigger() {
-        //        0 0 12 * * ? -> mezzanotte
-        return new CronTrigger("0 03 15 * * ?");
+        return new CronTrigger(cronTrigger);
     }
 }
