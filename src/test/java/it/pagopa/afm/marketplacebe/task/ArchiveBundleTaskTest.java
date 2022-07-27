@@ -9,6 +9,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.service.CalculatorService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -52,31 +53,42 @@ class ArchiveBundleTaskTest {
     @MockBean
     ArchivedCiBundleRepository archivedCiBundleRepository;
 
+    @MockBean
+    CalculatorService calculatorService;
+
     @Test
-    public void archiveBundleTask() {
+    void archiveBundleTask() {
         when(bundleRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockBundle()));
         BundleTaskExecutor taskExecutor = spy(new BundleTaskExecutor(bundleRepository, archivedBundleRepository));
         archiveTask(taskExecutor);
     }
 
     @Test
-    public void archiveBundleOfferTask() {
+    void archiveBundleOfferTask() {
         when(bundleOfferRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockBundleOffer()));
         BundleOfferTaskExecutor taskExecutor = spy(new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository));
         archiveTask(taskExecutor);
     }
 
     @Test
-    public void archiveBundleRequestTask() {
+    void archiveBundleRequestTask() {
         when(bundleRequestRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockBundleRequestE()));
         BundleRequestTaskExecutor taskExecutor = spy(new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository));
         archiveTask(taskExecutor);
     }
 
     @Test
-    public void archiveCiBundleTask() {
+    void archiveCiBundleTask() {
         when(ciBundleRepository.findByValidityDateToBefore(any(LocalDate.class))).thenReturn(List.of(TestUtil.getMockCiBundle()));
         CiBundleTaskExecutor taskExecutor = spy(new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository));
+        archiveTask(taskExecutor);
+    }
+
+    @Test
+    void configureCalculatorTask() {
+        when(bundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockBundle()));
+        when(ciBundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockCiBundle()));
+        CalculatorTaskExecutor taskExecutor = spy(new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository));
         archiveTask(taskExecutor);
     }
 
