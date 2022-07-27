@@ -1,9 +1,15 @@
 package it.pagopa.afm.marketplacebe.task;
 
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.service.CalculatorService;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class CalculatorTaskExecutor extends TaskExecutor {
@@ -20,6 +26,16 @@ public class CalculatorTaskExecutor extends TaskExecutor {
 
     @Override
     public void execute() {
-        calculatorService.configure();
+        List<Bundle> bundles = new ArrayList<>();
+        bundleRepository.findAll().forEach(bundles::add);
+
+        List<CiBundle> ciBundles = new ArrayList<>();
+        ciBundleRepository.findAll().forEach(ciBundles::add);
+
+        CalculatorConfiguration configuration = CalculatorConfiguration.builder()
+                .bundles(bundles)
+                .ciBundles(ciBundles)
+                .build();
+        calculatorService.configure(configuration);
     }
 }

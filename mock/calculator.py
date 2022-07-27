@@ -15,7 +15,13 @@ class APIHandler(tornado.web.RequestHandler):
 
     def get(self):
         print("request received", datetime.now())
-        print(f"{self.request}{self.request.body.decode()}")
+        print(f"{self.request} {self.request.body.decode()}")
+        self.set_status(200)
+        self.write("OK")
+
+    def post(self):
+        print("request received", datetime.now())
+        print(f"{self.request} {self.request.body.decode()}")
         self.set_status(200)
         self.write("OK")
 

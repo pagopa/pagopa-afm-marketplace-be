@@ -14,5 +14,7 @@ public class TaskExecutor {
         this.now = LocalDate.now();
     }
 
-    public void execute() {}
+    public void execute() {
+        throw new UnsupportedOperationException();
+    }
 }
