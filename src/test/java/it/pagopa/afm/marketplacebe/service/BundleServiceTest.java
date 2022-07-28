@@ -394,7 +394,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldCreateBundleAttributesByCi(){
+    void shouldCreateBundleAttributesByCi_1(){
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -415,9 +415,74 @@ class BundleServiceTest {
                 ciBundle.getCiFiscalCode(),
                 bundle.getId(),
                 getMockBundleAttribute()
-                );
+        );
 
         verify(ciBundleRepository, times(1)).save(Mockito.any());
+    }
+
+    @Test
+    void shouldCreateBundleAttributesByCi_2(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        // Valid bundle
+        bundle.setValidityDateTo(null);
+        bundle.setType(BundleType.GLOBAL);
+        ciBundle.setIdBundle(bundle.getId());
+
+        when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.empty());
+
+        when(ciBundleRepository.save(Mockito.any()))
+                .thenReturn(ciBundle);
+
+        BundleAttributeResponse response = bundleService.createBundleAttributesByCi(
+                ciBundle.getCiFiscalCode(),
+                bundle.getId(),
+                getMockBundleAttribute()
+        );
+
+        verify(ciBundleRepository, times(1)).save(Mockito.any());
+    }
+
+    @Test
+    void shouldRaiseBadRequestCreateBundleAttributesByCi_1(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+
+        when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
+
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.createBundleAttributesByCi(
+                        ciBundle.getCiFiscalCode(),
+                        bundle.getId(),
+                        getMockBundleAttribute())
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+    }
+
+    @Test
+    void shouldRaiseBadRequestCreateBundleAttributesByCi_2(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(null);
+        bundle.setType(BundleType.PRIVATE);
+
+        when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
+
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.createBundleAttributesByCi(
+                        ciBundle.getCiFiscalCode(),
+                        bundle.getId(),
+                        getMockBundleAttribute())
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
     }
 
     @Test
