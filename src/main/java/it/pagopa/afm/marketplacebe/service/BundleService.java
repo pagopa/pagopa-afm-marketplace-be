@@ -76,20 +76,6 @@ public class BundleService {
                 .build();
     }
 
-    private List<Bundle> getValidBundleByType(List<BundleType> types){
-        switch (types.size()){
-            case 1:
-                return bundleRepository.getValidBundleByType(types.get(0).getValue());
-            case 2:
-                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue());
-            case 3:
-                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue(),
-                        types.get(2).getValue());
-            default:
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST);
-
-        }
-    }
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
         List<PspBundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
@@ -116,19 +102,19 @@ public class BundleService {
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
-    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
-        var bundle = bundleRepository.findById(idBundle)
-                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
-        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
-        if (BundleType.GLOBAL.equals(bundle.getType())) {
-            ciBundleRepository.delete(ciBundle);
-        } else {
-            ciBundleRepository.save(ciBundle.toBuilder()
-                    .validityDateTo(LocalDate.now())
-                    .build());
-        }
-    }
+//    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
+//        var bundle = bundleRepository.findById(idBundle)
+//                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+//        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+//                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+//        if (BundleType.GLOBAL.equals(bundle.getType())) {
+//            ciBundleRepository.delete(ciBundle);
+//        } else {
+//            ciBundleRepository.save(ciBundle.toBuilder()
+//                    .validityDateTo(LocalDate.now())
+//                    .build());
+//        }
+//    }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         // verify validityDateFrom, if null set to now +1d
@@ -592,6 +578,21 @@ public class BundleService {
                     throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
         });
+    }
+
+    private List<Bundle> getValidBundleByType(List<BundleType> types){
+        switch (types.size()) {
+            case 1:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue());
+            case 2:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue());
+            case 3:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue(),
+                        types.get(2).getValue());
+            default:
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "BundleType not specified");
+
+        }
     }
 
 }

@@ -12,6 +12,9 @@ import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -56,20 +59,31 @@ class BundleServiceTest {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Test
-    void shouldGetBundles() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void shouldGetBundles(int bundleTypeSize) {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue()))
-                .thenReturn(bundleList);
+        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue())).thenReturn(bundleList);
+        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue(), BundleType.PUBLIC.getValue())).thenReturn(bundleList);
+        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue(), BundleType.PUBLIC.getValue(), BundleType.GLOBAL.getValue())).thenReturn(bundleList);
 
-        Bundles bundles = bundleService.getBundles(List.of(BundleType.PRIVATE));
+        List<BundleType> list;
+        if (bundleTypeSize == 1) {
+            list = List.of(BundleType.PRIVATE);
+        }
+        else if (bundleTypeSize == 2) {
+            list = List.of(BundleType.PRIVATE, BundleType.PUBLIC);
+        }
+        else {
+            list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
+        }
+        Bundles bundles = bundleService.getBundles(list);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
-
     }
 
     @Test
@@ -87,7 +101,6 @@ class BundleServiceTest {
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
-
     }
 
     @Test
@@ -117,6 +130,14 @@ class BundleServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exc.getHttpStatus());
+    }
+
+    @Test
+    void shouldGetBundlesRaiseException() {
+        AppException exc = assertThrows(AppException.class, () ->
+                bundleService.getBundles(new ArrayList<>())
+        );
+        assertEquals(HttpStatus.BAD_REQUEST, exc.getHttpStatus());
     }
 
     @Test
@@ -737,6 +758,23 @@ class BundleServiceTest {
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
 
         updateBundle_ko(TestUtil.getMockBundle(), HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void removeBundle_ko_1() {
+        Bundle bundle = TestUtil.getMockBundle();
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        String idPsp = TestUtil.getMockIdPsp();
+        String idBundle = bundle.getId();
+
+        try {
+            bundleService.removeBundle(idPsp, idBundle);
+        } catch (AppException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());
+        } catch (Exception e) {
+            fail();
+        }
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
