@@ -485,17 +485,18 @@ public class BundleService {
     /**
      * Verify if payment amount range overlaps the target one
      *
-     * @param minPaymentAmount
-     * @param maxPaymentAmount
-     * @param minPaymentAmountTarget
-     * @param maxPaymentAmountTarget
+     * @param minPaymentAmount min amount of bundle request
+     * @param maxPaymentAmount max amount of bundle request
+     * @param minPaymentAmountTarget min amount of existent bundle
+     * @param maxPaymentAmountTarget max amount of existent bundle
      * @return
      */
     private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
-        return !(minPaymentAmount >= minPaymentAmountTarget &&
-                minPaymentAmount <= maxPaymentAmountTarget &&
-                maxPaymentAmount >= minPaymentAmountTarget &&
-                maxPaymentAmount <= maxPaymentAmountTarget);
+        return minPaymentAmount < maxPaymentAmount &&
+                (
+                    (minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget) ||
+                    (minPaymentAmount > maxPaymentAmountTarget && maxPaymentAmount > maxPaymentAmountTarget)
+                );
     }
 
     /**
@@ -583,16 +584,12 @@ public class BundleService {
 
         List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
-            // verify payment amount range validity and verify if validityDateFrom is acceptable
-            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
-            }
-
+            // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
-            if (!isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
-                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
+                !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                        !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
         });
     }

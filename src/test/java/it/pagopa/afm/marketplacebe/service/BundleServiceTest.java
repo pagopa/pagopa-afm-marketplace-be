@@ -608,18 +608,6 @@ class BundleServiceTest {
     }
 
     @Test
-    void createBundle_ko_3() {
-        // same (payment method, touchpoint, type, transferCategoryList), different payment amount range
-        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
-        List<Bundle> bundles = TestUtil.getMockBundleSameConfigurationDifferentPaymentAmountRange();
-
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
-                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
-
-        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
     void createBundle_ko_4() {
         // same (payment method, touchpoint, type, transferCategoryList, payment amount range), different validityDate
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
