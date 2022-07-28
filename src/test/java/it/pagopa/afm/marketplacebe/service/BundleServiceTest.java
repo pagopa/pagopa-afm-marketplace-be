@@ -421,7 +421,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldCreateBundleAttributesByCi_2(){
+    void shouldCreateBundleAttributesByCi_2() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -435,8 +435,7 @@ class BundleServiceTest {
         when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
                 ciBundle.getCiFiscalCode())).thenReturn(Optional.empty());
 
-        when(ciBundleRepository.save(Mockito.any()))
-                .thenReturn(ciBundle);
+        when(ciBundleRepository.save(Mockito.any())).thenReturn(ciBundle);
 
         BundleAttributeResponse response = bundleService.createBundleAttributesByCi(
                 ciBundle.getCiFiscalCode(),
@@ -444,11 +443,11 @@ class BundleServiceTest {
                 getMockBundleAttribute()
         );
 
-        verify(ciBundleRepository, times(1)).save(Mockito.any());
+        verify(ciBundleRepository, times(2)).save(Mockito.any());
     }
 
     @Test
-    void shouldRaiseBadRequestCreateBundleAttributesByCi_1(){
+    void shouldRaiseBadRequestCreateBundleAttributesByCi_1() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
 
