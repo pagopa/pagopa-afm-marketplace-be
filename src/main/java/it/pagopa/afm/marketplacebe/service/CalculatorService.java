@@ -16,6 +16,6 @@ public interface CalculatorService {
     @Retryable(exclude = FeignException.FeignClientException.class,
             maxAttemptsExpression = "${service.calculator.retry.maxAttempts}",
             backoff = @Backoff(delayExpression = "${service.calculator.retry.maxDelay}"))
-    @PostMapping(value = "/configure", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/configuration", consumes = MediaType.APPLICATION_JSON_VALUE)
     void configure(@RequestBody CalculatorConfiguration configuration);
 }
