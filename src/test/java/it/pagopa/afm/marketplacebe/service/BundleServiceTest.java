@@ -456,12 +456,16 @@ class BundleServiceTest {
 
         when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
+
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.createBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        getMockBundleAttribute())
+                        fiscalCode,
+                        idBundle,
+                        attributes)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
@@ -724,12 +728,16 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = anyString();
+
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.removeBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        anyString())
+                        fiscalCode,
+                        idBundle,
+                        idAttribute)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, appException.getHttpStatus());
