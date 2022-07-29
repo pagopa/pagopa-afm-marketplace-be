@@ -152,7 +152,7 @@ public class BundleOfferService {
 
         // check if the bundle has already been offered
         var offerBundle = bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(bundle.getId(), ciFiscalCode);
-        if (offerBundle.isPresent()) {
+        if (offerBundle.isPresent() && !offerBundle.get().getId().equals(idBundleOffer)) {
             throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, bundle.getId(), "Bundle already offered to CI " + ciFiscalCode);
         }
 

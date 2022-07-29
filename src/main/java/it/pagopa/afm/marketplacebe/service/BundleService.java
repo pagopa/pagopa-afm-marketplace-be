@@ -76,20 +76,6 @@ public class BundleService {
                 .build();
     }
 
-    private List<Bundle> getValidBundleByType(List<BundleType> types){
-        switch (types.size()){
-            case 1:
-                return bundleRepository.getValidBundleByType(types.get(0).getValue());
-            case 2:
-                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue());
-            case 3:
-                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue(),
-                        types.get(2).getValue());
-            default:
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST);
-
-        }
-    }
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
         List<PspBundleDetails> bundleList = bundleRepository
                 .findByIdPsp(idPsp)
@@ -116,19 +102,19 @@ public class BundleService {
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
-    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
-        var bundle = bundleRepository.findById(idBundle)
-                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
-        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
-        if (BundleType.GLOBAL.equals(bundle.getType())) {
-            ciBundleRepository.delete(ciBundle);
-        } else {
-            ciBundleRepository.save(ciBundle.toBuilder()
-                    .validityDateTo(LocalDate.now())
-                    .build());
-        }
-    }
+//    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
+//        var bundle = bundleRepository.findById(idBundle)
+//                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+//        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+//                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+//        if (BundleType.GLOBAL.equals(bundle.getType())) {
+//            ciBundleRepository.delete(ciBundle);
+//        } else {
+//            ciBundleRepository.save(ciBundle.toBuilder()
+//                    .validityDateTo(LocalDate.now())
+//                    .build());
+//        }
+//    }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         // verify validityDateFrom, if null set to now +1d
@@ -401,7 +387,7 @@ public class BundleService {
         // bundle attribute should be removed only for global and public bundles
         Bundle bundle = getBundle(idBundle);
 
-        if (bundle.getValidityDateTo() != null) {
+        if (bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
@@ -485,17 +471,18 @@ public class BundleService {
     /**
      * Verify if payment amount range overlaps the target one
      *
-     * @param minPaymentAmount
-     * @param maxPaymentAmount
-     * @param minPaymentAmountTarget
-     * @param maxPaymentAmountTarget
+     * @param minPaymentAmount min amount of bundle request
+     * @param maxPaymentAmount max amount of bundle request
+     * @param minPaymentAmountTarget min amount of existent bundle
+     * @param maxPaymentAmountTarget max amount of existent bundle
      * @return
      */
     private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
-        return !(minPaymentAmount >= minPaymentAmountTarget &&
-                minPaymentAmount <= maxPaymentAmountTarget &&
-                maxPaymentAmount >= minPaymentAmountTarget &&
-                maxPaymentAmount <= maxPaymentAmountTarget);
+        return minPaymentAmount < maxPaymentAmount &&
+                (
+                    (minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget) ||
+                    (minPaymentAmount > maxPaymentAmountTarget && maxPaymentAmount > maxPaymentAmountTarget)
+                );
     }
 
     /**
@@ -583,18 +570,29 @@ public class BundleService {
 
         List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
-            // verify payment amount range validity and verify if validityDateFrom is acceptable
-            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
-            }
-
+            // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
-            if (!isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
-                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
+                !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                        !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
         });
+    }
+
+    private List<Bundle> getValidBundleByType(List<BundleType> types){
+        switch (types.size()) {
+            case 1:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue());
+            case 2:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue());
+            case 3:
+                return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue(),
+                        types.get(2).getValue());
+            default:
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "BundleType not specified");
+
+        }
     }
 
 }
