@@ -627,8 +627,7 @@ class BundleServiceTest {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
-//        bundle.setValidityDateTo(null);
-//        bundle.setType(BundleType.GLOBAL);
+        bundle.setValidityDateTo(LocalDate.now());
         ciBundle.setIdBundle(bundle.getId());
 
         when(bundleRepository.findById(bundle.getId()))
