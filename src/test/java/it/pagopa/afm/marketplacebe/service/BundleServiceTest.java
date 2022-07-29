@@ -693,6 +693,20 @@ class BundleServiceTest {
     }
 
     @Test
+    void createBundle_ko_3() {
+        // same bundle configuration
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setMinPaymentAmount(20000L);
+        bundleRequest.setMaxPaymentAmount(10000L);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     void createBundle_ko_4() {
         // same (payment method, touchpoint, type, transferCategoryList, payment amount range), different validityDate
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
