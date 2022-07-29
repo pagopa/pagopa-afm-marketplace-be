@@ -387,7 +387,7 @@ public class BundleService {
         // bundle attribute should be removed only for global and public bundles
         Bundle bundle = getBundle(idBundle);
 
-        if (bundle.getValidityDateTo() != null) {
+        if (bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
