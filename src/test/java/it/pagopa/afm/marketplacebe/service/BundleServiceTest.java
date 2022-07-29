@@ -7,6 +7,7 @@ import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
@@ -124,9 +125,10 @@ class BundleServiceTest {
         // Precondition
         when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
                 .thenReturn(Optional.empty());
-
+        String idBundle = bundle.getId();
+        String idPsp = bundle.getIdPsp();
         AppException exc = assertThrows(AppException.class, () ->
-                bundleService.getBundleById(bundle.getIdPsp(), bundle.getIdPsp())
+                bundleService.getBundleById(idBundle, idPsp)
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exc.getHttpStatus());
@@ -134,8 +136,9 @@ class BundleServiceTest {
 
     @Test
     void shouldGetBundlesRaiseException() {
+        List bundles = new ArrayList();
         AppException exc = assertThrows(AppException.class, () ->
-                bundleService.getBundles(new ArrayList<>())
+                bundleService.getBundles(bundles)
         );
         assertEquals(HttpStatus.BAD_REQUEST, exc.getHttpStatus());
     }
@@ -473,12 +476,15 @@ class BundleServiceTest {
 
         when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.createBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        getMockBundleAttribute())
+                        fiscalCode,
+                        idBundle,
+                        attributes)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
@@ -556,13 +562,18 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = UUID.randomUUID().toString();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
+
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.updateBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        UUID.randomUUID().toString(),
-                        getMockBundleAttribute())
+                        fiscalCode,
+                        idBundle,
+                        idAttribute,
+                        attributes)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
@@ -583,13 +594,18 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = UUID.randomUUID().toString();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
+
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.updateBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        UUID.randomUUID().toString(),
-                        getMockBundleAttribute())
+                        fiscalCode,
+                        idBundle,
+                        idAttribute,
+                        attributes)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
@@ -613,10 +629,14 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = ciBundle.getAttributes().get(0).getId();
+
         bundleService.removeBundleAttributesByCi(
-                ciBundle.getCiFiscalCode(),
-                bundle.getId(),
-                ciBundle.getAttributes().get(0).getId()
+                fiscalCode,
+                idBundle,
+                idAttribute
         );
 
         verify(ciBundleRepository, times(1)).delete(ciBundle);
@@ -639,12 +659,16 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = ciBundle.getAttributes().get(0).getId();
+
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.removeBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        ciBundle.getAttributes().get(0).getId())
+                        fiscalCode,
+                        idBundle,
+                        idAttribute)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
@@ -668,12 +692,16 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = ciBundle.getAttributes().get(0).getId();
+
         AppException appException = assertThrows(
                 AppException.class,
                 () -> bundleService.removeBundleAttributesByCi(
-                        ciBundle.getCiFiscalCode(),
-                        bundle.getId(),
-                        ciBundle.getAttributes().get(0).getId())
+                        fiscalCode,
+                        idBundle,
+                        idAttribute)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
