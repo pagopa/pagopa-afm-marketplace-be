@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -418,7 +419,7 @@ class BundleOfferServiceTest {
         when(ciBundleRepository.save(any())).thenReturn(
                 getMockCiBundle()
         );
-        String mockBundleOfferId = getMockBundleOfferId();
+        String mockBundleOfferId = UUID.randomUUID().toString();
         var exception = assertThrows(AppException.class,
                 () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
 
