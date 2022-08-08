@@ -36,6 +36,7 @@ public class CalculatorTaskExecutor extends TaskExecutor {
                 .bundles(bundles)
                 .ciBundles(ciBundles)
                 .build();
+
         calculatorService.configure(configuration);
     }
 }
