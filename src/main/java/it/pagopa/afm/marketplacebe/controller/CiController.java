@@ -211,7 +211,6 @@ public class CiController {
             @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
             @Parameter(description = "Filter by psp") @RequestParam(required = false) String idPsp) {
         return ResponseEntity.ok(bundleRequestService.getRequestsByCI(ciFiscalCode, size, cursor, idPsp));
-
     }
 
     /**
