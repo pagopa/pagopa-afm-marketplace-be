@@ -375,7 +375,7 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
-        if (bundle.getValidityDateTo() != null) {
+        if (bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 

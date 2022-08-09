@@ -495,6 +495,29 @@ class BundleServiceTest {
     }
 
     @Test
+    void shouldRaiseBadRequestCreateBundleAttributesByCi_3(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(null);
+
+        when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
+
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
+        attributes.setMaxPaymentAmount(20000L);
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.createBundleAttributesByCi(
+                        fiscalCode,
+                        idBundle,
+                        attributes)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+    }
+
+    @Test
     void shouldUpdateBundleAttributesByCi(){
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
@@ -556,6 +579,7 @@ class BundleServiceTest {
     void shouldRaiseBadRequestUpdateBundleAttributesByCi_1(){
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(LocalDate.now().minusDays(1));
 
         when(bundleRepository.findById(bundle.getId()))
                 .thenReturn(Optional.of(bundle));
@@ -602,6 +626,38 @@ class BundleServiceTest {
         String idBundle = bundle.getId();
         String idAttribute = UUID.randomUUID().toString();
         CiBundleAttributeModel attributes = getMockBundleAttribute();
+
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.updateBundleAttributesByCi(
+                        fiscalCode,
+                        idBundle,
+                        idAttribute,
+                        attributes)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+    }
+
+    @Test
+    void shouldRaiseBadRequestUpdateBundleAttributesByCi_3(){
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+
+        when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        when(ciBundleRepository.save(Mockito.any()))
+                .thenReturn(ciBundle);
+
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        String idAttribute = UUID.randomUUID().toString();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
+        attributes.setMaxPaymentAmount(20000L);
 
         AppException appException = assertThrows(
                 AppException.class,
@@ -957,6 +1013,8 @@ class BundleServiceTest {
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
 
+        when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(TestUtil.getMockCiBundle()));
+
         Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
         assertNotNull(result);
     }
@@ -974,6 +1032,10 @@ class BundleServiceTest {
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
+
+        CiBundle ciBundle = getMockCiBundle();
+        ciBundle.getAttributes().get(0).setMaxPaymentAmount(2000L);
+        when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(ciBundle));
 
         Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
         assertNotNull(result);
