@@ -94,6 +94,15 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
         }
 
+        // rule R15: attribute payment amount should be lower than bundle one
+        if (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null) {
+            ciBundleSubscriptionRequest.getCiBundleAttributeModelList().parallelStream().forEach(attribute -> {
+                if (attribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+                    throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Payment amount should be lower than or equal to bundle payment amount.");
+                }
+            });
+        }
+
         List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null
                 && !ciBundleSubscriptionRequest.getCiBundleAttributeModelList().isEmpty()) ?
                 ciBundleSubscriptionRequest.getCiBundleAttributeModelList()

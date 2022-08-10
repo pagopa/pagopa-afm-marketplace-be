@@ -195,6 +195,17 @@ public class BundleService {
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
         bundle.setLastUpdatedDate(LocalDateTime.now());
 
+        // rule R15: adapt paymentAmount of the related ciBundle
+        List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
+        ciBundles.parallelStream().forEach(ciBundle -> {
+            ciBundle.getAttributes().parallelStream().forEach(attribute -> {
+                if (attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
+                    attribute.setMaxPaymentAmount(bundle.getPaymentAmount());
+                    ciBundleRepository.save(ciBundle);
+                }
+            });
+        });
+
         return bundleRepository.save(bundle);
     }
 
@@ -322,6 +333,11 @@ public class BundleService {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
         }
 
+        // rule R15: attribute payment amount should be lower than bundle one
+        if (bundleAttribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, "Payment amount should be lower than or equal to bundle payment amount.");
+        }
+
         // find or create CI-Bundle
         CiBundle ciBundle;
         try {
@@ -359,12 +375,17 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
-        if (bundle.getValidityDateTo() != null) {
+        if (bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
         if (!bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
+        }
+
+        // rule R15: attribute payment amount should be lower than bundle one
+        if (bundleAttribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, "Payment amount should be lower than or equal to bundle payment amount.");
         }
 
         var ciBundle = findCiBundle(fiscalCode, idBundle);
