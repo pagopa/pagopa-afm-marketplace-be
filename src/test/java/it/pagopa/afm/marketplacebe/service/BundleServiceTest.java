@@ -95,7 +95,7 @@ class BundleServiceTest {
         List<String> requiredTypes = List.of("PRIVATE");
 
         // Precondition
-        when(bundleRepository.findByIdPsp(bundle.getIdPsp()))
+        when(bundleRepository.findByIdPsp(bundle.getIdPsp(), any(PartitionKey.class)))
                 .thenReturn(bundleList);
 
         Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), 0, 100);
@@ -152,7 +152,7 @@ class BundleServiceTest {
         when(bundleRepository.save(Mockito.any()))
                 .thenReturn(bundle);
 
-        when(bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)))
+        when(bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)))
                 .thenReturn(Optional.empty());
 
         bundleService.createBundle(idPsp, bundleRequest);
@@ -185,7 +185,7 @@ class BundleServiceTest {
         String idPsp = "test_id_psp";
 
 
-        when(bundleRepository.findByName(Mockito.any(), Mockito.any()))
+        when(bundleRepository.findByNameAndIdPsp(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(getMockBundle()));
 
         AppException appException = assertThrows(AppException.class,
@@ -206,7 +206,7 @@ class BundleServiceTest {
 
         when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
                 .thenReturn(Optional.of(bundle));
-        when(bundleRepository.findByName(Mockito.any(), Mockito.any()))
+        when(bundleRepository.findByNameAndIdPsp(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(bundle));
 
         when(bundleRepository.save(Mockito.any()))
@@ -824,7 +824,7 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
-        when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
 
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), TestUtil.getMockBundleRequest());
@@ -841,7 +841,7 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
-        when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
 
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
@@ -859,7 +859,7 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
-        when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
 
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
@@ -877,7 +877,7 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
-        when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
 
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
@@ -893,7 +893,7 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
-        when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
 
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
@@ -969,7 +969,7 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
-        when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
 
         createBundle_ko(TestUtil.getMockBundleRequest(), HttpStatus.CONFLICT);
     }

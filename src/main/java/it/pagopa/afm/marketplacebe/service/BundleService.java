@@ -83,7 +83,7 @@ public class BundleService {
 
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
         List<PspBundleDetails> bundleList = bundleRepository
-                .findByIdPsp(idPsp)
+                .findByIdPsp(idPsp, new PartitionKey(idPsp))
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
@@ -107,20 +107,6 @@ public class BundleService {
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
-//    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
-//        var bundle = bundleRepository.findById(idBundle)
-//                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
-//        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-//                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
-//        if (BundleType.GLOBAL.equals(bundle.getType())) {
-//            ciBundleRepository.delete(ciBundle);
-//        } else {
-//            ciBundleRepository.save(ciBundle.toBuilder()
-//                    .validityDateTo(LocalDate.now())
-//                    .build());
-//        }
-//    }
-
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
@@ -135,7 +121,7 @@ public class BundleService {
         analyzeBundlesOverlapping(idPsp, bundleRequest);
 
         // verify no bundle exists with the same name
-        if (bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()) {
+        if (bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)).isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -285,7 +271,7 @@ public class BundleService {
                 .findByCiFiscalCode(fiscalCode)
                 .parallelStream()
                 .map(ciBundle -> {
-                    Bundle bundle = bundleRepository.findById(ciBundle.getIdBundle()).orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, ciBundle.getIdBundle()));
+                    Bundle bundle = getBundle(ciBundle.getIdBundle());
                     CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
                     ciBundleInfo.setIdCiBundle(ciBundle.getId());
                     return ciBundleInfo;
@@ -304,8 +290,7 @@ public class BundleService {
     public BundleDetailsForCi getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
-        var bundle = bundleRepository.findById(ciBundle.getIdBundle())
-                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+        var bundle = getBundle(ciBundle.getIdBundle());
 
         return modelMapper.map(bundle, BundleDetailsForCi.class);
     }

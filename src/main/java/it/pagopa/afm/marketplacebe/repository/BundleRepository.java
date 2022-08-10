@@ -24,15 +24,11 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
 
     Optional<Bundle> findById(String idBundle, PartitionKey idPsp);
 
-    Page<Bundle> findById(String idBundle, Pageable pageable);
-
-    List<Bundle> findByName(String name);
-
-    Optional<Bundle> findByName(String name, PartitionKey idPsp);
+    Optional<Bundle> findByNameAndIdPsp(String name, String idPsp, PartitionKey partitionKey);
 
     Optional<Bundle> findByNameAndIdNot(String name, String id, PartitionKey idPsp);
 
-    List<Bundle> findByIdPsp(String idPsp);
+    List<Bundle> findByIdPsp(String idPsp, PartitionKey partitionKey);
 
     @Query(value = "SELECT * " +
             "FROM bundles b " +
@@ -59,8 +55,6 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     List<Bundle> getValidBundleByType(@Param("type0") String type0, @Param("type1") String type1, @Param("type2") String type2);
 
     List<Bundle> findByIdPspAndTypeAndPaymentMethodAndTouchpoint(String idPsp, BundleType type, PaymentMethod paymentMethod, Touchpoint touchpoint);
-
-    Page<Bundle> findByIdPsp(String idPsp, Pageable pageable);
 
     @Query(value = "SELECT * " +
             "FROM bundles b " +
