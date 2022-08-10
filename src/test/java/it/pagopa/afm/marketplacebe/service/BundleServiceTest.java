@@ -4,6 +4,7 @@ import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -11,10 +12,10 @@ import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.task.CalculatorTaskExecutor;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -46,8 +47,13 @@ class BundleServiceTest {
 
     @MockBean
     private CiBundleRepository ciBundleRepository;
+
     @MockBean
     private BundleRequestRepository bundleRequestRepository;
+
+    @MockBean
+    private CalculatorTaskExecutor calculatorTaskExecutor;
+
     @Autowired
     @InjectMocks
     private BundleService bundleService;
@@ -1100,6 +1106,14 @@ class BundleServiceTest {
         } catch (Exception e) {
             fail();
         }
+    }
+
+    @Test
+    void getConfiguration_ok_1() {
+        when(calculatorTaskExecutor.getConfiguration()).thenReturn(new CalculatorConfiguration());
+
+        CalculatorConfiguration result = bundleService.getConfiguration();
+        assertNotNull(result);
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
