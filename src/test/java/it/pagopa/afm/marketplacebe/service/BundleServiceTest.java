@@ -821,7 +821,7 @@ class BundleServiceTest {
 
     @Test
     void createBundle_ok_1() {
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
@@ -838,7 +838,7 @@ class BundleServiceTest {
         bundleRequest.setTransferCategoryList(new ArrayList<>());
         List<Bundle> bundles = TestUtil.getMockBundleSameConfigurationDifferentPaymentAmountRange();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
@@ -856,7 +856,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(12));
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
@@ -874,7 +874,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(12));
         List<Bundle> bundles = TestUtil.getMockBundleSameConfigurationDifferentPaymentAmountRange();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
@@ -890,7 +890,7 @@ class BundleServiceTest {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         bundleRequest.setType(BundleType.PUBLIC);
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.empty());
@@ -916,7 +916,7 @@ class BundleServiceTest {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
@@ -930,7 +930,7 @@ class BundleServiceTest {
         bundleRequest.setMaxPaymentAmount(10000L);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
@@ -944,7 +944,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(10));
         List<Bundle> bundles = TestUtil.getMockBundleWithoutValidityDateTo();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
@@ -957,7 +957,7 @@ class BundleServiceTest {
         bundleRequest.setMaxPaymentAmount(1500L);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(bundles);
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
@@ -966,7 +966,7 @@ class BundleServiceTest {
     @Test
     void createBundle_ko_6() {
         // bundle name conflict
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByName(anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
@@ -1007,7 +1007,7 @@ class BundleServiceTest {
         Bundle bundle = TestUtil.getMockBundle();
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -1027,7 +1027,7 @@ class BundleServiceTest {
 
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -1048,7 +1048,7 @@ class BundleServiceTest {
         bundle.setId("cbfbc9c6-6c0b-429e-83ca-30ef453504fa");
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        when(bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
                 any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));

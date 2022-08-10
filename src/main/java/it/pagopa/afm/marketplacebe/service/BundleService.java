@@ -9,6 +9,7 @@ import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
@@ -26,6 +27,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.task.CalculatorTaskExecutor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,9 @@ public class BundleService {
 
     @Autowired
     private BundleOfferRepository bundleOfferRepository;
+
+    @Autowired
+    private CalculatorService calculatorService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -127,7 +132,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlapping(bundleRequest);
+        analyzeBundlesOverlapping(idPsp, bundleRequest);
 
         // verify no bundle exists with the same name
         if (bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()) {
@@ -175,7 +180,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlapping(bundleRequest);
+        analyzeBundlesOverlapping(idPsp, bundleRequest);
 
         // verify the only other bundle with the same name is the bundle I want to modify
         Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdNot(bundleRequest.getName(), idBundle, new PartitionKey(idPsp));
@@ -434,6 +439,11 @@ public class BundleService {
         }
     }
 
+    public CalculatorConfiguration getConfiguration() {
+        CalculatorTaskExecutor calculatorTaskExecutor = new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository);
+        return calculatorTaskExecutor.getConfiguration();
+    }
+
     /**
      * find CI-Bundle by fiscalCode and idBundle if exists from DB
      *
@@ -514,7 +524,7 @@ public class BundleService {
      * @return
      */
     private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
-        return transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains);
+        return transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains);
     }
 
     /**
@@ -583,13 +593,13 @@ public class BundleService {
      *
      * @param bundleRequest
      */
-    private void analyzeBundlesOverlapping(BundleRequest bundleRequest) {
+    private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
 
-        List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
+        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(idPsp, bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable

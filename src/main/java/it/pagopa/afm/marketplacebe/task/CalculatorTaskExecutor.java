@@ -26,17 +26,19 @@ public class CalculatorTaskExecutor extends TaskExecutor {
 
     @Override
     public void execute() {
+        calculatorService.configure(getConfiguration());
+    }
+
+    public CalculatorConfiguration getConfiguration() {
         List<Bundle> bundles = new ArrayList<>();
         bundleRepository.findAll().forEach(bundles::add);
 
         List<CiBundle> ciBundles = new ArrayList<>();
         ciBundleRepository.findAll().forEach(ciBundles::add);
 
-        CalculatorConfiguration configuration = CalculatorConfiguration.builder()
+        return CalculatorConfiguration.builder()
                 .bundles(bundles)
                 .ciBundles(ciBundles)
                 .build();
-
-        calculatorService.configure(configuration);
     }
 }
