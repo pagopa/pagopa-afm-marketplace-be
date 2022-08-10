@@ -188,14 +188,14 @@ public class BundleService {
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
-        ciBundles.parallelStream().forEach(ciBundle -> {
+        ciBundles.parallelStream().forEach(ciBundle ->
             ciBundle.getAttributes().parallelStream().forEach(attribute -> {
                 if (attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
                     attribute.setMaxPaymentAmount(bundle.getPaymentAmount());
                     ciBundleRepository.save(ciBundle);
                 }
-            });
-        });
+            })
+        );
 
         return bundleRepository.save(bundle);
     }
