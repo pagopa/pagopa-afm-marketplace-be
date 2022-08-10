@@ -95,7 +95,7 @@ class BundleServiceTest {
         List<String> requiredTypes = List.of("PRIVATE");
 
         // Precondition
-        when(bundleRepository.findByIdPsp(bundle.getIdPsp(), any(PartitionKey.class)))
+        when(bundleRepository.findByIdPsp(bundle.getIdPsp(), new PartitionKey(bundle.getIdPsp())))
                 .thenReturn(bundleList);
 
         Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), 0, 100);
