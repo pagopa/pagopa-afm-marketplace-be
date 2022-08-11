@@ -4,7 +4,7 @@
     "title": "PagoPA AFM Marketplace",
     "description": "Marketplace backend for pagoPA AFM",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.3.2-4"
+    "version": "0.3.2-5"
   },
   "servers": [
     {
