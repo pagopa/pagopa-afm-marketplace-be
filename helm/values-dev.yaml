@@ -72,6 +72,7 @@ microservice-chart:
     AFM_CALCULATOR_RETRY_MAX_ATTEMPTS: "1"
     AFM_CALCULATOR_RETRY_MAX_DELAY: "2000"
     CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
+    ENV: 'dev'
   envSecret:
     COSMOS_KEY: afm-marketplace-cosmos-primary-connection-string
   #    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
