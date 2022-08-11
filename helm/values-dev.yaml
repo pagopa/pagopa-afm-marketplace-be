@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaafmmarketplacebe
-    tag: "0.0.1" #improve
+    tag: "0.3.2-1" #improve
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -72,10 +72,9 @@ microservice-chart:
     AFM_CALCULATOR_RETRY_MAX_ATTEMPTS: "1"
     AFM_CALCULATOR_RETRY_MAX_DELAY: "2000"
     CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
-
   envSecret:
     COSMOS_KEY: afm-marketplace-cosmos-primary-connection-string
-#    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
+  #    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
 
   keyvault:
     name: "pagopa-d-afm-kv"
