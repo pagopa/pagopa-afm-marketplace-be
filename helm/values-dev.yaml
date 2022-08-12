@@ -67,7 +67,6 @@ microservice-chart:
           targetValue: "30"
   envConfig:
     COSMOS_URI: https://pagopa-d-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
-    #    COSMOS_URI: https://pagopa-d-afm-cosmosdb-account.documents.azure.com:443/
     CONFIGURATION_TRIGGER: "0 0 12 * * ?"
     AFM_CALCULATOR_HOST: https://api.dev.platform.pagopa.it/afm/calculator-service/v1
     AFM_CALCULATOR_RETRY_MAX_ATTEMPTS: "1"
@@ -77,7 +76,6 @@ microservice-chart:
     LOGGING_LEVEL: "DEBUG"
   envSecret:
     COSMOS_KEY: afm-marketplace-cosmos-pkey
-#    COSMOS_KEY: cosmos-pkey
   #    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
 
   keyvault:
