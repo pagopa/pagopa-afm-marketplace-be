@@ -40,9 +40,6 @@ public class HomeController {
     @Value("${properties.environment}")
     private String environment;
 
-    @Value("${server.servlet.context-path}")
-    private String basePath;
-
     @Autowired
     private BundleService bundleService;
 
@@ -52,7 +49,7 @@ public class HomeController {
     @Hidden
     @GetMapping("")
     public RedirectView home() {
-        return new RedirectView(basePath + "/swagger-ui.html");
+        return new RedirectView("/swagger-ui.html");
     }
 
     /**
