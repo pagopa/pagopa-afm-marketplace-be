@@ -52,6 +52,7 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
             "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10)) AND b.type IN (@type0, @type1, @type2)")
     List<Bundle> getValidBundleByType(@Param("type0") String type0, @Param("type1") String type1, @Param("type2") String type2);
 
+    List<Bundle> findByIdPspAndTypeAndPaymentMethodInAndTouchpointIn(String idPsp, BundleType type, List<String> paymentMethodList, List<String> touchpointList);
     List<Bundle> findByIdPspAndTypeAndPaymentMethodAndTouchpoint(String idPsp, BundleType type, PaymentMethod paymentMethod, Touchpoint touchpoint);
 
     @Query(value = "SELECT * " +

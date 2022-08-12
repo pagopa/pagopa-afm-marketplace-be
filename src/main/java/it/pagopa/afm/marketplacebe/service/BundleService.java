@@ -7,6 +7,8 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
@@ -509,7 +511,8 @@ public class BundleService {
      * @return
      */
     private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
-        return transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains);
+        // TODO check null -> includes all!
+        return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
     }
 
     /**
@@ -584,14 +587,18 @@ public class BundleService {
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
 
+        // TODO check!
+//        List<String> paymentMethodList = List.of(bundleRequest.getPaymentMethod().getValue(), PaymentMethod.ANY.getValue());
+//        List<String> touchpointList = List.of(bundleRequest.getTouchpoint().getValue(), Touchpoint.ANY.getValue());
+//        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodInAndTouchpointIn(idPsp, bundleRequest.getType(), paymentMethodList, touchpointList);
         List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(idPsp, bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
             if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
-                        !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
         });
     }
