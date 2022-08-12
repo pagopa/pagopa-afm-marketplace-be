@@ -76,8 +76,8 @@ microservice-chart:
     ENV: "dev"
     LOGGING_LEVEL: "DEBUG"
   envSecret:
-    #    COSMOS_KEY: afm-marketplace-cosmos-primary-connection-string
-    COSMOS_KEY: cosmos-pkey
+    COSMOS_KEY: afm-marketplace-cosmos-pkey
+#    COSMOS_KEY: cosmos-pkey
   #    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
 
   keyvault:
