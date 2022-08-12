@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaafmmarketplacebe
-    tag: "0.3.2-7" #improve
+    tag: "0.3.2-8" #improve
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -67,7 +67,7 @@ microservice-chart:
           targetValue: "30"
   envConfig:
     COSMOS_URI: https://pagopa-d-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
-#    COSMOS_URI: https://pagopa-d-afm-cosmosdb-account.documents.azure.com:443/
+    #    COSMOS_URI: https://pagopa-d-afm-cosmosdb-account.documents.azure.com:443/
     CONFIGURATION_TRIGGER: "0 0 12 * * ?"
     AFM_CALCULATOR_HOST: https://api.dev.platform.pagopa.it/afm/calculator-service/v1
     AFM_CALCULATOR_RETRY_MAX_ATTEMPTS: "1"
