@@ -31,10 +31,10 @@ import java.util.List;
 @RestController
 public class HomeController {
 
-    @Value("${application.name}")
+    @Value("${info.app.name}")
     private String name;
 
-    @Value("${application.version}")
+    @Value("${info.app.version}")
     private String version;
 
     @Value("${properties.environment}")

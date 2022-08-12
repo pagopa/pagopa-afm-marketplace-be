@@ -21,7 +21,7 @@ import static it.pagopa.afm.marketplacebe.util.Constants.HEADER_REQUEST_ID;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI customOpenAPI(@Value("${application.description}") String appDescription, @Value("${application.version}") String appVersion) {
+    public OpenAPI customOpenAPI(@Value("${info.app.description}") String appDescription, @Value("${info.app.version}") String appVersion) {
         return new OpenAPI()
                 .components(new Components()
                         .addSecuritySchemes("Authorization",
