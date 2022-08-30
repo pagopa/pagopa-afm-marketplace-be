@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaafmmarketplacebe
-    tag: "0.3.2-10" #improve
+    tag: "0.3.3" #improve
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -76,7 +76,7 @@ microservice-chart:
     LOGGING_LEVEL: "INFO"
   envSecret:
     COSMOS_KEY: afm-marketplace-cosmos-pkey
-#    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
+  #    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-d-connection-string
 
   keyvault:
     name: "pagopa-d-afm-kv"
