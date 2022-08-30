@@ -68,7 +68,7 @@ microservice-chart:
   envConfig:
     COSMOS_URI: https://pagopa-d-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
     CONFIGURATION_TRIGGER: "0 0 12 * * ?"
-    AFM_CALCULATOR_HOST: https://api.dev.platform.pagopa.it/afm/calculator-service/v1
+    AFM_CALCULATOR_HOST: https://api.dev.platform.pagopa.it/afm/calculator-data-service/v1
     AFM_CALCULATOR_RETRY_MAX_ATTEMPTS: "1"
     AFM_CALCULATOR_RETRY_MAX_DELAY: "2000"
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
