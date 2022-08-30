@@ -7,8 +7,11 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
@@ -26,6 +29,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.task.CalculatorTaskExecutor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,6 +61,9 @@ public class BundleService {
     private BundleOfferRepository bundleOfferRepository;
 
     @Autowired
+    private CalculatorService calculatorService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     public Bundles getBundles(List<BundleType> bundleTypes) {
@@ -78,7 +85,7 @@ public class BundleService {
 
     public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
         List<PspBundleDetails> bundleList = bundleRepository
-                .findByIdPsp(idPsp)
+                .findByIdPsp(idPsp, new PartitionKey(idPsp))
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .collect(Collectors.toList());
@@ -102,20 +109,6 @@ public class BundleService {
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
-//    public void deleteBundleByFiscalCode(String fiscalCode, String idBundle) {
-//        var bundle = bundleRepository.findById(idBundle)
-//                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
-//        var ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
-//                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
-//        if (BundleType.GLOBAL.equals(bundle.getType())) {
-//            ciBundleRepository.delete(ciBundle);
-//        } else {
-//            ciBundleRepository.save(ciBundle.toBuilder()
-//                    .validityDateTo(LocalDate.now())
-//                    .build());
-//        }
-//    }
-
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
@@ -127,10 +120,10 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlapping(bundleRequest);
+        analyzeBundlesOverlapping(idPsp, bundleRequest);
 
         // verify no bundle exists with the same name
-        if (bundleRepository.findByName(bundleRequest.getName(), new PartitionKey(idPsp)).isPresent()) {
+        if (bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)).isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
@@ -175,7 +168,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlapping(bundleRequest);
+        analyzeBundlesOverlapping(idPsp, bundleRequest);
 
         // verify the only other bundle with the same name is the bundle I want to modify
         Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdNot(bundleRequest.getName(), idBundle, new PartitionKey(idPsp));
@@ -197,14 +190,14 @@ public class BundleService {
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
-        ciBundles.parallelStream().forEach(ciBundle -> {
+        ciBundles.parallelStream().forEach(ciBundle ->
             ciBundle.getAttributes().parallelStream().forEach(attribute -> {
                 if (attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
                     attribute.setMaxPaymentAmount(bundle.getPaymentAmount());
                     ciBundleRepository.save(ciBundle);
                 }
-            });
-        });
+            })
+        );
 
         return bundleRepository.save(bundle);
     }
@@ -280,7 +273,7 @@ public class BundleService {
                 .findByCiFiscalCode(fiscalCode)
                 .parallelStream()
                 .map(ciBundle -> {
-                    Bundle bundle = bundleRepository.findById(ciBundle.getIdBundle()).orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, ciBundle.getIdBundle()));
+                    Bundle bundle = getBundle(ciBundle.getIdBundle());
                     CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
                     ciBundleInfo.setIdCiBundle(ciBundle.getId());
                     return ciBundleInfo;
@@ -299,8 +292,7 @@ public class BundleService {
     public BundleDetailsForCi getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
-        var bundle = bundleRepository.findById(ciBundle.getIdBundle())
-                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
+        var bundle = getBundle(ciBundle.getIdBundle());
 
         return modelMapper.map(bundle, BundleDetailsForCi.class);
     }
@@ -434,6 +426,11 @@ public class BundleService {
         }
     }
 
+    public CalculatorConfiguration getConfiguration() {
+        CalculatorTaskExecutor calculatorTaskExecutor = new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository);
+        return calculatorTaskExecutor.getConfiguration();
+    }
+
     /**
      * find CI-Bundle by fiscalCode and idBundle if exists from DB
      *
@@ -514,7 +511,7 @@ public class BundleService {
      * @return
      */
     private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
-        return transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains);
+        return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
     }
 
     /**
@@ -583,20 +580,20 @@ public class BundleService {
      *
      * @param bundleRequest
      */
-    private void analyzeBundlesOverlapping(BundleRequest bundleRequest) {
+    private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
 
-        List<Bundle> bundles = bundleRepository.findByTypeAndPaymentMethodAndTouchpoint(bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
+        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(idPsp, bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
             if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
-                        !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                    throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
         });
     }

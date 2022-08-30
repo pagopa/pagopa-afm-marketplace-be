@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 @Getter
 public enum PaymentMethod {
+    ANY("ANY"),
     PPAL("PPAL"),
     BPAY("BPAY"),
     PayBP("PayBP"),

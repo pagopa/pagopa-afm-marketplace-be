@@ -1,6 +1,7 @@
 package it.pagopa.afm.marketplacebe.controller;
 
 import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,16 @@ class HomeControllerTest {
         when(bundleService.getBundles(any())).thenReturn(TestUtil.getMockBundles());
 
         String url = "/bundles";
+        mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void getConfiguration() throws Exception {
+        when(bundleService.getConfiguration()).thenReturn(new CalculatorConfiguration());
+
+        String url = "/configuration";
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));

@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 @Getter
 public enum Touchpoint {
+    ANY("ANY"),
     IO("IO"),
     WISP("WISP"),
     CHECKOUT("CHECKOUT");

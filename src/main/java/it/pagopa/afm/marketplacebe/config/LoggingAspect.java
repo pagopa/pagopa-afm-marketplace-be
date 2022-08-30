@@ -26,10 +26,10 @@ import java.util.stream.StreamSupport;
 @Slf4j
 public class LoggingAspect {
 
-    @Value("${application.name}")
+    @Value("${info.app.name}")
     private String name;
 
-    @Value("${application.version}")
+    @Value("${info.app.version}")
     private String version;
 
     @Value("${properties.environment}")

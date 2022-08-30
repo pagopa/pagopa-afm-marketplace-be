@@ -2,5 +2,9 @@
   "selfDiagnostics": {
     "destination": "console",
     "level": "INFO"
+  },
+  "role": {
+    "name": "pagopa-afm-marketplace-be",
+    "instance": "pagopa-afm-marketplace-be"
   }
 }
