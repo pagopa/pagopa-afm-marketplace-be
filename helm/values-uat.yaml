@@ -74,8 +74,8 @@ microservice-chart:
     CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
     ENV: 'uat'
   envSecret:
-    COSMOS_KEY: afm-marketplace-cosmos-primary-connection-string
-  #    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-u-connection-string
+    COSMOS_KEY: afm-marketplace-u-cosmos-pkey
+    APPLICATIONINSIGHTS_CONNECTION_STRING: ai-u-connection-string
 
   keyvault:
     name: "pagopa-u-afm-kv"
