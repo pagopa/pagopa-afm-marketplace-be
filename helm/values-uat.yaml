@@ -42,29 +42,22 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "500Mi"
-      cpu: "350m"
+      memory: "128Mi"
+      cpu: "0.1"
     limits:
-      memory: "500Mi"
-      cpu: "350m"
+      memory: "512Mi"
+      cpu: "0.3"
   autoscaling:
     minReplica: 1
-    maxReplica: 2
+    maxReplica: 3
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
-      - type: azure-monitor
+      - type: cpu
         metadata:
-          tenantId: 7788edaf-0346-4068-9d79-c868aed15b3d
-          subscriptionId: 26abc801-0d8f-4a6e-ac5f-8e81bcc09112
-          resourceGroupName: pagopa-u-afm-sec-rg
-          resourceURI: Microsoft.KeyVault/vaults/pagopa-u-afm-kv
-          metricName: ServiceApiHit
-          # metricNamespace: Microsoft.KeyVault/vaults
-          # metricFilter: namespace eq 'default'
-          # metricAggregationInterval: "-1:1:0"
-          metricAggregationType: Count
-          targetValue: "30"
+          # Required
+          type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+          value: "75"
   envConfig:
     COSMOS_URI: https://pagopa-u-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
     CONFIGURATION_TRIGGER: "0 0 12 * * ?"
