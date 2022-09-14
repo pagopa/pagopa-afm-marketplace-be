@@ -81,7 +81,8 @@ stages:
 
           - template: templates/maven-github-release/template.yaml@pagopaCommons
             parameters:
-              semver: '${{ parameters.SEMVER }}'
+              ${{ if ne(parameters.SEMVER, 'skip') }}:
+                semver: '${{ parameters.SEMVER }}'
               release_branch: $(SOURCE_BRANCH)
               gitEmail: $(GIT_EMAIL)
               gitUsername: $(GIT_USERNAME)
