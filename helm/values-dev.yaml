@@ -46,11 +46,11 @@ microservice-chart:
       cpu: "0.20"
     limits:
       memory: "512Mi"
-      cpu: "0.20"
+      cpu: "0.3"
   autoscaling:
     enable: true
     minReplica: 1
-    maxReplica: 10
+    maxReplica: 3
     pollingInterval: 30 # seconds
     cooldownPeriod: 300 # seconds
     triggers:
@@ -58,7 +58,7 @@ microservice-chart:
         metadata:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-          value: "70"
+          value: "75"
   envConfig:
     WEBSITE_SITE_NAME: 'pagopaafmmarketplacebe' # required to show cloud role name in application insights
     COSMOS_URI: https://pagopa-d-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
@@ -68,7 +68,7 @@ microservice-chart:
     AFM_CALCULATOR_RETRY_MAX_DELAY: "2000"
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
     ENV: "dev"
-    LOGGING_LEVEL: "DEBUG"
+    LOGGING_LEVEL: "INFO"
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
