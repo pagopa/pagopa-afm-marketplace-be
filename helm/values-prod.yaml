@@ -28,7 +28,7 @@ microservice-chart:
     port: 8080
   ingress:
     create: true
-    host: "weudev.afm.internal.platform.pagopa.it"
+    host: "weuprod.afm.internal.platform.pagopa.it"
     path: /pagopa-afm-marketplace-service/(.*)
   serviceAccount:
     create: false
