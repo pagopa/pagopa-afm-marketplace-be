@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaafmmarketplacebe
-    tag: "0.3.3-1" #improve
+    tag: "0.3.3"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -40,6 +40,12 @@ microservice-chart:
       type: RuntimeDefault
   securityContext:
     allowPrivilegeEscalation: false
+  volumeMounts:
+    - mountPath: "/mnt/afm-volume-data"
+      name: afm-data-mount-point
+  volumes:
+    name: afm-data-mount-point
+    persistentVolumeClaim: afm-volume-data
   resources:
     requests:
       memory: "128Mi"
@@ -47,6 +53,27 @@ microservice-chart:
     limits:
       memory: "512Mi"
       cpu: "0.3"
+  persistence:
+    name: afm-pv-data
+    storage: 3Gi
+    accessModes: ReadWriteMany
+    readOnly: false
+    storageClassName: azurefile-csi
+    volumeHandle: afm-volume-data
+    mountOptions:
+      - dir_mode=0777
+      - file_mode=0777
+      - uid=0
+      - gid=0
+      - mfsymlinks
+      - cache=strict # https://github.com/piastry/cifs-utils/blob/master/mount.cifs.rst
+      - nosharesock # reduce probability of reconnect races
+      - nobrl
+    claim:
+      accessModes: ReadWriteMany
+      storage: 3Gi
+      name: afm-volume-data
+      volumeName: afm-pm-data
   autoscaling:
     enable: true
     minReplica: 1
@@ -70,10 +97,10 @@ microservice-chart:
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
     ENV: "dev"
     LOGGING_LEVEL: "INFO"
+    DATA_VOLUME: "/mnt/afm-volume-data"
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
-
     COSMOS_KEY: afm-marketplace-d-cosmos-pkey
   keyvault:
     name: "pagopa-d-afm-kv"
@@ -81,3 +108,4 @@ microservice-chart:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+

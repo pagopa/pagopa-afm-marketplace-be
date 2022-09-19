@@ -26,6 +26,11 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -39,6 +44,9 @@ public class HomeController {
 
     @Value("${properties.environment}")
     private String environment;
+
+    @Value("${volume.mount-point}")
+    private String volume;
 
     @Autowired
     private BundleService bundleService;
@@ -74,6 +82,17 @@ public class HomeController {
                 .version(version)
                 .environment(environment)
                 .build();
+
+        try {
+            File file = new File(volume + "/test.txt");
+            file.createNewFile();
+            FileWriter fw = new FileWriter(file);
+            fw.write(LocalDateTime.now().toString());
+            fw.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
 
