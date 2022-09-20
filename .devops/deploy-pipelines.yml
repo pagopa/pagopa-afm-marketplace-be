@@ -203,5 +203,5 @@ stages:
               cd ./integration-test
               yarn install
               yarn test
-            displayName: 'Run Cucumber Tests'
+            displayName: 'Run Integration Tests'
 
