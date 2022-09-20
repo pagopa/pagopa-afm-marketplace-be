@@ -141,6 +141,7 @@ stages:
                 - script: |
                     git checkout $(sourceBranch)
                     echo "[INFO] Deploy version: $(deploy_version)"
+                    ls
                   displayName: Checkout
 
                 - template: templates/helm-microservice-chart-setup/template.yaml@pagopaCommons
