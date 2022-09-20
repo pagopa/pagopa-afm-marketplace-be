@@ -12,7 +12,7 @@ COPY --from=buildtime /build/target/*.jar application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
 
-FROM ghcr.io/pagopa/docker-base-springboot-openjdk11:v1.0.0
+FROM ghcr.io/pagopa/docker-base-springboot-openjdk11:v1.0.1
 COPY --chown=spring:spring  --from=builder dependencies/ ./
 COPY --chown=spring:spring  --from=builder snapshot-dependencies/ ./
 # https://github.com/moby/moby/issues/37965#issuecomment-426853382
