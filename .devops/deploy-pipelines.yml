@@ -173,15 +173,20 @@ stages:
     jobs:
       - job: 'do_healthcheck'
         steps:
-          - template: templates/rest-healthcheck/template.yaml@pagopaCommons
-            parameters:
-              azureSubscription: '$(kubernetesServiceConnection)'
-              appName: '$(imageRepository)'
-              endpoint: 'https://$(host)/$(APIM_BASEPATH)/v1/info'
-              endpointType: 'public'
-              containerInstanceResourceGroup: ''
-              containerInstanceVNet: ''
-              containerInstanceSubnet: ''
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                OUTPUT_REST = $(az rest --skip-authorization-header --method get --url "https://$(host)/$(APIM_BASEPATH)/v1/info")
+                echo ${OUTPUT_REST}
+                # check if rest response contains app-name
+                if [[ ${OUTPUT_REST} == *$(imageRepository)* ]]; then
+                  echo "responseCheckString: '$(imageRepository)' found, continue"
+                  exit 0
+                else
+                  echo "responseCheckString: '$(imageRepository)' not found, fail"
+                  exit 1
+                fi
 
   # Run Integration Test
   - stage: Test
