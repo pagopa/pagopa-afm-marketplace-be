@@ -32,7 +32,7 @@ parameters:
       - False
       - True
   - name: TEST
-    displayName: Run tests
+    displayName: Run integration tests
     type: boolean
     default: true
 
@@ -146,8 +146,7 @@ stages:
 
                 - script: |
                     git checkout $(sourceBranch)
-                    echo "[INFO] Deploy version: $(deploy_version)"
-                    ls
+                    echo "[INFO] Branch: $(sourceBranch) Deploy version: $(deploy_version)"
                   displayName: Checkout
 
                 - template: templates/helm-microservice-chart-setup/template.yaml@pagopaCommons
@@ -188,12 +187,12 @@ stages:
                   exit 1
                 fi
 
-  # Run Integration Test
+  # Run Integration Tests
   - stage: Test
     dependsOn:
       - Deploy
       - Healthcheck
-    condition: eq('${{ parameters.TEST }}', 'true')
+    condition: and(succeeded(), eq('${{ parameters.TEST }}', 'true'))
     jobs:
       - job: integration_tests
         steps:
