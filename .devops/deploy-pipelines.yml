@@ -138,6 +138,8 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
+
                 - script: |
                     git checkout $(sourceBranch)
                     echo "[INFO] Deploy version: $(deploy_version)"
