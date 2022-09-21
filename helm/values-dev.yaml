@@ -41,11 +41,13 @@ microservice-chart:
   securityContext:
     allowPrivilegeEscalation: false
   volumeMounts:
-    - mountPath: "/mnt/afm-volume-data"
+    afmDate:
       name: afm-data-mount-point
+      mountPath: "/mnt/afm-data-volume"
+      readOnly: false
   volumes:
     name: afm-data-mount-point
-    persistentVolumeClaim: afm-volume-data
+    persistentVolumeClaim: afm-data-volume
   resources:
     requests:
       memory: "128Mi"
@@ -59,7 +61,10 @@ microservice-chart:
     accessModes: ReadWriteMany
     readOnly: false
     storageClassName: azurefile-csi
-    volumeHandle: afm-volume-data
+    volumeHandle: afm-data-volume
+    volumeAttributes:
+      resourceGroup: pagopa-d-weu-afm-rg
+      shareName: pagopa-d-weu-afm-data-volume
     mountOptions:
       - dir_mode=0777
       - file_mode=0777
@@ -72,7 +77,7 @@ microservice-chart:
     claim:
       accessModes: ReadWriteMany
       storage: 3Gi
-      name: afm-volume-data
+      name: afm-data-volume
       volumeName: afm-pv-data
   autoscaling:
     enable: true
@@ -96,11 +101,13 @@ microservice-chart:
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
     ENV: "dev"
     LOGGING_LEVEL: "INFO"
-    DATA_VOLUME: "/mnt/afm-volume-data"
+    DATA_VOLUME: "/mnt/afm-data-volume"
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
     COSMOS_KEY: afm-marketplace-d-cosmos-pkey
+    AZURESTORAGEACCOUNTKEY: azurestorageaccountkey
+    AZURESTORAGEACCOUNTNAME: azurestorageaccountname
   keyvault:
     name: "pagopa-d-afm-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
