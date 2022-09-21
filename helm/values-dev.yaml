@@ -40,14 +40,12 @@ microservice-chart:
       type: RuntimeDefault
   securityContext:
     allowPrivilegeEscalation: false
-  volumeMounts:
-    afmDate:
+  volumes:
+    afmDataVolume:
       name: afm-data-mount-point
       mountPath: "/mnt/afm-data-volume"
       readOnly: false
-  volumes:
-    name: afm-data-mount-point
-    persistentVolumeClaim: afm-data-volume
+      persistentVolumeClaim: afm-data-volume
   resources:
     requests:
       memory: "128Mi"
