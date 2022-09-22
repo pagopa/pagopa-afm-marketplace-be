@@ -41,8 +41,7 @@ microservice-chart:
   securityContext:
     allowPrivilegeEscalation: false
   volumes:
-    afmDataVolume:
-      name: afm-data-mount-point
+    - name: afm-data-mount-point
       mountPath: "/mnt/afm-data-volume"
       readOnly: false
       persistentVolumeClaim: afm-data-volume
