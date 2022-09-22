@@ -53,29 +53,28 @@ microservice-chart:
       memory: "512Mi"
       cpu: "0.3"
   persistence:
-    name: afm-pv-data
-    storage: 3Gi
-    accessModes: ReadWriteMany
-    readOnly: false
-    storageClassName: azurefile-csi
-    volumeHandle: afm-data-volume
-    volumeAttributes:
-      resourceGroup: pagopa-d-weu-afm-rg
-      shareName: pagopa-d-weu-afm-data-volume
-    mountOptions:
-      - dir_mode=0777
-      - file_mode=0777
-      - uid=0
-      - gid=0
-      - mfsymlinks
-      - cache=strict # https://github.com/piastry/cifs-utils/blob/master/mount.cifs.rst
-      - nosharesock # reduce probability of reconnect races
-      - nobrl
-    claim:
-      accessModes: ReadWriteMany
+    - name: afm-pv-data
+      create: true
+      storageClassName: azurefile-csi
       storage: 3Gi
-      name: afm-data-volume
-      volumeName: afm-pv-data
+      accessModes: ReadWriteMany
+      readOnly: false
+      volumeHandle: afm-data-volume
+      volumeAttributes:
+        resourceGroup: pagopa-d-weu-afm-rg
+        shareName: pagopa-d-weu-afm-data-volume
+      mountOptions:
+        - dir_mode=0777
+        - file_mode=0777
+        - uid=0
+        - gid=0
+        - mfsymlinks
+        - cache=strict # https://github.com/piastry/cifs-utils/blob/master/mount.cifs.rst
+        - nosharesock # reduce probability of reconnect races
+        - nobrl
+      claim:
+        create: true
+        name: afm-data-volume
   autoscaling:
     enable: true
     minReplica: 1
