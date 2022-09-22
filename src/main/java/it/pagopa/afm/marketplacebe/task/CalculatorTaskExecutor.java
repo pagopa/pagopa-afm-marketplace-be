@@ -26,7 +26,7 @@ public class CalculatorTaskExecutor extends TaskExecutor {
 
     @Override
     public void execute() {
-        calculatorService.configure(getConfiguration());
+//        calculatorService.configure(getConfiguration());
     }
 
     public CalculatorConfiguration getConfiguration() {
