@@ -44,7 +44,7 @@ microservice-chart:
     - name: afm-data-mount-point
       mountPath: "/mnt/afm-data-volume"
       readOnly: false
-      persistentVolumeClaim: afm-data-volume
+      persistentVolumeClaim: afm-data-volume-rw
   resources:
     requests:
       memory: "128Mi"
@@ -53,13 +53,13 @@ microservice-chart:
       memory: "512Mi"
       cpu: "0.3"
   persistence:
-    - name: afm-pv-data
+    - name: afm-pv-data-rw
       create: true
       storageClassName: azurefile-csi
       storage: 3Gi
       accessModes: ReadWriteMany
       readOnly: false
-      volumeHandle: afm-data-volume
+      volumeHandle: afm-data-volume-rw
       volumeAttributes:
         resourceGroup: pagopa-d-weu-afm-rg
         shareName: pagopa-d-weu-afm-data-volume
@@ -74,7 +74,7 @@ microservice-chart:
         - nobrl
       claim:
         create: true
-        name: afm-data-volume
+        name: afm-data-volume-rw
   autoscaling:
     enable: true
     minReplica: 1
