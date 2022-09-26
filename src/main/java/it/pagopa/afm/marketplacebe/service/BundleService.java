@@ -60,9 +60,6 @@ public class BundleService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
 
-    @Value("${volume.mount-point}")
-    private String volume;
-
     @Value("${azure.storage.connectionString}")
     private String storageConnectionString;
 
@@ -468,7 +465,7 @@ public class BundleService {
         BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
         BundleRequestTaskExecutor bundleRequestArchiver = new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository);
         CiBundleTaskExecutor ciBundleArchiver = new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository);
-        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, volume, storageConnectionString, containerBlob);
+        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, storageConnectionString, containerBlob);
 
         TaskManager taskManager = new TaskManager(
                 bundleArchiver,

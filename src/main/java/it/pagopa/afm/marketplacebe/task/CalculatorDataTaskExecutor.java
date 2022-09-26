@@ -24,7 +24,6 @@ import java.util.List;
 
 @Slf4j
 public class CalculatorDataTaskExecutor extends TaskExecutor {
-    private String volume;
     private String storageConnectionString;
     private String containerBlob;
 
@@ -33,11 +32,10 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
     private CiBundleRepository ciBundleRepository;
 
     public CalculatorDataTaskExecutor(CalculatorService calculatorService, BundleRepository bundleRepository, CiBundleRepository ciBundleRepository,
-                                      String volume, String storageConnectionString, String containerBlob) {
+                                      String storageConnectionString, String containerBlob) {
         this.bundleRepository = bundleRepository;
         this.calculatorService = calculatorService;
         this.ciBundleRepository = ciBundleRepository;
-        this.volume = volume;
         this.storageConnectionString = storageConnectionString;
         this.containerBlob = containerBlob;
     }
@@ -58,14 +56,9 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        LocalDate now = LocalDate.now();
 
         try {
-            String filename = String.format("configuration_%s_%s_%s.json", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
-            objectMapper.writeValue(new File(String.format("%s/%s", volume, filename)), configuration);
-
             store(objectMapper.writeValueAsString(configuration));
-
             calculatorService.configure();
         } catch (IOException e) {
             log.error("Problem to save configuration: ", e);

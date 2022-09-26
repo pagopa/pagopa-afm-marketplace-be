@@ -45,9 +45,6 @@ public class HomeController {
     @Value("${properties.environment}")
     private String environment;
 
-    @Value("${volume.mount-point}")
-    private String volume;
-
     @Autowired
     private BundleService bundleService;
 
@@ -82,16 +79,6 @@ public class HomeController {
                 .version(version)
                 .environment(environment)
                 .build();
-
-        try {
-            File file = new File(volume + "/test.txt");
-            file.createNewFile();
-            FileWriter fw = new FileWriter(file);
-            fw.write(LocalDateTime.now().toString());
-            fw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
