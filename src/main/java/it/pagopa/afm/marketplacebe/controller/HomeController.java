@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.AppInfo;
 import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
@@ -64,7 +65,7 @@ public class HomeController {
      *
      * @return ok
      */
-    @Operation(summary = "Return OK if application is started", tags = {"Home"})
+    @Operation(summary = "Return OK if application is started", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Home"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AppInfo.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -95,7 +96,7 @@ public class HomeController {
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
 
-    @Operation(summary = "Get bundles by type", tags = {"CI",})
+    @Operation(summary = "Get bundles by type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -114,7 +115,7 @@ public class HomeController {
         return bundleService.getBundles(types);
     }
 
-    @Operation(summary = "Get the configuration", tags = {"Home",})
+    @Operation(summary = "Get the configuration", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Home",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CalculatorConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),

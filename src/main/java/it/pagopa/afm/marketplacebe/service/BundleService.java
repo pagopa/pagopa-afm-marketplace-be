@@ -63,6 +63,12 @@ public class BundleService {
     @Value("${volume.mount-point}")
     private String volume;
 
+    @Value("${azure.storage.connectionString}")
+    private String storageConnectionString;
+
+    @Value("${azure.storage.blobName}")
+    private String containerBlob;
+
     @Autowired
     private BundleRepository bundleRepository;
 
@@ -89,7 +95,6 @@ public class BundleService {
 
     @Autowired
     private ArchivedCiBundleRepository archivedCiBundleRepository;
-
 
     @Autowired
     private ThreadPoolTaskScheduler taskScheduler;
@@ -463,7 +468,7 @@ public class BundleService {
         BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
         BundleRequestTaskExecutor bundleRequestArchiver = new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository);
         CiBundleTaskExecutor ciBundleArchiver = new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository);
-        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, volume);
+        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, volume, storageConnectionString, containerBlob);
 
         TaskManager taskManager = new TaskManager(
                 bundleArchiver,

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,38 +22,40 @@ import static it.pagopa.afm.marketplacebe.util.Constants.HEADER_REQUEST_ID;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI customOpenAPI(@Value("${info.app.description}") String appDescription, @Value("${info.app.version}") String appVersion) {
+    OpenAPI customOpenAPI(@Value("${info.app.name}") String appTitle,
+                          @Value("${info.app.description}") String appDescription,
+                          @Value("${info.app.version}") String appVersion) {
         return new OpenAPI()
                 .components(new Components()
-                        .addSecuritySchemes("Authorization",
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .description("JWT token get after Azure Login")
-                                        .name("Authorization")
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")
-                                        .in(SecurityScheme.In.HEADER))
+                        .addSecuritySchemes("ApiKey", new SecurityScheme()
+                                .type(SecurityScheme.Type.APIKEY)
+                                .description("The API key to access this function app.")
+                                .name("Ocp-Apim-Subscription-Key")
+                                .in(SecurityScheme.In.HEADER))
                 )
                 .info(new Info()
-                        .title("PagoPA AFM Marketplace")
+                        .title(appDescription)
                         .version(appVersion)
-                        .description(appDescription)
+                        .description(appTitle)
                         .termsOfService("https://www.pagopa.gov.it/"));
-
     }
-
     @Bean
-    public OpenApiCustomiser sortOperationsAlphabetically() {
+    OpenApiCustomiser sortOperationsAlphabetically() {
         return openApi -> {
             Paths paths = openApi.getPaths().entrySet()
                     .stream()
                     .sorted(Map.Entry.comparingByKey())
                     .collect(Paths::new, (map, item) -> map.addPathItem(item.getKey(), item.getValue()), Paths::putAll);
 
+            paths.forEach((key, value) -> value.readOperations().forEach(operation -> {
+                var responses = operation.getResponses().entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .collect(ApiResponses::new, (map, item) -> map.addApiResponse(item.getKey(), item.getValue()), ApiResponses::putAll);
+                operation.setResponses(responses);
+            }));
             openApi.setPaths(paths);
         };
     }
-
     @Bean
     public OpenApiCustomiser addCommonHeaders() {
         return openApi -> openApi.getPaths().forEach((key, value) -> {
@@ -71,6 +74,4 @@ public class SwaggerConfig {
                                     .description("This header identifies the call"))));
         });
     }
-
-
 }

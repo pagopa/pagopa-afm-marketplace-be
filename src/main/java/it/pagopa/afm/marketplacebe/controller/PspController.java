@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
@@ -61,7 +62,7 @@ public class PspController {
      * @param idPsp : PSP identifier
      * @return ResponseEntity with status 200 (OK) and with body the bundle list
      */
-    @Operation(summary = "Get paginated list of bundles of a PSP", tags = {"PSP",})
+    @Operation(summary = "Get paginated list of bundles of a PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -88,7 +89,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return the bundle details
      */
-    @Operation(summary = "Get a bundle", tags = {"PSP",})
+    @Operation(summary = "Get a bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspBundleDetails.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -113,7 +114,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return list of CI
      */
-    @Operation(summary = "Get paginated list of CI subscribed to a bundle", tags = {"PSP",})
+    @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -140,7 +141,7 @@ public class PspController {
      * @param ciFiscalCode : Creditor Institution fiscal code
      * @return the bundle details
      */
-    @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", tags = {"PSP",})
+    @Operation(summary = "Get details of a relationship between a bundle and a creditor institution", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             // TODO: update schema - 200
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundleDetails.class))),
@@ -167,7 +168,7 @@ public class PspController {
      * @param idPsp : PSP identifier
      * @return the bundle created
      */
-    @Operation(summary = "Create a new bundle", tags = {"PSP",})
+    @Operation(summary = "Create a new bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -192,7 +193,7 @@ public class PspController {
      * @param idBundle : Bundle identifier
      * @return the bundle updated
      */
-    @Operation(summary = "Update a bundle", tags = {"PSP",})
+    @Operation(summary = "Update a bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -218,7 +219,7 @@ public class PspController {
      * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
      */
-    @Operation(summary = "Delete the bundle with the given id", tags = {"PSP",})
+    @Operation(summary = "Delete the bundle with the given id", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -246,7 +247,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of PSP offers regarding private bundles", tags = {"PSP",})
+    @Operation(summary = "Get paginated list of PSP offers regarding private bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleOffers.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -273,7 +274,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "PSP offers a private bundle to a creditor institution", tags = {"PSP",})
+    @Operation(summary = "PSP offers a private bundle to a creditor institution", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -301,7 +302,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "PSP deletes a private bundle offered", tags = {"PSP",})
+    @Operation(summary = "PSP deletes a private bundle offered", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiFiscalCodeList.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -331,7 +332,7 @@ public class PspController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", tags = {"PSP",})
+    @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspRequests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -353,7 +354,7 @@ public class PspController {
     }
 
 
-    @Operation(summary = "the PSP accepts a request of a CI", tags = {"PSP",})
+    @Operation(summary = "the PSP accepts a request of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -372,7 +373,7 @@ public class PspController {
     }
 
 
-    @Operation(summary = "the PSP rejects a request of a CI", tags = {"PSP",})
+    @Operation(summary = "the PSP rejects a request of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
