@@ -1112,8 +1112,7 @@ class BundleServiceTest {
     void getConfiguration_ok_1() {
         when(calculatorTaskExecutor.getConfiguration()).thenReturn(new CalculatorConfiguration());
 
-        CalculatorConfiguration result = bundleService.getConfiguration();
-        assertNotNull(result);
+        bundleService.getConfiguration();
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {

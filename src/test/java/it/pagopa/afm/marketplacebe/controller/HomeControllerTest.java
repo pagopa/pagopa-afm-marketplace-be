@@ -54,12 +54,9 @@ class HomeControllerTest {
 
     @Test
     void getConfiguration() throws Exception {
-        when(bundleService.getConfiguration()).thenReturn(new CalculatorConfiguration());
-
         String url = "/configuration";
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isOk());
     }
 
 }

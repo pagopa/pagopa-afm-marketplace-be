@@ -459,7 +459,7 @@ public class BundleService {
         }
     }
 
-    public CalculatorConfiguration getConfiguration() {
+    public void getConfiguration() {
 
         BundleTaskExecutor bundleArchiver = new BundleTaskExecutor(bundleRepository, archivedBundleRepository);
         BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
@@ -476,8 +476,6 @@ public class BundleService {
                 taskScheduler.getScheduledThreadPoolExecutor());
 
         CompletableFuture.runAsync(taskManager);
-
-        return null;
     }
 
     /**
