@@ -138,6 +138,9 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
+                  persistCredentials: true
+
                 - script: |
                     git checkout $(sourceBranch)
                     echo "[INFO] Branch: $(sourceBranch) Deploy version: $(deploy_version)"
