@@ -7,6 +7,8 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
@@ -143,6 +145,9 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
+        verifyPaymentMethod(bundleRequest);
+        verifyTouchpoint(bundleRequest);
+
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
@@ -184,6 +189,9 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
+        verifyPaymentMethod(bundleRequest);
+        verifyTouchpoint(bundleRequest);
+
         Bundle bundle = getBundle(idBundle, idPsp);
 
         // check if validityDateTo is after now
@@ -260,8 +268,10 @@ public class BundleService {
         bundleRequestRepository.saveAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
-        BundleOffer offers = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
-        bundleOfferRepository.delete(offers);
+        BundleOffer offer = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
+        if (offer != null) {
+            bundleOfferRepository.delete(offer);
+        }
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP) {
@@ -476,6 +486,18 @@ public class BundleService {
                 taskScheduler.getScheduledThreadPoolExecutor());
 
         CompletableFuture.runAsync(taskManager);
+    }
+
+    private void verifyPaymentMethod(BundleRequest bundleRequest) {
+        if (bundleRequest.getPaymentMethod() == null) {
+            bundleRequest.setPaymentMethod(PaymentMethod.ANY);
+        }
+    }
+
+    private void verifyTouchpoint(BundleRequest bundleRequest) {
+        if (bundleRequest.getTouchpoint() == null) {
+            bundleRequest.setTouchpoint(Touchpoint.ANY);
+        }
     }
 
     /**
