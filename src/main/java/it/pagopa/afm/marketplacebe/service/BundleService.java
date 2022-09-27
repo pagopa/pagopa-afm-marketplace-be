@@ -470,6 +470,7 @@ public class BundleService {
     }
 
     public void getConfiguration() {
+        log.info("Configuration requested..." + LocalDateTime.now());
 
         BundleTaskExecutor bundleArchiver = new BundleTaskExecutor(bundleRepository, archivedBundleRepository);
         BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
@@ -485,7 +486,15 @@ public class BundleService {
                 calculatorDataTaskExecutor,
                 taskScheduler.getScheduledThreadPoolExecutor());
 
-        CompletableFuture.runAsync(taskManager);
+        CompletableFuture.runAsync(taskManager)
+                .whenComplete((msg, ex) -> {
+                    LocalDateTime when = LocalDateTime.now();
+                    if (ex != null) {
+                        log.error("Configuration not sent " + when, ex);
+                    } else {
+                        log.info("Configuration sent " + when);
+                    }
+                });
     }
 
     private void verifyPaymentMethod(BundleRequest bundleRequest) {
