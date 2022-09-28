@@ -18,8 +18,7 @@ public class TaskManager implements Runnable {
                        BundleOfferTaskExecutor bundleOfferArchiver,
                        BundleRequestTaskExecutor bundleRequestArchiver,
                        CiBundleTaskExecutor ciBundleArchiver,
-                       CalculatorDataTaskExecutor calculatorDataTaskExecutor,
-                       ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
+                       CalculatorDataTaskExecutor calculatorDataTaskExecutor) {
         this.bundleArchiver = bundleArchiver;
         this.bundleOfferArchiver = bundleOfferArchiver;
         this.bundleRequestArchiver = bundleRequestArchiver;
