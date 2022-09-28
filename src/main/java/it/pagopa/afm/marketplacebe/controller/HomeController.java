@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.AppInfo;
-import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.service.BundleService;
@@ -27,10 +26,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController

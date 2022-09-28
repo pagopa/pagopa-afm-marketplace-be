@@ -9,20 +9,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
+import it.pagopa.afm.marketplacebe.model.CalculatorInfoConfiguration;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.service.CalculatorService;
 import it.pagopa.afm.marketplacebe.util.AzuriteStorageUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class CalculatorDataTaskExecutor extends TaskExecutor {
@@ -62,12 +61,10 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
         try {
             String filename = String.format("configuration_%s_%s_%s.json", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
             store(objectMapper.writeValueAsString(configuration), filename);
-            Map<String, String> data = new HashMap<>();
-            data.put("filename", filename);
-            calculatorService.configure(data);
+            calculatorService.configure(CalculatorInfoConfiguration.builder().filename(filename).build());
         } catch (IOException e) {
             log.error("Problem to save configuration: ", e);
-            throw new RuntimeException(e);
+            throw new AppException(AppError.CALCULATOR_ERROR);
         }
         log.debug("Calculator Data notified");
     }

@@ -33,7 +33,9 @@ public enum AppError {
     REQUEST_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Request already accepted", "The request %s was accepted on %s"),
     REQUEST_ALREADY_REJECTED(HttpStatus.CONFLICT, "Request already rejected", "The request %s was rejected on %s"),
 
-    BUNDLE_ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle attribute not found", "Bundle attribute with id %s not found.");
+    BUNDLE_ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle attribute not found", "Bundle attribute with id %s not found."),
+
+    CALCULATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something was wrong generating configuration");
 
     public final HttpStatus httpStatus;
     public final String title;

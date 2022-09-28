@@ -11,7 +11,6 @@ import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
