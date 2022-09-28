@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class CalculatorDataTaskExecutor extends TaskExecutor {
@@ -58,16 +60,19 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
         objectMapper.registerModule(new JavaTimeModule());
 
         try {
-            store(objectMapper.writeValueAsString(configuration));
-            calculatorService.configure();
+            String filename = String.format("configuration_%s_%s_%s.json", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
+            store(objectMapper.writeValueAsString(configuration), filename);
+            Map<String, String> data = new HashMap<>();
+            data.put("filename", filename);
+            calculatorService.configure(data);
         } catch (IOException e) {
             log.error("Problem to save configuration: ", e);
             throw new RuntimeException(e);
         }
-        log.debug("Calculator Data configured");
+        log.debug("Calculator Data notified");
     }
 
-    private void store(String configuration) {
+    private void store(String configuration, String filename) {
         // try to create blob container
         AzuriteStorageUtil azuriteStorageUtil = new AzuriteStorageUtil(storageConnectionString, null,null, containerBlob);
         azuriteStorageUtil.createBlob();
@@ -76,7 +81,6 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
                 .connectionString(storageConnectionString).buildClient();
         BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerBlob);
 
-        String filename = String.format("configuration_%s_%s_%s.json", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
         BlobClient blobClient = containerClient.getBlobClient(filename);
         blobClient.deleteIfExists();
         blobClient.upload(BinaryData.fromString(configuration));
