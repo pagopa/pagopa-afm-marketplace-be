@@ -74,7 +74,7 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
 
     private void store(String configuration, String filename) {
         // try to create blob container
-        AzuriteStorageUtil azuriteStorageUtil = new AzuriteStorageUtil(storageConnectionString, null,null, containerBlob);
+        AzuriteStorageUtil azuriteStorageUtil = new AzuriteStorageUtil(storageConnectionString, containerBlob);
         azuriteStorageUtil.createBlob();
 
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
