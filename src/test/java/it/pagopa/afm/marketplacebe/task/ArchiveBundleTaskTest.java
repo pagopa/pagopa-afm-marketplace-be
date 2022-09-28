@@ -88,7 +88,7 @@ class ArchiveBundleTaskTest {
     void configureCalculatorTask() {
         when(bundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockBundle()));
         when(ciBundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockCiBundle()));
-        CalculatorTaskExecutor taskExecutor = spy(new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository));
+        CalculatorDataTaskExecutor taskExecutor = spy(new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, "connectionString", "blobContainer"));
         archiveTask(taskExecutor);
     }
 

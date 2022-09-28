@@ -43,7 +43,10 @@ public class CalculatorDataTaskExecutor extends TaskExecutor {
 
     @Override
     public void execute() {
+        generateConfiguration();
+    }
 
+    private void generateConfiguration() {
         List<Bundle> bundles = new ArrayList<>();
         bundleRepository.findAll().forEach(bundles::add);
 
