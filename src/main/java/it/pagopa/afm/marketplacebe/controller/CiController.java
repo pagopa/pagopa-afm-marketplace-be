@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
@@ -54,7 +55,7 @@ public class CiController {
     @Autowired
     private BundleService bundleService;
 
-    @Operation(summary = "Get paginated list of bundles of a CI", tags = {"CI",})
+    @Operation(summary = "Get paginated list of bundles of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -74,7 +75,7 @@ public class CiController {
         return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page);
     }
 
-    @Operation(summary = "Get a bundle of a CI", tags = {"CI",})
+    @Operation(summary = "Get a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetailsForCi.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -92,7 +93,7 @@ public class CiController {
         return bundleService.getBundleByFiscalCode(fiscalCode, idBundle);
     }
 
-    @Operation(summary = "Remove a bundle of a CI", tags = {"CI",})
+    @Operation(summary = "Remove a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -111,7 +112,7 @@ public class CiController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Get attributes of a bundle of a CI", tags = {"CI",})
+    @Operation(summary = "Get attributes of a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleDetailsAttributes.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -129,7 +130,7 @@ public class CiController {
         return bundleService.getBundleAttributesByFiscalCode(fiscalCode, idBundle);
     }
 
-    @Operation(summary = "Create a new bundle attribute", tags = {"CI",})
+    @Operation(summary = "Create a new bundle attribute", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleAttributeResponse.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -148,7 +149,7 @@ public class CiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundleAttributesByCi(fiscalCode, idBundle, bundleAttribute));
     }
 
-    @Operation(summary = "Update an attribute of a bundle", tags = {"CI",})
+    @Operation(summary = "Update an attribute of a bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -166,7 +167,7 @@ public class CiController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Delete an attribute of a bundle", tags = {"CI",})
+    @Operation(summary = "Delete an attribute of a bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -193,7 +194,7 @@ public class CiController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", tags = {"CI",})
+    @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiRequests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -220,7 +221,7 @@ public class CiController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Create CI request to the PSP regarding public bundles", tags = {"CI",})
+    @Operation(summary = "Create CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleRequestId.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -245,7 +246,7 @@ public class CiController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Delete CI request regarding a public bundles", tags = {"CI",})
+    @Operation(summary = "Delete CI request regarding a public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -274,7 +275,7 @@ public class CiController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", tags = {"CI",})
+    @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleCiOffers.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -294,7 +295,7 @@ public class CiController {
         return ResponseEntity.ok(bundleOfferService.getCiOffers(ciFiscalCode, idPsp));
     }
 
-    @Operation(summary = "The CI accepts an offer of a PSP", tags = {"CI",})
+    @Operation(summary = "The CI accepts an offer of a PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiBundleId.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -311,7 +312,7 @@ public class CiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleOfferService.acceptOffer(ciFiscalCode, idBundleOffer));
     }
 
-    @Operation(summary = "The CI rejects the offer of the PSP", tags = {"CI",})
+    @Operation(summary = "The CI rejects the offer of the PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),

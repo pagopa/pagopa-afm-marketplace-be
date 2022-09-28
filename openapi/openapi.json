@@ -1,14 +1,14 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "PagoPA AFM Marketplace",
-    "description": "Marketplace backend for pagoPA AFM",
+    "title": "Marketplace API for PagoPA AFM",
+    "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.3.3-7"
+    "version": "0.3.3-14"
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:8585/api/v1",
+      "url": "http://127.0.0.1:8585",
       "description": "Generated server url"
     }
   ],
@@ -76,6 +76,24 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bundles"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -144,26 +162,13 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Bundles"
-                }
-              }
-            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -305,7 +310,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -433,7 +443,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -561,7 +576,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -600,6 +620,24 @@
           "required": true
         },
         "responses": {
+          "201": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleAttributeResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -625,24 +663,6 @@
                 "description": "This header identifies the call",
                 "schema": {
                   "type": "string"
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BundleAttributeResponse"
                 }
               }
             }
@@ -687,7 +707,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -747,6 +772,20 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -763,20 +802,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -830,7 +855,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "delete": {
         "tags": [
@@ -868,6 +898,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -884,20 +928,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -951,7 +981,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -992,6 +1027,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -1008,20 +1057,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -1075,7 +1110,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1136,6 +1176,24 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleCiOffers"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -1176,24 +1234,6 @@
               }
             }
           },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BundleCiOffers"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "headers": {
@@ -1223,7 +1263,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1264,6 +1309,24 @@
           }
         ],
         "responses": {
+          "201": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CiBundleId"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -1304,24 +1367,6 @@
               }
             }
           },
-          "201": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CiBundleId"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "headers": {
@@ -1351,7 +1396,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1392,6 +1442,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -1408,20 +1472,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -1475,7 +1525,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1623,7 +1678,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -1653,6 +1713,24 @@
           "required": true
         },
         "responses": {
+          "201": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleRequestId"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -1693,24 +1771,6 @@
               }
             }
           },
-          "201": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BundleRequestId"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "headers": {
@@ -1740,7 +1800,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1781,6 +1846,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -1797,20 +1876,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -1864,7 +1929,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1882,9 +1952,23 @@
         "tags": [
           "Home"
         ],
-        "summary": "Get the configuration",
+        "summary": "Generate the configuration",
         "operationId": "getConfiguration",
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "headers": {
@@ -1924,26 +2008,13 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CalculatorConfiguration"
-                }
-              }
-            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -1964,24 +2035,6 @@
         "summary": "Return OK if application is started",
         "operationId": "healthCheck",
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "headers": {
@@ -1996,6 +2049,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AppInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
                 }
               }
             }
@@ -2051,7 +2122,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -2108,6 +2184,24 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bundles"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -2176,26 +2270,13 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Bundles"
-                }
-              }
-            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -2227,6 +2308,24 @@
           "required": true
         },
         "responses": {
+          "201": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -2267,24 +2366,6 @@
               }
             }
           },
-          "201": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BundleResponse"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "headers": {
@@ -2314,7 +2395,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -2357,6 +2443,24 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PspBundleDetails"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -2397,24 +2501,6 @@
               }
             }
           },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PspBundleDetails"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "headers": {
@@ -2444,7 +2530,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "put": {
         "tags": [
@@ -2485,6 +2576,20 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -2501,20 +2606,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -2568,7 +2659,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "delete": {
         "tags": [
@@ -2599,6 +2695,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -2615,20 +2725,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -2682,7 +2778,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -2812,7 +2913,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -2864,24 +2970,6 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "headers": {
@@ -2896,6 +2984,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CiBundleDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
                 }
               }
             }
@@ -2951,7 +3057,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3091,7 +3202,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3230,7 +3346,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3287,24 +3408,6 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "headers": {
@@ -3319,6 +3422,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BundleOffers"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
                 }
               }
             }
@@ -3374,7 +3495,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3450,6 +3576,24 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PspRequests"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -3518,26 +3662,13 @@
                 }
               }
             }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PspRequests"
-                }
-              }
-            }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3580,6 +3711,20 @@
           }
         ],
         "responses": {
+          "201": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -3596,20 +3741,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "201": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -3663,7 +3794,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3706,6 +3842,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {}
+            }
+          },
           "400": {
             "description": "Bad Request",
             "headers": {
@@ -3722,20 +3872,6 @@
                   "$ref": "#/components/schemas/ProblemJson"
                 }
               }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {}
             }
           },
           "401": {
@@ -3789,7 +3925,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
       },
       "parameters": [
         {
@@ -3829,6 +3970,7 @@
           "paymentMethod": {
             "type": "string",
             "enum": [
+              "ANY",
               "PPAL",
               "BPAY",
               "PayBP",
@@ -3843,6 +3985,7 @@
           "touchpoint": {
             "type": "string",
             "enum": [
+              "ANY",
               "IO",
               "WISP",
               "CHECKOUT"
@@ -4194,15 +4337,8 @@
         }
       },
       "CiBundleAttribute": {
-        "required": [
-          "id",
-          "insertedDate"
-        ],
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "maxPaymentAmount": {
             "type": "integer",
             "format": "int64"
@@ -4261,146 +4397,6 @@
           },
           "dbConnection": {
             "type": "string"
-          }
-        }
-      },
-      "Bundle": {
-        "required": [
-          "idPsp"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "idPsp": {
-            "maxLength": 35,
-            "minLength": 0,
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "paymentAmount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "minPaymentAmount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "maxPaymentAmount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "PPAL",
-              "BPAY",
-              "PayBP",
-              "BBT",
-              "AD",
-              "CP",
-              "PO",
-              "JIF",
-              "MYBK"
-            ]
-          },
-          "touchpoint": {
-            "type": "string",
-            "enum": [
-              "IO",
-              "WISP",
-              "CHECKOUT"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "GLOBAL",
-              "PUBLIC",
-              "PRIVATE"
-            ]
-          },
-          "transferCategoryList": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "validityDateFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "validityDateTo": {
-            "type": "string",
-            "format": "date"
-          },
-          "insertedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastUpdatedDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "CalculatorConfiguration": {
-        "type": "object",
-        "properties": {
-          "bundles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Bundle"
-            }
-          },
-          "ciBundles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CiBundle"
-            }
-          }
-        }
-      },
-      "CiBundle": {
-        "required": [
-          "ciFiscalCode",
-          "id",
-          "idBundle"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "ciFiscalCode": {
-            "type": "string"
-          },
-          "idBundle": {
-            "type": "string"
-          },
-          "attributes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CiBundleAttribute"
-            }
-          },
-          "validityDateFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "validityDateTo": {
-            "type": "string",
-            "format": "date"
-          },
-          "insertedDate": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -4702,11 +4698,11 @@
       }
     },
     "securitySchemes": {
-      "Authorization": {
-        "type": "http",
-        "description": "JWT token get after Azure Login",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "ApiKey": {
+        "type": "apiKey",
+        "description": "The API key to access this function app.",
+        "name": "Ocp-Apim-Subscription-Key",
+        "in": "header"
       }
     }
   }

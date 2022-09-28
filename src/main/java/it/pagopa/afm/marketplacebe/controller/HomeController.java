@@ -7,9 +7,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.AppInfo;
-import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.service.BundleService;
@@ -57,7 +57,7 @@ public class HomeController {
      *
      * @return ok
      */
-    @Operation(summary = "Return OK if application is started", tags = {"Home"})
+    @Operation(summary = "Return OK if application is started", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Home"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AppInfo.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -74,10 +74,11 @@ public class HomeController {
                 .version(version)
                 .environment(environment)
                 .build();
+
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
 
-    @Operation(summary = "Get bundles by type", tags = {"CI",})
+    @Operation(summary = "Get bundles by type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -96,9 +97,9 @@ public class HomeController {
         return bundleService.getBundles(types);
     }
 
-    @Operation(summary = "Get the configuration", tags = {"Home",})
+    @Operation(summary = "Generate the configuration", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Home",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CalculatorConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
@@ -106,7 +107,8 @@ public class HomeController {
             value = "/configuration",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public CalculatorConfiguration getConfiguration() {
-        return bundleService.getConfiguration();
+    public ResponseEntity<Void> getConfiguration() {
+        bundleService.getConfiguration();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

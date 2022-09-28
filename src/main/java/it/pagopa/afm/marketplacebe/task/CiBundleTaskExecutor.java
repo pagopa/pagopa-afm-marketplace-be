@@ -33,5 +33,6 @@ public class CiBundleTaskExecutor extends TaskExecutor {
         archivedCiBundleRepository.saveAll(archivedBundles);
 
         ciBundleRepository.deleteAll(bundles);
+        log.debug("Ci Bundle archived");
     }
 }

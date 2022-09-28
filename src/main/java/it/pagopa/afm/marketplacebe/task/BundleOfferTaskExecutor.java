@@ -33,5 +33,6 @@ public class BundleOfferTaskExecutor extends TaskExecutor {
         archivedBundleOfferRepository.saveAll(archivedBundles);
 
         bundleOfferRepository.deleteAll(offers);
+        log.debug("Bundle Offer archived");
     }
 }

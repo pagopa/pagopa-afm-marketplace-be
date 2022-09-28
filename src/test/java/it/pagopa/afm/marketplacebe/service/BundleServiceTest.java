@@ -12,7 +12,7 @@ import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.task.CalculatorTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.CalculatorDataTaskExecutor;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,7 +52,7 @@ class BundleServiceTest {
     private BundleRequestRepository bundleRequestRepository;
 
     @MockBean
-    private CalculatorTaskExecutor calculatorTaskExecutor;
+    private CalculatorDataTaskExecutor calculatorDataTaskExecutor;
 
     @Autowired
     @InjectMocks
@@ -1106,14 +1106,6 @@ class BundleServiceTest {
         } catch (Exception e) {
             fail();
         }
-    }
-
-    @Test
-    void getConfiguration_ok_1() {
-        when(calculatorTaskExecutor.getConfiguration()).thenReturn(new CalculatorConfiguration());
-
-        CalculatorConfiguration result = bundleService.getConfiguration();
-        assertNotNull(result);
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {

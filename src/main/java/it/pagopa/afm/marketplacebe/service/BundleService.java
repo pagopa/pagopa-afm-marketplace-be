@@ -11,7 +11,6 @@ import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
@@ -25,13 +24,24 @@ import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.task.CalculatorTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.CalculatorDataTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.TaskManager;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -41,12 +51,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BundleService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
+
+    @Value("${azure.storage.connectionString}")
+    private String storageConnectionString;
+
+    @Value("${azure.storage.blobName}")
+    private String containerBlob;
 
     @Autowired
     private BundleRepository bundleRepository;
@@ -62,6 +80,18 @@ public class BundleService {
 
     @Autowired
     private CalculatorService calculatorService;
+
+    @Autowired
+    private ArchivedBundleRepository archivedBundleRepository;
+
+    @Autowired
+    private ArchivedBundleOfferRepository archivedBundleOfferRepository;
+
+    @Autowired
+    private ArchivedBundleRequestRepository archivedBundleRequestRepository;
+
+    @Autowired
+    private ArchivedCiBundleRepository archivedCiBundleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -110,6 +140,9 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
+        verifyPaymentMethod(bundleRequest);
+        verifyTouchpoint(bundleRequest);
+
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
@@ -151,6 +184,9 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
+        verifyPaymentMethod(bundleRequest);
+        verifyTouchpoint(bundleRequest);
+
         Bundle bundle = getBundle(idBundle, idPsp);
 
         // check if validityDateTo is after now
@@ -227,8 +263,10 @@ public class BundleService {
         bundleRequestRepository.saveAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
-        BundleOffer offers = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
-        bundleOfferRepository.delete(offers);
+        BundleOffer offer = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
+        if (offer != null) {
+            bundleOfferRepository.delete(offer);
+        }
     }
 
     public CiFiscalCodeList getCIs(String idBundle, String idPSP) {
@@ -426,9 +464,43 @@ public class BundleService {
         }
     }
 
-    public CalculatorConfiguration getConfiguration() {
-        CalculatorTaskExecutor calculatorTaskExecutor = new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository);
-        return calculatorTaskExecutor.getConfiguration();
+    public void getConfiguration() {
+        log.info("Configuration requested..." + LocalDateTime.now());
+
+        BundleTaskExecutor bundleArchiver = new BundleTaskExecutor(bundleRepository, archivedBundleRepository);
+        BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
+        BundleRequestTaskExecutor bundleRequestArchiver = new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository);
+        CiBundleTaskExecutor ciBundleArchiver = new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository);
+        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, storageConnectionString, containerBlob);
+
+        TaskManager taskManager = new TaskManager(
+                bundleArchiver,
+                bundleOfferArchiver,
+                bundleRequestArchiver,
+                ciBundleArchiver,
+                calculatorDataTaskExecutor);
+
+        CompletableFuture.runAsync(taskManager)
+                .whenComplete((msg, ex) -> {
+                    LocalDateTime when = LocalDateTime.now();
+                    if (ex != null) {
+                        log.error("Configuration not sent " + when, ex);
+                    } else {
+                        log.info("Configuration sent " + when);
+                    }
+                });
+    }
+
+    private void verifyPaymentMethod(BundleRequest bundleRequest) {
+        if (bundleRequest.getPaymentMethod() == null) {
+            bundleRequest.setPaymentMethod(PaymentMethod.ANY);
+        }
+    }
+
+    private void verifyTouchpoint(BundleRequest bundleRequest) {
+        if (bundleRequest.getTouchpoint() == null) {
+            bundleRequest.setTouchpoint(Touchpoint.ANY);
+        }
     }
 
     /**

@@ -12,34 +12,29 @@ public class TaskManager implements Runnable {
     private final BundleOfferTaskExecutor bundleOfferArchiver;
     private final BundleRequestTaskExecutor bundleRequestArchiver;
     private final CiBundleTaskExecutor ciBundleArchiver;
-
-    private final CalculatorTaskExecutor calculatorTaskExecutor;
-
-    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+    private final CalculatorDataTaskExecutor calculatorDataTaskExecutor;
 
     public TaskManager(BundleTaskExecutor bundleArchiver,
                        BundleOfferTaskExecutor bundleOfferArchiver,
                        BundleRequestTaskExecutor bundleRequestArchiver,
                        CiBundleTaskExecutor ciBundleArchiver,
-                       CalculatorTaskExecutor calculatorTaskExecutor,
-                       ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
+                       CalculatorDataTaskExecutor calculatorDataTaskExecutor) {
         this.bundleArchiver = bundleArchiver;
         this.bundleOfferArchiver = bundleOfferArchiver;
         this.bundleRequestArchiver = bundleRequestArchiver;
         this.ciBundleArchiver = ciBundleArchiver;
 
-        this.calculatorTaskExecutor = calculatorTaskExecutor;
-        this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
+        this.calculatorDataTaskExecutor = calculatorDataTaskExecutor;
     }
 
     @Override
     public void run() {
 
-        CompletableFuture<Void> cf1 = CompletableFuture.runAsync(new TaskRunnable(bundleArchiver), scheduledThreadPoolExecutor);
-        CompletableFuture<Void> cf2 = CompletableFuture.runAsync(new TaskRunnable(bundleOfferArchiver), scheduledThreadPoolExecutor);
-        CompletableFuture<Void> cf3 = CompletableFuture.runAsync(new TaskRunnable(bundleRequestArchiver), scheduledThreadPoolExecutor);
-        CompletableFuture<Void> cf4 = CompletableFuture.runAsync(new TaskRunnable(ciBundleArchiver), scheduledThreadPoolExecutor);
+        CompletableFuture<Void> cf1 = CompletableFuture.runAsync(new TaskRunnable(bundleArchiver));
+        CompletableFuture<Void> cf2 = CompletableFuture.runAsync(new TaskRunnable(bundleOfferArchiver));
+        CompletableFuture<Void> cf3 = CompletableFuture.runAsync(new TaskRunnable(bundleRequestArchiver));
+        CompletableFuture<Void> cf4 = CompletableFuture.runAsync(new TaskRunnable(ciBundleArchiver));
 
-        CompletableFuture.allOf(cf1, cf2, cf3, cf4).thenRunAsync(new TaskRunnable(calculatorTaskExecutor), scheduledThreadPoolExecutor);
+        CompletableFuture.allOf(cf1, cf2, cf3, cf4).thenRunAsync(new TaskRunnable(calculatorDataTaskExecutor));
     }
 }

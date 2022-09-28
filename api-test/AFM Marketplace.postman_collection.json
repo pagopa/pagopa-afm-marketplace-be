@@ -1030,42 +1030,56 @@
 			"response": []
 		},
 		{
-			"name": "liveness",
+			"name": "info",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{afm-host}}/actuator/health/liveness",
+					"raw": "{{afm-host}}/info",
 					"host": [
 						"{{afm-host}}"
 					],
 					"path": [
-						"actuator",
-						"health",
-						"liveness"
+						"info"
 					]
 				}
 			},
 			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{primary_sub_key_marketplace}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Ocp-Apim-Subscription-Key",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		},
 		{
-			"name": "readiness",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{afm-host}}/actuator/health/readiness",
-					"host": [
-						"{{afm-host}}"
-					],
-					"path": [
-						"actuator",
-						"health",
-						"readiness"
-					]
-				}
-			},
-			"response": []
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

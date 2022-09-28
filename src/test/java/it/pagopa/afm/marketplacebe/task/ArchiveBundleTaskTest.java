@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,7 +89,7 @@ class ArchiveBundleTaskTest {
     void configureCalculatorTask() {
         when(bundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockBundle()));
         when(ciBundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockCiBundle()));
-        CalculatorTaskExecutor taskExecutor = spy(new CalculatorTaskExecutor(calculatorService, bundleRepository, ciBundleRepository));
+        CalculatorDataTaskExecutor taskExecutor = spy(new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, "connectionString", "blobContainer"));
         archiveTask(taskExecutor);
     }
 

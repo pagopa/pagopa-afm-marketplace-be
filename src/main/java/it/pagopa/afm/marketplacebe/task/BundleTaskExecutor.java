@@ -33,5 +33,6 @@ public class BundleTaskExecutor extends TaskExecutor {
         archivedBundleRepository.saveAll(archivedBundles);
 
         bundleRepository.deleteAll(bundles);
+        log.debug("Bundle archived");
     }
 }
