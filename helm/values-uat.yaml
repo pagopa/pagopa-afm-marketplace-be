@@ -67,7 +67,7 @@ microservice-chart:
     AFM_CALCULATOR_RETRY_MAX_DELAY: "2000"
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
     ENV: 'uat'
-    LOGGING_LEVEL: "INFO"
+    DEFAULT_LOGGING_LEVEL: "INFO"
   envSecret:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-u-connection-string'
