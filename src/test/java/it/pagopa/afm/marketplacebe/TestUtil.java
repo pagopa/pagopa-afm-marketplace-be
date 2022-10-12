@@ -90,7 +90,7 @@ public class TestUtil {
                 .minPaymentAmount(0L)
                 .maxPaymentAmount(10000L)
                 .paymentMethod(PaymentMethod.CP)
-                .touchpoint(Touchpoint.IO)
+                .touchpoint(Touchpoint.builder().name("IO").build())
                 .type(BundleType.GLOBAL)
                 .transferCategoryList(transferCategoryList)
                 .validityDateFrom(LocalDate.now().plusDays(1))

@@ -499,7 +499,7 @@ public class BundleService {
 
     private void verifyTouchpoint(BundleRequest bundleRequest) {
         if (bundleRequest.getTouchpoint() == null) {
-            bundleRequest.setTouchpoint(Touchpoint.ANY);
+            bundleRequest.setTouchpoint(Touchpoint.builder().name("ANY").build());
         }
     }
 

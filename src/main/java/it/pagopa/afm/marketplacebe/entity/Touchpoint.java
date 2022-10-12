@@ -1,28 +1,31 @@
 package it.pagopa.afm.marketplacebe.entity;
 
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
+import com.azure.spring.data.cosmos.core.mapping.Container;
+import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 
-import java.util.Arrays;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
+@Container(containerName = "touchpoints")
 @Getter
-public enum Touchpoint {
-    ANY("ANY"),
-    IO("IO"),
-    WISP("WISP"),
-    CHECKOUT("CHECKOUT");
+@Setter
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+public class Touchpoint {
 
-    private final String value;
+    @Id
+    @GeneratedValue
+    @NotBlank
+    private String id;
 
-    Touchpoint(final String touchpoint) {
-        this.value = touchpoint;
-    }
+    @NotNull
+    private String name;
 
-    public static Touchpoint fromValue(String value) {
-        return Arrays.stream(Touchpoint.values())
-                .filter(elem -> elem.value.equals(value))
-                .findFirst()
-                .orElseThrow(() -> new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "Touchpoint not found", "Cannot convert string '" + value + "' into enum"));
-    }
+    @CreatedDate
+    private LocalDateTime createdDate;
 }
