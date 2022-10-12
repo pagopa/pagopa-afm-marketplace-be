@@ -44,7 +44,7 @@ public class Bundle {
 
     private PaymentMethod paymentMethod;
 
-    private Touchpoint touchpoint;
+    private String touchpoint;
 
     private BundleType type;
 

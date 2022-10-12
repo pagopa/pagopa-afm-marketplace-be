@@ -24,7 +24,7 @@ public class BundleRequest {
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
     private PaymentMethod paymentMethod;
-    private Touchpoint touchpoint;
+    private String touchpoint;
     private BundleType type;
     private List<String> transferCategoryList;
     private LocalDate validityDateFrom;

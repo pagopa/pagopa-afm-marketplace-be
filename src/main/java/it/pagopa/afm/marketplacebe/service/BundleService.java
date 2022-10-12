@@ -24,14 +24,7 @@ import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.*;
 import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
@@ -77,6 +70,9 @@ public class BundleService {
 
     @Autowired
     private BundleOfferRepository bundleOfferRepository;
+
+    @Autowired
+    private TouchpointRepository touchpointRepository;
 
     @Autowired
     private CalculatorService calculatorService;
@@ -498,8 +494,14 @@ public class BundleService {
     }
 
     private void verifyTouchpoint(BundleRequest bundleRequest) {
-        if (bundleRequest.getTouchpoint() == null) {
-            bundleRequest.setTouchpoint(Touchpoint.builder().name("ANY").build());
+        String touchpoint = bundleRequest.getTouchpoint();
+
+        if (touchpoint == null) {
+            bundleRequest.setTouchpoint("ANY");
+        } else {
+            if(touchpointRepository.findByName(touchpoint).isEmpty()){
+                throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
+            }
         }
     }
 
