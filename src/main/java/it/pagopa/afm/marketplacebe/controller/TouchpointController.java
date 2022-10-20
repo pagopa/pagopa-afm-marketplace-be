@@ -60,7 +60,7 @@ public class TouchpointController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(
-            value = "/touchpoint/{id}",
+            value = "/touchpoints/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public Touchpoint getTouchpoint(
@@ -77,7 +77,7 @@ public class TouchpointController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @PostMapping(
-            value = "/touchpoint",
+            value = "/touchpoints",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<Touchpoint>createTouchpoint(
@@ -94,7 +94,7 @@ public class TouchpointController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @DeleteMapping(
-            value = "/touchpoint/{id}",
+            value = "/touchpoints/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity deleteTouchpoint(

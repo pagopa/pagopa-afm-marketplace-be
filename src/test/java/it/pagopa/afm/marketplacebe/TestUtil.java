@@ -423,4 +423,12 @@ public class TestUtil {
                 .build();
     }
 
+    public static Touchpoint getMockTouchpoint(){
+        return Touchpoint.builder()
+                .id(UUID.randomUUID().toString())
+                .name("IO")
+                .createdDate(LocalDateTime.now())
+                .build();
+    }
+
 }

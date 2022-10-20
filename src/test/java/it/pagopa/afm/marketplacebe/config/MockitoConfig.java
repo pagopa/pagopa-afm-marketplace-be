@@ -58,4 +58,10 @@ public class MockitoConfig {
         return Mockito.mock(ArchivedCiBundleRepository.class);
     }
 
+    @Bean
+    @Primary
+    public TouchpointRepository touchpointRepository() {
+        return Mockito.mock(TouchpointRepository.class);
+    }
+
 }
