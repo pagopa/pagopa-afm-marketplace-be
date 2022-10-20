@@ -38,6 +38,7 @@ import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 import org.modelmapper.ModelMapper;
@@ -431,4 +432,25 @@ public class TestUtil {
                 .build();
     }
 
+    public static Touchpoint getMockTouchpoint(String name){
+        return Touchpoint.builder()
+                .id(UUID.randomUUID().toString())
+                .name(name)
+                .createdDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static Iterable<Touchpoint> getMockTouchpoints(){
+        return List.of(
+                getMockTouchpoint("IO"),
+                getMockTouchpoint("CHECKOUT"),
+                getMockTouchpoint("WISP")
+        );
+    }
+
+    public static it.pagopa.afm.marketplacebe.entity.Touchpoint getMockTouchpointRequest() {
+        return it.pagopa.afm.marketplacebe.entity.Touchpoint.builder()
+                .name("IO")
+                .build();
+    }
 }
