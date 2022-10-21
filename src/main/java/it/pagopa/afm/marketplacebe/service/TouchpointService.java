@@ -77,13 +77,4 @@ public class TouchpointService {
         return touchpoint.get();
     }
 
-    private it.pagopa.afm.marketplacebe.entity.Touchpoint getTouchpointByName(String name){
-        Optional<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpoint = touchpointRepository.findByName(name);
-
-        if(touchpoint.isEmpty()){
-            throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, name);
-        }
-
-        return touchpoint.get();
-    }
 }
