@@ -32,12 +32,13 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.CalculatorDataTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
+import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +80,6 @@ public class BundleService {
     private BundleOfferRepository bundleOfferRepository;
 
     @Autowired
-    private CalculatorService calculatorService;
-
-    @Autowired
     private ArchivedBundleRepository archivedBundleRepository;
 
     @Autowired
@@ -92,6 +90,9 @@ public class BundleService {
 
     @Autowired
     private ArchivedCiBundleRepository archivedCiBundleRepository;
+
+    @Autowired
+    private ValidBundleRepository validBundleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -471,14 +472,14 @@ public class BundleService {
         BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
         BundleRequestTaskExecutor bundleRequestArchiver = new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository);
         CiBundleTaskExecutor ciBundleArchiver = new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository);
-        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, storageConnectionString, containerBlob);
+        ValidBundlesTaskExecutor validBundlesTaskExecutor = new ValidBundlesTaskExecutor(bundleRepository, ciBundleRepository, validBundleRepository);
 
         TaskManager taskManager = new TaskManager(
                 bundleArchiver,
                 bundleOfferArchiver,
                 bundleRequestArchiver,
                 ciBundleArchiver,
-                calculatorDataTaskExecutor);
+                validBundlesTaskExecutor);
 
         CompletableFuture.runAsync(taskManager)
                 .whenComplete((msg, ex) -> {

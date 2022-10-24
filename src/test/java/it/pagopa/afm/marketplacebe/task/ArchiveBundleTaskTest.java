@@ -9,7 +9,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.service.CalculatorService;
+import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +54,7 @@ class ArchiveBundleTaskTest {
     ArchivedCiBundleRepository archivedCiBundleRepository;
 
     @MockBean
-    CalculatorService calculatorService;
+    ValidBundleRepository validBundleRepository;
 
     @Test
     void archiveBundleTask() {
@@ -86,10 +85,10 @@ class ArchiveBundleTaskTest {
     }
 
     @Test
-    void configureCalculatorTask() {
+    void configureValidBundlesTask() {
         when(bundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockBundle()));
         when(ciBundleRepository.findAll()).thenReturn(List.of(TestUtil.getMockCiBundle()));
-        CalculatorDataTaskExecutor taskExecutor = spy(new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, "connectionString", "blobContainer"));
+        ValidBundlesTaskExecutor taskExecutor = spy(new ValidBundlesTaskExecutor(bundleRepository, ciBundleRepository, validBundleRepository));
         archiveTask(taskExecutor);
     }
 
