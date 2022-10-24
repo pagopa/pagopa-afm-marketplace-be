@@ -41,22 +41,22 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
 
         List<ValidBundle> validBundleList = bundles.parallelStream().map(bundle -> {
             List<CiBundle> ciBundleList = ciBundles.stream().filter(ciBundle -> ciBundle.getIdBundle().equals(bundle.getId())).collect(Collectors.toList());
-            return ValidBundle.builder()
-                    .id(bundle.getId())
-                    .idPsp(bundle.getIdPsp())
-                    .name(bundle.getName())
-                    .description(bundle.getDescription())
-                    .paymentAmount(bundle.getPaymentAmount())
-                    .minPaymentAmount(bundle.getMinPaymentAmount())
-                    .maxPaymentAmount(bundle.getMaxPaymentAmount())
-                    .paymentMethod(bundle.getPaymentMethod())
-                    .touchpoint(bundle.getTouchpoint())
-                    .type(bundle.getType())
-                    .transferCategoryList(bundle.getTransferCategoryList())
-                    .ciBundleList(ciBundleList)
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(bundle.getValidityDateFrom())
-                    .build();
+            ValidBundle validBundle = new ValidBundle();
+            validBundle.setId(bundle.getId());
+            validBundle.setIdPsp(bundle.getIdPsp());
+            validBundle.setName(bundle.getName());
+            validBundle.setDescription(bundle.getDescription());
+            validBundle.setPaymentAmount(bundle.getPaymentAmount());
+            validBundle.setMinPaymentAmount(bundle.getMinPaymentAmount());
+            validBundle.setMaxPaymentAmount(bundle.getMaxPaymentAmount());
+            validBundle.setPaymentMethod(bundle.getPaymentMethod());
+            validBundle.setTouchpoint(bundle.getTouchpoint());
+            validBundle.setType(bundle.getType());
+            validBundle.setTransferCategoryList(bundle.getTransferCategoryList());
+            validBundle.setCiBundleList(ciBundleList);
+            validBundle.setValidityDateTo(bundle.getValidityDateTo());
+            validBundle.setValidityDateFrom(bundle.getValidityDateFrom());
+            return validBundle;
         }).collect(Collectors.toList());
 
         validBundleRepository.deleteAll();
