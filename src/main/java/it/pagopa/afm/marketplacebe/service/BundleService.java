@@ -1,36 +1,16 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
-import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.*;
-import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.CalculatorDataTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.TaskManager;
+import it.pagopa.afm.marketplacebe.task.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,9 +55,6 @@ public class BundleService {
     private TouchpointRepository touchpointRepository;
 
     @Autowired
-    private CalculatorService calculatorService;
-
-    @Autowired
     private ArchivedBundleRepository archivedBundleRepository;
 
     @Autowired
@@ -88,6 +65,9 @@ public class BundleService {
 
     @Autowired
     private ArchivedCiBundleRepository archivedCiBundleRepository;
+
+    @Autowired
+    private ValidBundleRepository validBundleRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -467,14 +447,14 @@ public class BundleService {
         BundleOfferTaskExecutor bundleOfferArchiver = new BundleOfferTaskExecutor(bundleOfferRepository, archivedBundleOfferRepository);
         BundleRequestTaskExecutor bundleRequestArchiver = new BundleRequestTaskExecutor(bundleRequestRepository, archivedBundleRequestRepository);
         CiBundleTaskExecutor ciBundleArchiver = new CiBundleTaskExecutor(ciBundleRepository, archivedCiBundleRepository);
-        CalculatorDataTaskExecutor calculatorDataTaskExecutor = new CalculatorDataTaskExecutor(calculatorService, bundleRepository, ciBundleRepository, storageConnectionString, containerBlob);
+        ValidBundlesTaskExecutor validBundlesTaskExecutor = new ValidBundlesTaskExecutor(bundleRepository, ciBundleRepository, validBundleRepository);
 
         TaskManager taskManager = new TaskManager(
                 bundleArchiver,
                 bundleOfferArchiver,
                 bundleRequestArchiver,
                 ciBundleArchiver,
-                calculatorDataTaskExecutor);
+                validBundlesTaskExecutor);
 
         CompletableFuture.runAsync(taskManager)
                 .whenComplete((msg, ex) -> {

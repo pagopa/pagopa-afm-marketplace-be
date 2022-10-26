@@ -2,18 +2,19 @@ package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.model.bundle.*;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
-import it.pagopa.afm.marketplacebe.task.CalculatorDataTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +24,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,9 +34,6 @@ import java.util.*;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -56,7 +53,7 @@ class BundleServiceTest {
     private TouchpointRepository touchpointRepository;
 
     @MockBean
-    private CalculatorDataTaskExecutor calculatorDataTaskExecutor;
+    private ValidBundlesTaskExecutor validBundlesTaskExecutor;
 
     @Autowired
     @InjectMocks

@@ -64,4 +64,10 @@ public class MockitoConfig {
         return Mockito.mock(TouchpointRepository.class);
     }
 
+    @Bean
+    @Primary
+    public ValidBundleRepository validBundleRepository() {
+        return Mockito.mock(ValidBundleRepository.class);
+    }
+
 }

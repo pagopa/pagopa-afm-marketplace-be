@@ -1,10 +1,30 @@
 {
+<<<<<<< HEAD
     "openapi": "3.0.1",
     "info": {
         "title": "Marketplace API for PagoPA AFM",
         "description": "marketplace-be",
         "termsOfService": "https://www.pagopa.gov.it/",
         "version": "0.4.0-6"
+=======
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Marketplace API for PagoPA AFM",
+    "description": "marketplace-be",
+    "termsOfService": "https://www.pagopa.gov.it/",
+    "version": "0.5.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8585",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "CI",
+      "description": "Everything about CI"
+>>>>>>> main
     },
     "servers": [
         {
