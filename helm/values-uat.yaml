@@ -72,9 +72,6 @@ microservice-chart:
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-u-connection-string'
     COSMOS_KEY: afm-marketplace-u-cosmos-pkey
-    CONNECTION_STRING: storage-account-u-connection-str
-    BLOB_CONTAINER_NAME: storage-account-u-blob-name
-    AFM_CALCULATOR_SUBSCRIPTION_KEY: afm-calculator-data-subscription-key
   keyvault:
     name: "pagopa-u-afm-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
