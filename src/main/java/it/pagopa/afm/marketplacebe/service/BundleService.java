@@ -42,7 +42,6 @@ import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -60,12 +59,6 @@ import java.util.stream.Collectors;
 public class BundleService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
-
-    @Value("${azure.storage.connectionString}")
-    private String storageConnectionString;
-
-    @Value("${azure.storage.blobName}")
-    private String containerBlob;
 
     @Autowired
     private BundleRepository bundleRepository;
@@ -566,22 +559,16 @@ public class BundleService {
      * @param maxPaymentAmount max amount of bundle request
      * @param minPaymentAmountTarget min amount of existent bundle
      * @param maxPaymentAmountTarget max amount of existent bundle
-     * @return
      */
     private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
-        return minPaymentAmount < maxPaymentAmount &&
-                (
-                    (minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget) ||
-                    (minPaymentAmount > maxPaymentAmountTarget && maxPaymentAmount > maxPaymentAmountTarget)
-                );
+        return minPaymentAmount < maxPaymentAmount && (
+                minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget || minPaymentAmount > maxPaymentAmountTarget
+        );
     }
 
     /**
      * Verify if transferCategoryList overlaps the target one
      *
-     * @param transferCategoryList
-     * @param transferCategoryListTarget
-     * @return
      */
     private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
         return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
@@ -602,9 +589,6 @@ public class BundleService {
     /**
      * Verify if validDateFrom is acceptable according to target validityDateTo
      *
-     * @param validityDateFrom
-     * @param validityDateToTarget
-     * @return
      */
     private boolean isValidityDateFromValid(LocalDate validityDateFrom, LocalDate validityDateToTarget) {
         return validityDateToTarget != null && !validityDateFrom.isBefore(validityDateToTarget) && !validityDateFrom.isEqual(validityDateToTarget);
@@ -613,7 +597,6 @@ public class BundleService {
     /**
      * If date is null, returns the next acceptable date
      *
-     * @param date
      * @return date
      */
     private LocalDate getNextAcceptableDate(LocalDate date) {
@@ -627,7 +610,6 @@ public class BundleService {
     /**
      * Verify if bundleRequest has got acceptable validityDateFrom and validityDateFrom
      *
-     * @param bundleRequest
      */
     private void analyzeValidityDate(BundleRequest bundleRequest) {
         // verify if validityDateFrom is equal or after now
@@ -651,7 +633,6 @@ public class BundleService {
     /**
      * Verify if the request could be accepted according to the existent bundles
      *
-     * @param bundleRequest
      */
     private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
