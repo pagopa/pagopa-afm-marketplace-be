@@ -39,6 +39,7 @@ import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,12 +158,17 @@ public class BundleService {
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
+                .idChannel(bundleRequest.getIdChannel())
+                .idBrokerPsp(bundleRequest.getIdBrokerPsp())
                 .name(bundleRequest.getName())
                 .description(bundleRequest.getDescription())
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
                 .paymentMethod(bundleRequest.getPaymentMethod())
+                .onUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) ? CommonUtil.deNull(bundleRequest.getOnUs()) : false)
+                .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
+                .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) ? CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()) : false)
                 .touchpoint(bundleRequest.getTouchpoint())
                 .type(bundleRequest.getType())
                 .transferCategoryList(bundleRequest.getTransferCategoryList())
