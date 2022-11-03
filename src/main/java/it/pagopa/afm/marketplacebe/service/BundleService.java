@@ -212,6 +212,8 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
+        bundle.setIdChannel(bundleRequest.getIdChannel());
+        bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
         bundle.setName(bundleRequest.getName());
         bundle.setDescription(bundleRequest.getDescription());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
@@ -223,6 +225,9 @@ public class BundleService {
         bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
         bundle.setLastUpdatedDate(LocalDateTime.now());
+        bundle.setOnUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()));
+        bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
+        bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
