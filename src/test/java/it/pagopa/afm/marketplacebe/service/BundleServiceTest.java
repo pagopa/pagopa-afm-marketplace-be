@@ -936,6 +936,39 @@ class BundleServiceTest {
     }
 
     @Test
+    void createBundle_ok_6() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range), different type
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setPaymentMethod(null);
+        bundleRequest.setTouchpoint(null);
+        bundleRequest.setType(BundleType.PUBLIC);
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_7() {
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setPaymentMethod(PaymentMethod.CP);
+        bundleRequest.setDigitalStamp(true);
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
     void createBundle_ko_1() {
         // validityDateFrom > validityDateTo
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();

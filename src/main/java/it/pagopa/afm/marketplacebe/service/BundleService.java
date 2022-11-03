@@ -135,8 +135,8 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
-        verifyPaymentMethod(bundleRequest);
-        verifyTouchpoint(bundleRequest);
+        setPaymentMethodAnyIfNull(bundleRequest);
+        setVerifyTouchpointAnyIfNull(bundleRequest);
 
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
@@ -184,8 +184,8 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
-        verifyPaymentMethod(bundleRequest);
-        verifyTouchpoint(bundleRequest);
+        setPaymentMethodAnyIfNull(bundleRequest);
+        setVerifyTouchpointAnyIfNull(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
@@ -487,22 +487,17 @@ public class BundleService {
 
         CompletableFuture.runAsync(taskManager)
                 .whenComplete((msg, ex) -> {
-                    LocalDateTime when = LocalDateTime.now();
-                    if (ex != null) {
-                        log.error("Configuration not sent " + when, ex);
-                    } else {
-                        log.info("Configuration sent " + when);
-                    }
+                    log.info("Configuration executed " + LocalDateTime.now());
                 });
     }
 
-    private void verifyPaymentMethod(BundleRequest bundleRequest) {
+    private void setPaymentMethodAnyIfNull(BundleRequest bundleRequest) {
         if (bundleRequest.getPaymentMethod() == null) {
             bundleRequest.setPaymentMethod(PaymentMethod.ANY);
         }
     }
 
-    private void verifyTouchpoint(BundleRequest bundleRequest) {
+    private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
         if (bundleRequest.getTouchpoint() == null) {
             bundleRequest.setTouchpoint(Touchpoint.ANY);
         }
