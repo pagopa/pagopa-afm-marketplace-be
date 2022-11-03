@@ -19,9 +19,13 @@ import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
@@ -72,6 +76,12 @@ class BundleServiceTest {
 
     @MockBean
     private ValidBundlesTaskExecutor validBundlesTaskExecutor;
+
+    @MockBean
+    private BundleOfferRepository bundleOfferRepository;
+
+    @MockBean
+    private TaskManager taskManager;
 
     @Autowired
     @InjectMocks
@@ -1125,6 +1135,19 @@ class BundleServiceTest {
         } catch (Exception e) {
             fail();
         }
+    }
+
+    @Test
+    void getConfiguration_ok() {
+        // only to verify all tasks are called
+        when(bundleRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(bundleOfferRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(bundleRequestRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(ciBundleRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(bundleRepository.findAll()).thenReturn(new ArrayList<>());
+        when(ciBundleRepository.findAll()).thenReturn(new ArrayList<>());
+
+        bundleService.getConfiguration();
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
