@@ -486,9 +486,7 @@ public class BundleService {
                 validBundlesTaskExecutor);
 
         CompletableFuture.runAsync(taskManager)
-                .whenComplete((msg, ex) -> {
-                    log.info("Configuration executed " + LocalDateTime.now());
-                });
+                .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
     private void setPaymentMethodAnyIfNull(BundleRequest bundleRequest) {

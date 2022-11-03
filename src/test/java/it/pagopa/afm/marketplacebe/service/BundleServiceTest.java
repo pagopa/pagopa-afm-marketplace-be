@@ -23,8 +23,6 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import org.assertj.core.util.Lists;
@@ -53,10 +51,10 @@ import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1201,7 +1199,7 @@ class BundleServiceTest {
         when(bundleRepository.findAll()).thenReturn(new ArrayList<>());
         when(ciBundleRepository.findAll()).thenReturn(new ArrayList<>());
 
-        bundleService.getConfiguration();
+        assertDoesNotThrow(() -> bundleService.getConfiguration());
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
