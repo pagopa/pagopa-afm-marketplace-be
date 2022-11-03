@@ -56,6 +56,7 @@ import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1106,6 +1107,26 @@ class BundleServiceTest {
         when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(ciBundle));
 
         Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
+        assertNotNull(result);
+    }
+
+    @Test
+    void updateBundle_ok_3() {
+        BundleRequest bundleRequest = getMockBundleRequest();
+        bundleRequest.setPaymentMethod(PaymentMethod.CP);
+        bundleRequest.setDigitalStamp(true);
+        Bundle bundle = TestUtil.getMockBundle();
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+                any(BundleType.class), any(PaymentMethod.class), any(Touchpoint.class))).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
+
+        when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(TestUtil.getMockCiBundle()));
+
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), bundleRequest);
         assertNotNull(result);
     }
 
