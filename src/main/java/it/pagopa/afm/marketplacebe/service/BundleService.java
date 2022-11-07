@@ -39,6 +39,7 @@ import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,8 +135,8 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
-        verifyPaymentMethod(bundleRequest);
-        verifyTouchpoint(bundleRequest);
+        setPaymentMethodAnyIfNull(bundleRequest);
+        setVerifyTouchpointAnyIfNull(bundleRequest);
 
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
@@ -157,12 +158,17 @@ public class BundleService {
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
+                .idChannel(bundleRequest.getIdChannel())
+                .idBrokerPsp(bundleRequest.getIdBrokerPsp())
                 .name(bundleRequest.getName())
                 .description(bundleRequest.getDescription())
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
                 .paymentMethod(bundleRequest.getPaymentMethod())
+                .onUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()))
+                .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
+                .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
                 .touchpoint(bundleRequest.getTouchpoint())
                 .type(bundleRequest.getType())
                 .transferCategoryList(bundleRequest.getTransferCategoryList())
@@ -178,8 +184,8 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
-        verifyPaymentMethod(bundleRequest);
-        verifyTouchpoint(bundleRequest);
+        setPaymentMethodAnyIfNull(bundleRequest);
+        setVerifyTouchpointAnyIfNull(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
@@ -206,6 +212,8 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
+        bundle.setIdChannel(bundleRequest.getIdChannel());
+        bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
         bundle.setName(bundleRequest.getName());
         bundle.setDescription(bundleRequest.getDescription());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
@@ -217,6 +225,9 @@ public class BundleService {
         bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
         bundle.setLastUpdatedDate(LocalDateTime.now());
+        bundle.setOnUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()));
+        bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
+        bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
@@ -475,23 +486,16 @@ public class BundleService {
                 validBundlesTaskExecutor);
 
         CompletableFuture.runAsync(taskManager)
-                .whenComplete((msg, ex) -> {
-                    LocalDateTime when = LocalDateTime.now();
-                    if (ex != null) {
-                        log.error("Configuration not sent " + when, ex);
-                    } else {
-                        log.info("Configuration sent " + when);
-                    }
-                });
+                .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
-    private void verifyPaymentMethod(BundleRequest bundleRequest) {
+    private void setPaymentMethodAnyIfNull(BundleRequest bundleRequest) {
         if (bundleRequest.getPaymentMethod() == null) {
             bundleRequest.setPaymentMethod(PaymentMethod.ANY);
         }
     }
 
-    private void verifyTouchpoint(BundleRequest bundleRequest) {
+    private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
         if (bundleRequest.getTouchpoint() == null) {
             bundleRequest.setTouchpoint(Touchpoint.ANY);
         }

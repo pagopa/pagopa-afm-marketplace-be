@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @UtilityClass
 public class CommonUtil {
@@ -30,5 +31,13 @@ public class CommonUtil {
     public boolean isValidityDateToAcceptable(LocalDate validityDateTo) {
         LocalDate now = LocalDate.now();
         return validityDateTo == null || !(validityDateTo.isEqual(now) || validityDateTo.isBefore(now));
+    }
+
+    /**
+     * @param value value to deNullify.
+     * @return return false if value is null
+     */
+    public static Boolean deNull(Boolean value) {
+        return Optional.ofNullable(value).orElse(false);
     }
 }

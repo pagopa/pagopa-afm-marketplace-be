@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,12 +19,19 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class BundleRequest {
+    @NotNull
+    private String idChannel;
+    @NotNull
+    private String idBrokerPsp;
     private String name;
     private String description;
     private Long paymentAmount;
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
     private PaymentMethod paymentMethod;
+    private Boolean onUs;
+    private Boolean digitalStamp;
+    private Boolean digitalStampRestriction;
     private Touchpoint touchpoint;
     private BundleType type;
     private List<String> transferCategoryList;

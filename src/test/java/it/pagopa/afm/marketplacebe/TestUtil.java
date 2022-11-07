@@ -84,12 +84,17 @@ public class TestUtil {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
 
         return BundleRequest.builder()
+                .idChannel("idChannel")
+                .idBrokerPsp("idBrokerPsp")
                 .name("name")
                 .description("description")
                 .paymentAmount(100L)
                 .minPaymentAmount(0L)
                 .maxPaymentAmount(10000L)
                 .paymentMethod(PaymentMethod.CP)
+                .onUs(true)
+                .digitalStamp(false)
+                .digitalStampRestriction(false)
                 .touchpoint(Touchpoint.IO)
                 .type(BundleType.GLOBAL)
                 .transferCategoryList(transferCategoryList)
