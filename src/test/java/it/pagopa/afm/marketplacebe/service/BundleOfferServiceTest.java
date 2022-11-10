@@ -348,6 +348,7 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getHttpStatus(), exception.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getTitle(), exception.getTitle());
     }
+
     @Test
     void acceptOfferAccepted() {
         BundleOffer mockBundleOffer = getMockBundleOffer();

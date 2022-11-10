@@ -4,7 +4,7 @@
         "title": "Marketplace API for PagoPA AFM",
         "description": "marketplace-be",
         "termsOfService": "https://www.pagopa.gov.it/",
-        "version": "0.5.0"
+        "version": "0.6.1"
     },
     "servers": [
         {
@@ -4432,8 +4432,18 @@
     "components": {
         "schemas": {
             "BundleRequest": {
+                "required": [
+                    "idBrokerPsp",
+                    "idChannel"
+                ],
                 "type": "object",
                 "properties": {
+                    "idChannel": {
+                        "type": "string"
+                    },
+                    "idBrokerPsp": {
+                        "type": "string"
+                    },
                     "name": {
                         "type": "string"
                     },
@@ -4466,6 +4476,15 @@
                             "JIF",
                             "MYBK"
                         ]
+                    },
+                    "onUs": {
+                        "type": "boolean"
+                    },
+                    "digitalStamp": {
+                        "type": "boolean"
+                    },
+                    "digitalStampRestriction": {
+                        "type": "boolean"
                     },
                     "touchpoint": {
                         "type": "string"

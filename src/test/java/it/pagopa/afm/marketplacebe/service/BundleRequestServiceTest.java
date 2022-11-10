@@ -202,7 +202,6 @@ class BundleRequestServiceTest {
     }
 
 
-
     @Test
     void shouldGetRequestsByPsp_1() {
         List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
@@ -239,11 +238,11 @@ class BundleRequestServiceTest {
 
         // Preconditions
         Mockito.when(bundleRequestRepository.findByIdAndIdPsp(bundleRequest.getId(), bundleRequest.getIdPsp()))
-                        .thenReturn(Optional.of(bundleRequest));
+                .thenReturn(Optional.of(bundleRequest));
         Mockito.when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
-                bundleRequest.getIdBundle(), bundleRequest.getCiFiscalCode()
+                        bundleRequest.getIdBundle(), bundleRequest.getCiFiscalCode()
                 ))
-                        .thenReturn(Optional.of(ciBundle));
+                .thenReturn(Optional.of(ciBundle));
 
         bundleRequestService.acceptRequest(bundleRequest.getIdPsp(), bundleRequest.getId());
 

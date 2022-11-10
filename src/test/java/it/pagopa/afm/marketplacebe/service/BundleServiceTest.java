@@ -7,13 +7,23 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
+import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
@@ -30,40 +40,51 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BundleServiceTest {
-    @MockBean
-    private BundleRepository bundleRepository;
-
-    @MockBean
-    private CiBundleRepository ciBundleRepository;
-
-    @MockBean
-    private BundleRequestRepository bundleRequestRepository;
-
-    @MockBean
-    private TouchpointRepository touchpointRepository;
-
-    @MockBean
-    private ValidBundlesTaskExecutor validBundlesTaskExecutor;
-
-    @Autowired
-    @InjectMocks
-    private BundleService bundleService;
-
     @Captor
     ArgumentCaptor<Bundle> bundleArgumentCaptor = ArgumentCaptor.forClass(Bundle.class);
     @Captor
     ArgumentCaptor<CiBundle> ciBundleArgumentCaptor = ArgumentCaptor.forClass(CiBundle.class);
-
+    @MockBean
+    private BundleRepository bundleRepository;
+    @MockBean
+    private CiBundleRepository ciBundleRepository;
+    @MockBean
+    private BundleRequestRepository bundleRequestRepository;
+    @MockBean
+    private TouchpointRepository touchpointRepository;
+    @MockBean
+    private ValidBundlesTaskExecutor validBundlesTaskExecutor;
+    @MockBean
+    private BundleOfferRepository bundleOfferRepository;
+    @MockBean
+    private TaskManager taskManager;
+    @Autowired
+    @InjectMocks
+    private BundleService bundleService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -81,11 +102,9 @@ class BundleServiceTest {
         List<BundleType> list;
         if (bundleTypeSize == 1) {
             list = List.of(BundleType.PRIVATE);
-        }
-        else if (bundleTypeSize == 2) {
+        } else if (bundleTypeSize == 2) {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC);
-        }
-        else {
+        } else {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
         }
         Bundles bundles = bundleService.getBundles(list);
@@ -337,7 +356,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldGetBundlesByFiscalCode(){
+    void shouldGetBundlesByFiscalCode() {
         CiBundle mockCIBundle = getMockCiBundle();
         List<CiBundle> ciBundles = List.of(mockCIBundle);
         Bundle bundle = getMockBundle();
@@ -361,16 +380,16 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldGetBundleByFiscalCode(){
+    void shouldGetBundleByFiscalCode() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         ciBundle.setIdBundle(bundle.getId());
 
         // Preconditions
         when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
-                        ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
         when(bundleRepository.findById(bundle.getId()))
-                        .thenReturn(Optional.of(bundle));
+                .thenReturn(Optional.of(bundle));
 
         BundleDetailsForCi bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
 
@@ -378,7 +397,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRemoveByFiscalCode(){
+    void shouldRemoveByFiscalCode() {
         CiBundle ciBundle = getMockCiBundle();
 
         // Preconditions
@@ -394,7 +413,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldGetBundleAttributeByFiscalCode(){
+    void shouldGetBundleAttributeByFiscalCode() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         ciBundle.setIdBundle(bundle.getId());
@@ -410,7 +429,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldCreateBundleAttributesByCi_1(){
+    void shouldCreateBundleAttributesByCi_1() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -485,7 +504,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestCreateBundleAttributesByCi_2(){
+    void shouldRaiseBadRequestCreateBundleAttributesByCi_2() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
@@ -508,7 +527,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestCreateBundleAttributesByCi_3(){
+    void shouldRaiseBadRequestCreateBundleAttributesByCi_3() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
@@ -531,7 +550,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldUpdateBundleAttributesByCi(){
+    void shouldUpdateBundleAttributesByCi() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -559,7 +578,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseNotFoundUpdateBundleAttributesByCi(){
+    void shouldRaiseNotFoundUpdateBundleAttributesByCi() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -589,7 +608,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestUpdateBundleAttributesByCi_1(){
+    void shouldRaiseBadRequestUpdateBundleAttributesByCi_1() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(LocalDate.now().minusDays(1));
@@ -621,7 +640,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestUpdateBundleAttributesByCi_2(){
+    void shouldRaiseBadRequestUpdateBundleAttributesByCi_2() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         bundle.setType(BundleType.PRIVATE);
@@ -653,7 +672,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestUpdateBundleAttributesByCi_3(){
+    void shouldRaiseBadRequestUpdateBundleAttributesByCi_3() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
 
@@ -685,7 +704,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRemoveBundleAttributesByCi(){
+    void shouldRemoveBundleAttributesByCi() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -716,7 +735,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestRemoveBundleAttributesByCi_1(){
+    void shouldRaiseBadRequestRemoveBundleAttributesByCi_1() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -748,7 +767,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseBadRequestRemoveBundleAttributesByCi_2(){
+    void shouldRaiseBadRequestRemoveBundleAttributesByCi_2() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         // Valid bundle
@@ -781,7 +800,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void shouldRaiseNotFoundRemoveBundleAttributesByCi_1(){
+    void shouldRaiseNotFoundRemoveBundleAttributesByCi_1() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
@@ -834,7 +853,7 @@ class BundleServiceTest {
 
     @Test
     void createBundle_ok_1() {
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -852,7 +871,7 @@ class BundleServiceTest {
         bundleRequest.setTransferCategoryList(new ArrayList<>());
         List<Bundle> bundles = TestUtil.getMockBundleSameConfigurationDifferentPaymentAmountRange();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -871,7 +890,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(12));
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -890,7 +909,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(12));
         List<Bundle> bundles = TestUtil.getMockBundleSameConfigurationDifferentPaymentAmountRange();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -907,7 +926,40 @@ class BundleServiceTest {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         bundleRequest.setType(BundleType.PUBLIC);
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
+                any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_6() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range), different type
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setPaymentMethod(null);
+        bundleRequest.setTouchpoint(null);
+        bundleRequest.setType(BundleType.PUBLIC);
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
+                any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_7() {
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setPaymentMethod(PaymentMethod.CP);
+        bundleRequest.setDigitalStamp(true);
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
@@ -936,7 +988,7 @@ class BundleServiceTest {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
@@ -952,7 +1004,7 @@ class BundleServiceTest {
         bundleRequest.setMaxPaymentAmount(10000L);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
@@ -968,7 +1020,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(10));
         List<Bundle> bundles = TestUtil.getMockBundleWithoutValidityDateTo();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
@@ -983,7 +1035,7 @@ class BundleServiceTest {
         bundleRequest.setMaxPaymentAmount(1500L);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(bundles);
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
@@ -994,7 +1046,7 @@ class BundleServiceTest {
     @Test
     void createBundle_ko_6() {
         // bundle name conflict
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
@@ -1043,7 +1095,7 @@ class BundleServiceTest {
         Bundle bundle = TestUtil.getMockBundle();
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
@@ -1064,7 +1116,7 @@ class BundleServiceTest {
 
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
 
 
@@ -1081,6 +1133,26 @@ class BundleServiceTest {
     }
 
     @Test
+    void updateBundle_ok_3() {
+        BundleRequest bundleRequest = getMockBundleRequest();
+        bundleRequest.setPaymentMethod(PaymentMethod.CP);
+        bundleRequest.setDigitalStamp(true);
+        Bundle bundle = TestUtil.getMockBundle();
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
+                any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
+
+        when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(TestUtil.getMockCiBundle()));
+
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
     void updateBundle_ko_1() {
         // bundle name conflict
         Bundle bundle = TestUtil.getMockBundle();
@@ -1089,7 +1161,7 @@ class BundleServiceTest {
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
 
-        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint( anyString(),
+        when(bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(anyString(),
                 any(BundleType.class), any(PaymentMethod.class), anyString())).thenReturn(Collections.emptyList());
 
         when(bundleRepository.findByNameAndIdNot(anyString(), anyString(), any())).thenReturn(Optional.of(TestUtil.getMockBundle()));
@@ -1145,6 +1217,19 @@ class BundleServiceTest {
         } catch (Exception e) {
             fail();
         }
+    }
+
+    @Test
+    void getConfiguration_ok() {
+        // only to verify all tasks are called
+        when(bundleRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(bundleOfferRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(bundleRequestRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(ciBundleRepository.findByValidityDateToBefore(any())).thenReturn(new ArrayList<>());
+        when(bundleRepository.findAll()).thenReturn(new ArrayList<>());
+        when(ciBundleRepository.findAll()).thenReturn(new ArrayList<>());
+
+        assertDoesNotThrow(() -> bundleService.getConfiguration());
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {

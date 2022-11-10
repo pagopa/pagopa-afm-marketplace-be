@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: pagopapcommonacr.azurecr.io/pagopaafmmarketplacebe
-    tag: "0.5.0"
+    tag: "0.6.1"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -62,9 +62,6 @@ microservice-chart:
   envConfig:
     WEBSITE_SITE_NAME: 'pagopaafmmarketplacebe' # required to show cloud role name in application insights
     COSMOS_URI: https://pagopa-p-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
-    AFM_CALCULATOR_HOST: https://api.platform.pagopa.it/afm/calculator-data-service/v1
-    AFM_CALCULATOR_RETRY_MAX_ATTEMPTS: "1"
-    AFM_CALCULATOR_RETRY_MAX_DELAY: "2000"
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
     ENV: "prod"
     LOGGING_LEVEL: "INFO"

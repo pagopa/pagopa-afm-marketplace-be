@@ -5,6 +5,6 @@ import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 
 import java.util.Optional;
 
-public interface TouchpointRepository  extends CosmosRepository<Touchpoint, String> {
+public interface TouchpointRepository extends CosmosRepository<Touchpoint, String> {
     Optional<Touchpoint> findByName(String name);
 }

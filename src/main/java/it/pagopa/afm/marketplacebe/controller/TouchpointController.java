@@ -8,19 +8,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoint;
 import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
 import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoints;
-import it.pagopa.afm.marketplacebe.service.BundleService;
 import it.pagopa.afm.marketplacebe.service.TouchpointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -47,7 +49,7 @@ public class TouchpointController {
     )
     public Touchpoints getTouchpoints(
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page){
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
         return touchpointService.getTouchpoints();
     }
 
@@ -64,7 +66,7 @@ public class TouchpointController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public Touchpoint getTouchpoint(
-            @Parameter(description = "Touchpoint identifier", required = true) @PathVariable("id") String id){
+            @Parameter(description = "Touchpoint identifier", required = true) @PathVariable("id") String id) {
         return touchpointService.getTouchpoint(id);
     }
 
@@ -80,8 +82,8 @@ public class TouchpointController {
             value = "/touchpoints",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<Touchpoint>createTouchpoint(
-            @RequestBody @Valid @NotNull TouchpointRequest touchpointRequest){
+    public ResponseEntity<Touchpoint> createTouchpoint(
+            @RequestBody @Valid @NotNull TouchpointRequest touchpointRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(touchpointService.createTouchpoint(touchpointRequest));
     }
 
@@ -98,7 +100,7 @@ public class TouchpointController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity deleteTouchpoint(
-            @Parameter(description = "Touchpoint identifier", required = true) @PathVariable("id") String id){
+            @Parameter(description = "Touchpoint identifier", required = true) @PathVariable("id") String id) {
         touchpointService.deleteTouchpoint(id);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }

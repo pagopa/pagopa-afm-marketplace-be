@@ -45,12 +45,12 @@ public class TouchpointService {
                 .build();
     }
 
-    public Touchpoint getTouchpoint(String idTouchpoint){
+    public Touchpoint getTouchpoint(String idTouchpoint) {
         return modelMapper.map(getTouchpointById(idTouchpoint), Touchpoint.class);
     }
 
-    public Touchpoint createTouchpoint(TouchpointRequest request){
-        if(touchpointRepository.findByName(request.getName()).isPresent()){
+    public Touchpoint createTouchpoint(TouchpointRequest request) {
+        if (touchpointRepository.findByName(request.getName()).isPresent()) {
             throw new AppException(AppError.TOUCHPOINT_CONFLICT, request.getName());
         }
 
@@ -63,14 +63,14 @@ public class TouchpointService {
         return modelMapper.map(touchpointRepository.save(entry), Touchpoint.class);
     }
 
-    public void deleteTouchpoint(String idTouchpoint){
+    public void deleteTouchpoint(String idTouchpoint) {
         touchpointRepository.delete(getTouchpointById(idTouchpoint));
     }
 
-    private it.pagopa.afm.marketplacebe.entity.Touchpoint getTouchpointById(String idTouchpoint){
+    private it.pagopa.afm.marketplacebe.entity.Touchpoint getTouchpointById(String idTouchpoint) {
         Optional<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpoint = touchpointRepository.findById(idTouchpoint);
 
-        if(touchpoint.isEmpty()){
+        if (touchpoint.isEmpty()) {
             throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, idTouchpoint);
         }
 

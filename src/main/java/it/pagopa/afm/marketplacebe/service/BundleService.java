@@ -1,20 +1,48 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.repository.*;
-import it.pagopa.afm.marketplacebe.task.*;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
+import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
+import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.TaskManager;
+import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
+import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -32,12 +60,6 @@ import java.util.stream.Collectors;
 public class BundleService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
-
-    @Value("${azure.storage.connectionString}")
-    private String storageConnectionString;
-
-    @Value("${azure.storage.blobName}")
-    private String containerBlob;
 
     @Autowired
     private BundleRepository bundleRepository;
@@ -116,8 +138,8 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
-        verifyPaymentMethod(bundleRequest);
-        verifyTouchpoint(bundleRequest);
+        setPaymentMethodAnyIfNull(bundleRequest);
+        setVerifyTouchpointAnyIfNull(bundleRequest);
 
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
@@ -139,12 +161,17 @@ public class BundleService {
         LocalDateTime now = LocalDateTime.now();
         Bundle bundle = Bundle.builder()
                 .idPsp(idPsp)
+                .idChannel(bundleRequest.getIdChannel())
+                .idBrokerPsp(bundleRequest.getIdBrokerPsp())
                 .name(bundleRequest.getName())
                 .description(bundleRequest.getDescription())
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
                 .paymentMethod(bundleRequest.getPaymentMethod())
+                .onUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()))
+                .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
+                .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
                 .touchpoint(bundleRequest.getTouchpoint())
                 .type(bundleRequest.getType())
                 .transferCategoryList(bundleRequest.getTransferCategoryList())
@@ -160,8 +187,8 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
-        verifyPaymentMethod(bundleRequest);
-        verifyTouchpoint(bundleRequest);
+        setPaymentMethodAnyIfNull(bundleRequest);
+        setVerifyTouchpointAnyIfNull(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
@@ -188,6 +215,8 @@ public class BundleService {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
         }
 
+        bundle.setIdChannel(bundleRequest.getIdChannel());
+        bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
         bundle.setName(bundleRequest.getName());
         bundle.setDescription(bundleRequest.getDescription());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
@@ -199,16 +228,19 @@ public class BundleService {
         bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
         bundle.setLastUpdatedDate(LocalDateTime.now());
+        bundle.setOnUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()));
+        bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
+        bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
         ciBundles.parallelStream().forEach(ciBundle ->
-            ciBundle.getAttributes().parallelStream().forEach(attribute -> {
-                if (attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
-                    attribute.setMaxPaymentAmount(bundle.getPaymentAmount());
-                    ciBundleRepository.save(ciBundle);
-                }
-            })
+                ciBundle.getAttributes().parallelStream().forEach(attribute -> {
+                    if (attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
+                        attribute.setMaxPaymentAmount(bundle.getPaymentAmount());
+                        ciBundleRepository.save(ciBundle);
+                    }
+                })
         );
 
         return bundleRepository.save(bundle);
@@ -457,29 +489,22 @@ public class BundleService {
                 validBundlesTaskExecutor);
 
         CompletableFuture.runAsync(taskManager)
-                .whenComplete((msg, ex) -> {
-                    LocalDateTime when = LocalDateTime.now();
-                    if (ex != null) {
-                        log.error("Configuration not sent " + when, ex);
-                    } else {
-                        log.info("Configuration sent " + when);
-                    }
-                });
+                .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
-    private void verifyPaymentMethod(BundleRequest bundleRequest) {
+    private void setPaymentMethodAnyIfNull(BundleRequest bundleRequest) {
         if (bundleRequest.getPaymentMethod() == null) {
             bundleRequest.setPaymentMethod(PaymentMethod.ANY);
         }
     }
 
-    private void verifyTouchpoint(BundleRequest bundleRequest) {
+    private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
         String touchpoint = bundleRequest.getTouchpoint();
 
         if (touchpoint == null) {
             bundleRequest.setTouchpoint("ANY");
         } else {
-            if(touchpointRepository.findByName(touchpoint).isEmpty()){
+            if (touchpointRepository.findByName(touchpoint).isEmpty()) {
                 throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
             }
         }
@@ -543,26 +568,19 @@ public class BundleService {
     /**
      * Verify if payment amount range overlaps the target one
      *
-     * @param minPaymentAmount min amount of bundle request
-     * @param maxPaymentAmount max amount of bundle request
+     * @param minPaymentAmount       min amount of bundle request
+     * @param maxPaymentAmount       max amount of bundle request
      * @param minPaymentAmountTarget min amount of existent bundle
      * @param maxPaymentAmountTarget max amount of existent bundle
-     * @return
      */
     private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
-        return minPaymentAmount < maxPaymentAmount &&
-                (
-                    (minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget) ||
-                    (minPaymentAmount > maxPaymentAmountTarget && maxPaymentAmount > maxPaymentAmountTarget)
-                );
+        return minPaymentAmount < maxPaymentAmount && (
+                minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget || minPaymentAmount > maxPaymentAmountTarget
+        );
     }
 
     /**
      * Verify if transferCategoryList overlaps the target one
-     *
-     * @param transferCategoryList
-     * @param transferCategoryListTarget
-     * @return
      */
     private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
         return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
@@ -582,10 +600,6 @@ public class BundleService {
 
     /**
      * Verify if validDateFrom is acceptable according to target validityDateTo
-     *
-     * @param validityDateFrom
-     * @param validityDateToTarget
-     * @return
      */
     private boolean isValidityDateFromValid(LocalDate validityDateFrom, LocalDate validityDateToTarget) {
         return validityDateToTarget != null && !validityDateFrom.isBefore(validityDateToTarget) && !validityDateFrom.isEqual(validityDateToTarget);
@@ -594,7 +608,6 @@ public class BundleService {
     /**
      * If date is null, returns the next acceptable date
      *
-     * @param date
      * @return date
      */
     private LocalDate getNextAcceptableDate(LocalDate date) {
@@ -607,8 +620,6 @@ public class BundleService {
 
     /**
      * Verify if bundleRequest has got acceptable validityDateFrom and validityDateFrom
-     *
-     * @param bundleRequest
      */
     private void analyzeValidityDate(BundleRequest bundleRequest) {
         // verify if validityDateFrom is equal or after now
@@ -631,8 +642,6 @@ public class BundleService {
 
     /**
      * Verify if the request could be accepted according to the existent bundles
-     *
-     * @param bundleRequest
      */
     private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
@@ -652,7 +661,7 @@ public class BundleService {
         });
     }
 
-    private List<Bundle> getValidBundleByType(List<BundleType> types){
+    private List<Bundle> getValidBundleByType(List<BundleType> types) {
         switch (types.size()) {
             case 1:
                 return bundleRepository.getValidBundleByType(types.get(0).getValue());

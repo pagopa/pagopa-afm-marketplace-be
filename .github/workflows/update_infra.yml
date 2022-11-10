@@ -32,7 +32,7 @@ jobs:
         with:
           source_folder: 'infra'
           destination_repo: 'pagopa/pagopa-infra'
-          destination_folder: 'src/api/afm_api/marketplace/v1'
+          destination_folder: 'src/domains/afm-app/api/marketplace-service/v1'
           destination_base_branch: 'main'
           destination_head_branch: 'afm-marketplace-swagger-update'
           user_email: 'github-bot@pagopa.it'

@@ -38,7 +38,6 @@ import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.PspRequests;
-import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
 import lombok.experimental.UtilityClass;
 import org.assertj.core.util.Lists;
 import org.modelmapper.ModelMapper;
@@ -63,11 +62,18 @@ public class TestUtil {
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
     }
+
     public static String getMockCiFiscalCode() {
         return MOCK_CI_FISCAL_CODE;
     }
-    public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
-    public static String getMockBundleOfferId() { return MOCK_ID_OFFER; }
+
+    public static String getMockIdBundle() {
+        return MOCK_ID_BUNDLE;
+    }
+
+    public static String getMockBundleOfferId() {
+        return MOCK_ID_OFFER;
+    }
 
 
     /**
@@ -85,12 +91,17 @@ public class TestUtil {
         List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
 
         return BundleRequest.builder()
+                .idChannel("idChannel")
+                .idBrokerPsp("idBrokerPsp")
                 .name("name")
                 .description("description")
                 .paymentAmount(100L)
                 .minPaymentAmount(0L)
                 .maxPaymentAmount(10000L)
                 .paymentMethod(PaymentMethod.CP)
+                .onUs(true)
+                .digitalStamp(false)
+                .digitalStampRestriction(false)
                 .touchpoint("IO")
                 .type(BundleType.GLOBAL)
                 .transferCategoryList(transferCategoryList)
@@ -201,7 +212,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static CiBundleAttributeModel getMockBundleAttribute(){
+    public static CiBundleAttributeModel getMockBundleAttribute() {
         return CiBundleAttributeModel.builder()
                 .maxPaymentAmount(100L)
                 .transferCategory("PO")
@@ -306,7 +317,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static List<BundleOffer> getMockBundleOfferList(){
+    public static List<BundleOffer> getMockBundleOfferList() {
         return List.of(
                 getMockBundleOffer()
         );
@@ -329,6 +340,7 @@ public class TestUtil {
                 .ciBundleAttributes(Collections.emptyList())
                 .build();
     }
+
     public static PspRequests getMockPspRequests() {
         List<PspBundleRequest> list = List.of(getMockPspBundleRequest());
         PageInfo pageInfo = PageInfo.builder()
@@ -413,7 +425,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static ArchivedBundleOffer getMockArchivedBundleOffer(BundleOffer offer){
+    public static ArchivedBundleOffer getMockArchivedBundleOffer(BundleOffer offer) {
         return ArchivedBundleOffer.builder()
                 .idBundle(offer.getIdBundle())
                 .idPsp(offer.getIdPsp())
@@ -424,7 +436,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static Touchpoint getMockTouchpoint(){
+    public static Touchpoint getMockTouchpoint() {
         return Touchpoint.builder()
                 .id(UUID.randomUUID().toString())
                 .name("IO")
@@ -432,7 +444,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static Touchpoint getMockTouchpoint(String name){
+    public static Touchpoint getMockTouchpoint(String name) {
         return Touchpoint.builder()
                 .id(UUID.randomUUID().toString())
                 .name(name)
@@ -440,7 +452,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static Iterable<Touchpoint> getMockTouchpoints(){
+    public static Iterable<Touchpoint> getMockTouchpoints() {
         return List.of(
                 getMockTouchpoint("IO"),
                 getMockTouchpoint("CHECKOUT"),

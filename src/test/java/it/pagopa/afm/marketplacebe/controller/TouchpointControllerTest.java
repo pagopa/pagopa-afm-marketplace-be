@@ -1,7 +1,6 @@
 package it.pagopa.afm.marketplacebe.controller;
 
 import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.model.CalculatorConfiguration;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.junit.jupiter.api.Test;
@@ -15,11 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -48,7 +48,7 @@ class TouchpointControllerTest {
 
     @Test
     void getTouchpoint() throws Exception {
-        String url = "/touchpoints/"+ UUID.randomUUID();
+        String url = "/touchpoints/" + UUID.randomUUID();
 
         when(touchpointRepository.findById(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
 
@@ -71,7 +71,7 @@ class TouchpointControllerTest {
 
     @Test
     void deteteTouchpoint() throws Exception {
-        String url = "/touchpoints/"+ UUID.randomUUID();
+        String url = "/touchpoints/" + UUID.randomUUID();
 
         when(touchpointRepository.findById(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
 

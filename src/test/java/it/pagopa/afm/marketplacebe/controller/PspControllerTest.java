@@ -32,26 +32,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class PspControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    private BundleService bundleService;
-
-    @MockBean
-    private BundleOfferService bundleOfferService;
-
-    @MockBean
-    private BundleRequestService bundleRequestService;
-
     private final String BUNDLES = "/psps/%s/bundles";
     private final String BUNDLE = BUNDLES + "/%s";
     private final String CI_BUNDLES = BUNDLE + "/creditorInstitutions";
-    private final String OFFERS = "/psps/%s/offers";
     private final String SEND_OFFER = BUNDLE + "/offers";
+    private final String OFFERS = "/psps/%s/offers";
     private final String REQUESTS = "/psps/%s/requests";
     private final String ACCEPT_REQUEST = REQUESTS + "/%s/accept";
     private final String REJECT_REQUEST = REQUESTS + "/%s/reject";
+    @Autowired
+    private MockMvc mvc;
+    @MockBean
+    private BundleService bundleService;
+    @MockBean
+    private BundleOfferService bundleOfferService;
+    @MockBean
+    private BundleRequestService bundleRequestService;
 
     @Test
     void getBundles_200() throws Exception {

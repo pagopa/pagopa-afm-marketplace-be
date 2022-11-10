@@ -35,6 +35,17 @@ public class Bundle {
     @Size(max = 35)
     private String idPsp;
 
+    @NotNull
+    private String idChannel;
+
+    @NotNull
+    private String idBrokerPsp;
+
+    private Boolean digitalStamp;
+
+    // true if bundle must be used only for digital stamp
+    private Boolean digitalStampRestriction;
+
     private String name;
     private String description;
 
@@ -43,6 +54,9 @@ public class Bundle {
     private Long maxPaymentAmount;
 
     private PaymentMethod paymentMethod;
+
+    // useful only if paymentMethod = CP
+    private Boolean onUs;
 
     private String touchpoint;
 
