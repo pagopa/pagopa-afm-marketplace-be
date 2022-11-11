@@ -932,6 +932,9 @@ class BundleServiceTest {
         when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
 
+        when(touchpointRepository.findByName(bundleRequest.getTouchpoint())).thenReturn(Optional.of(
+                TestUtil.getMockTouchpoint(bundleRequest.getTouchpoint())));
+
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
         assertNotNull(result);
     }
@@ -1147,6 +1150,9 @@ class BundleServiceTest {
         when(bundleRepository.save(any(Bundle.class))).thenReturn(bundle);
 
         when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(TestUtil.getMockCiBundle()));
+
+        when(touchpointRepository.findByName(bundleRequest.getTouchpoint())).thenReturn(Optional.of(
+                TestUtil.getMockTouchpoint(bundleRequest.getTouchpoint())));
 
         Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), bundleRequest);
         assertNotNull(result);
