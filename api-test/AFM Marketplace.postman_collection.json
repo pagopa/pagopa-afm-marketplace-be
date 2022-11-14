@@ -986,6 +986,123 @@
 			]
 		},
 		{
+			"name": "Touchpoint",
+			"item": [
+				{
+					"name": "getTouchpoints",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/touchpoints",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"touchpoints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createTouchpoint",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"IO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/touchpoints",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"touchpoints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTouchpoint",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"pippo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/touchpoints/:id_touchpoint",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"touchpoints",
+								":id_touchpoint"
+							],
+							"variable": [
+								{
+									"key": "id_touchpoint",
+									"value": "b030634f-78ba-4463-98a2-f156f01f61ec"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteTouchpoint",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"pippo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/touchpoints/:id_touchpoint",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"touchpoints",
+								":id_touchpoint"
+							],
+							"variable": [
+								{
+									"key": "id_touchpoint",
+									"value": "7f0bf757-1d76-459d-9a4f-52d72f32bc05"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "getBundlesByType",
 			"request": {
 				"method": "GET",
@@ -1017,12 +1134,28 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{afm-host}}/{{afm-base-path}}/configuration",
+					"raw": "{{afm-host}}/configuration",
 					"host": [
 						"{{afm-host}}"
 					],
 					"path": [
-						"{{afm-base-path}}",
+						"configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getConfiguration Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{afm-host}}/configuration",
+					"host": [
+						"{{afm-host}}"
+					],
+					"path": [
 						"configuration"
 					]
 				}
@@ -1033,7 +1166,14 @@
 			"name": "info",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-Id",
+						"value": "pippo",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
 					"raw": "{{afm-host}}/info",
 					"host": [
