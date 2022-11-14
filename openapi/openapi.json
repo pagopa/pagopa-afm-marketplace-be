@@ -4323,7 +4323,7 @@
                     }
                 ],
                 "responses": {
-                    "202": {
+                    "200": {
                         "description": "OK",
                         "headers": {
                             "X-Request-Id": {
@@ -4334,11 +4334,7 @@
                             }
                         },
                         "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Touchpoint"
-                                }
-                            }
+                            "application/json": {}
                         }
                     },
                     "400": {

@@ -89,7 +89,7 @@ public class TouchpointController {
 
     @Operation(summary = "Delete touchpoint", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Touchpoint",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "202", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Touchpoint.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -99,7 +99,7 @@ public class TouchpointController {
             value = "/touchpoints/{id}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity deleteTouchpoint(
+    public ResponseEntity<Void> deleteTouchpoint(
             @Parameter(description = "Touchpoint identifier", required = true) @PathVariable("id") String id) {
         touchpointService.deleteTouchpoint(id);
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
