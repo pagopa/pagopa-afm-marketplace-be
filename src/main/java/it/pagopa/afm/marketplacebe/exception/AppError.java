@@ -22,8 +22,8 @@ public enum AppError {
     BUNDLE_OFFER_ALREADY_REJECTED(HttpStatus.CONFLICT, "Bundle Offer already rejected", "The offer %s was rejected on %s"),
 
     TOUCHPOINT_NOT_FOUND(HttpStatus.NOT_FOUND, "Touchpoint not found", "Touchpoint %s not found"),
-
-    TOUCHPOINT_CONFLICT(HttpStatus.CONFLICT, "Touchpoint conflict", "Touchpoint with name %s."),
+    TOUCHPOINT_CONFLICT(HttpStatus.CONFLICT, "Touchpoint conflict", "Touchpoint with name %s already exists."),
+    TOUCHPOINT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Touchpoint bad request", "Touchpoint with id %s."),
 
     CI_BUNDLE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "CI-BUNDLE bad request", "Problem to create CI-BUNDLE. %s"),
     CI_BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "No CI-BUNDLE relationship found", "Relation between Bundle %s and CI %s not found."),

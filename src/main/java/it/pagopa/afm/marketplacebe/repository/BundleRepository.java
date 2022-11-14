@@ -62,4 +62,11 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
             ")")
     List<Bundle> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
 
+
+    @Query(value = "SELECT * " +
+            "FROM bundles b " +
+            "WHERE (IS_NULL(b.validityDateTo) OR SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], " +
+            "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10)) AND b.touchpoint like @touchpointName")
+    List<Bundle> findByTouchpointAndValid(String touchpointName);
+
 }
