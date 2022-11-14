@@ -1,11 +1,13 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoint;
 import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
 import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoints;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -20,6 +22,9 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class TouchpointService {
+
+    @Autowired
+    private BundleRepository bundleRepository;
 
     @Autowired
     private TouchpointRepository touchpointRepository;
@@ -64,6 +69,11 @@ public class TouchpointService {
     }
 
     public void deleteTouchpoint(String idTouchpoint) {
+        var touchpoint = getTouchpointById(idTouchpoint);
+        List<Bundle> bundles = bundleRepository.findByTouchpointAndValid(touchpoint.getName());
+        if (!bundles.isEmpty()) {
+            throw new AppException(AppError.TOUCHPOINT_BAD_REQUEST, String.format("%s is used in at least one bundle.", idTouchpoint));
+        }
         touchpointRepository.delete(getTouchpointById(idTouchpoint));
     }
 

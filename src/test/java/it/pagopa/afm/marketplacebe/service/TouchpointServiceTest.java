@@ -5,6 +5,7 @@ import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoint;
 import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
 import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoints;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,11 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +34,9 @@ class TouchpointServiceTest {
     ArgumentCaptor<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpointArgumentCaptor = ArgumentCaptor.forClass(it.pagopa.afm.marketplacebe.entity.Touchpoint.class);
     @MockBean
     private TouchpointRepository touchpointRepository;
+
+    @MockBean
+    private BundleRepository bundleRepository;
     @Autowired
     @InjectMocks
     private TouchpointService touchpointService;
@@ -108,6 +115,7 @@ class TouchpointServiceTest {
 
         // Precondition
         when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
+        when(bundleRepository.findByTouchpointAndValid(anyString())).thenReturn(new ArrayList<>());
 
         // Tests
         touchpointService.deleteTouchpoint(id);
@@ -131,5 +139,22 @@ class TouchpointServiceTest {
         });
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
+    }
+
+    @Test
+    void shouldThrowBadRequestDeleteTouchpoint() {
+        it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
+        String id = mockTouchpoint.getId();
+
+        // Precondition
+        when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
+        when(bundleRepository.findByTouchpointAndValid(anyString())).thenReturn(List.of(TestUtil.getMockBundle()));
+
+        // Tests
+        AppException exception = assertThrows(AppException.class, () -> {
+            touchpointService.deleteTouchpoint(id);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
     }
 }
