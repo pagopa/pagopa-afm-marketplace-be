@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BundleTaskExecutor extends TaskExecutor {
 
-    private BundleRepository bundleRepository;
+    private final BundleRepository bundleRepository;
 
-    private ArchivedBundleRepository archivedBundleRepository;
+    private final ArchivedBundleRepository archivedBundleRepository;
 
     public BundleTaskExecutor(
             BundleRepository bundleRepository,

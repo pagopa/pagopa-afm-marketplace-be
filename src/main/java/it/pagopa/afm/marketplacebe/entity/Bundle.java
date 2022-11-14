@@ -58,7 +58,7 @@ public class Bundle {
     // useful only if paymentMethod = CP
     private Boolean onUs;
 
-    private Touchpoint touchpoint;
+    private String touchpoint;
 
     private BundleType type;
 

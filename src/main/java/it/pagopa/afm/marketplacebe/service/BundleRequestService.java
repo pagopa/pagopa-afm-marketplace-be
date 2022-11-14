@@ -253,7 +253,7 @@ public class BundleRequestService {
      * Create a new {@link ArchivedBundleRequest} entity and deletes the {@link BundleRequestEntity} entity.
      *
      * @param bundleRequestEntity an entity of {@link BundleRequestEntity}
-     * @param accepted      true = request is accepted, false = not accepted, null = deleted
+     * @param accepted            true = request is accepted, false = not accepted, null = deleted
      */
     private void archiveBundleRequest(BundleRequestEntity bundleRequestEntity, Boolean accepted) {
         var requestToArchive = bundleRequestEntity;
@@ -274,6 +274,7 @@ public class BundleRequestService {
 
     /**
      * Retrieve bundle
+     *
      * @param idBundle bundle identifier
      * @return bundle bundle or not found exception
      */

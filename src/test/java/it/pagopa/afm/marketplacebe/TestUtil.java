@@ -62,11 +62,18 @@ public class TestUtil {
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
     }
+
     public static String getMockCiFiscalCode() {
         return MOCK_CI_FISCAL_CODE;
     }
-    public static String getMockIdBundle() { return MOCK_ID_BUNDLE; }
-    public static String getMockBundleOfferId() { return MOCK_ID_OFFER; }
+
+    public static String getMockIdBundle() {
+        return MOCK_ID_BUNDLE;
+    }
+
+    public static String getMockBundleOfferId() {
+        return MOCK_ID_OFFER;
+    }
 
 
     /**
@@ -95,7 +102,7 @@ public class TestUtil {
                 .onUs(true)
                 .digitalStamp(false)
                 .digitalStampRestriction(false)
-                .touchpoint(Touchpoint.IO)
+                .touchpoint("IO")
                 .type(BundleType.GLOBAL)
                 .transferCategoryList(transferCategoryList)
                 .validityDateFrom(LocalDate.now().plusDays(1))
@@ -205,7 +212,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static CiBundleAttributeModel getMockBundleAttribute(){
+    public static CiBundleAttributeModel getMockBundleAttribute() {
         return CiBundleAttributeModel.builder()
                 .maxPaymentAmount(100L)
                 .transferCategory("PO")
@@ -310,7 +317,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static List<BundleOffer> getMockBundleOfferList(){
+    public static List<BundleOffer> getMockBundleOfferList() {
         return List.of(
                 getMockBundleOffer()
         );
@@ -333,6 +340,7 @@ public class TestUtil {
                 .ciBundleAttributes(Collections.emptyList())
                 .build();
     }
+
     public static PspRequests getMockPspRequests() {
         List<PspBundleRequest> list = List.of(getMockPspBundleRequest());
         PageInfo pageInfo = PageInfo.builder()
@@ -417,7 +425,7 @@ public class TestUtil {
                 .build();
     }
 
-    public static ArchivedBundleOffer getMockArchivedBundleOffer(BundleOffer offer){
+    public static ArchivedBundleOffer getMockArchivedBundleOffer(BundleOffer offer) {
         return ArchivedBundleOffer.builder()
                 .idBundle(offer.getIdBundle())
                 .idPsp(offer.getIdPsp())
@@ -428,4 +436,33 @@ public class TestUtil {
                 .build();
     }
 
+    public static Touchpoint getMockTouchpoint() {
+        return Touchpoint.builder()
+                .id(UUID.randomUUID().toString())
+                .name("IO")
+                .createdDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static Touchpoint getMockTouchpoint(String name) {
+        return Touchpoint.builder()
+                .id(UUID.randomUUID().toString())
+                .name(name)
+                .createdDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static Iterable<Touchpoint> getMockTouchpoints() {
+        return List.of(
+                getMockTouchpoint("IO"),
+                getMockTouchpoint("CHECKOUT"),
+                getMockTouchpoint("WISP")
+        );
+    }
+
+    public static it.pagopa.afm.marketplacebe.entity.Touchpoint getMockTouchpointRequest() {
+        return it.pagopa.afm.marketplacebe.entity.Touchpoint.builder()
+                .name("IO")
+                .build();
+    }
 }

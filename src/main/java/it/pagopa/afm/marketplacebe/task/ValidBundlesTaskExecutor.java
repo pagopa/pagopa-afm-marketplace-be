@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class ValidBundlesTaskExecutor extends TaskExecutor {
-    private BundleRepository bundleRepository;
-    private CiBundleRepository ciBundleRepository;
-    private ValidBundleRepository validBundleRepository;
+    private final BundleRepository bundleRepository;
+    private final CiBundleRepository ciBundleRepository;
+    private final ValidBundleRepository validBundleRepository;
 
     public ValidBundlesTaskExecutor(BundleRepository bundleRepository,
                                     CiBundleRepository ciBundleRepository,

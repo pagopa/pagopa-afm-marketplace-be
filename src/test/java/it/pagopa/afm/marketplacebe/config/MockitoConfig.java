@@ -8,6 +8,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -64,6 +65,12 @@ public class MockitoConfig {
     @Primary
     public ArchivedCiBundleRepository archivedCiBundleRepository() {
         return Mockito.mock(ArchivedCiBundleRepository.class);
+    }
+
+    @Bean
+    @Primary
+    public TouchpointRepository touchpointRepository() {
+        return Mockito.mock(TouchpointRepository.class);
     }
 
     @Bean

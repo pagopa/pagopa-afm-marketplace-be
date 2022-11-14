@@ -39,6 +39,7 @@ public class SwaggerConfig {
                         .description(appTitle)
                         .termsOfService("https://www.pagopa.gov.it/"));
     }
+
     @Bean
     OpenApiCustomiser sortOperationsAlphabetically() {
         return openApi -> {
@@ -56,6 +57,7 @@ public class SwaggerConfig {
             openApi.setPaths(paths);
         };
     }
+
     @Bean
     public OpenApiCustomiser addCommonHeaders() {
         return openApi -> openApi.getPaths().forEach((key, value) -> {

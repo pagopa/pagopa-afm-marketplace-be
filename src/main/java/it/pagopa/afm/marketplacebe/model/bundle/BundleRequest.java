@@ -2,7 +2,6 @@ package it.pagopa.afm.marketplacebe.model.bundle;
 
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
-import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +31,7 @@ public class BundleRequest {
     private Boolean onUs;
     private Boolean digitalStamp;
     private Boolean digitalStampRestriction;
-    private Touchpoint touchpoint;
+    private String touchpoint;
     private BundleType type;
     private List<String> transferCategoryList;
     private LocalDate validityDateFrom;

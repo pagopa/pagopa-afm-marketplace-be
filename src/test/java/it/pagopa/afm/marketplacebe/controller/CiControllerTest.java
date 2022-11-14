@@ -30,18 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class CiControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    private BundleService bundleService;
-
-    @MockBean
-    private BundleOfferService bundleOfferService;
-
-    @MockBean
-    private BundleRequestService bundleRequestService;
-
     private final String BUNDLES = "/cis/%s/bundles";
     private final String BUNDLE = BUNDLES + "/%s";
     private final String BUNDLE_ATTRIBUTES = BUNDLE + "/attributes";
@@ -49,7 +37,14 @@ class CiControllerTest {
     private final String OFFERS = "/cis/%s/offers";
     private final String ACCEPT_OFFER = OFFERS + "/%s/accept";
     private final String REJECT_OFFER = OFFERS + "/%s/reject";
-
+    @Autowired
+    private MockMvc mvc;
+    @MockBean
+    private BundleService bundleService;
+    @MockBean
+    private BundleOfferService bundleOfferService;
+    @MockBean
+    private BundleRequestService bundleRequestService;
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
@@ -243,7 +238,7 @@ class CiControllerTest {
 
         String url = String.format(REQUESTS, TestUtil.getMockCiFiscalCode());
 
-        mvc.perform(get (url)
+        mvc.perform(get(url)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -330,7 +325,7 @@ class CiControllerTest {
 
         String url = String.format(OFFERS, TestUtil.getMockCiFiscalCode());
 
-        mvc.perform(get (url)
+        mvc.perform(get(url)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
