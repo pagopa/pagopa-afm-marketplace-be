@@ -10,7 +10,6 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -98,7 +97,7 @@ public class TestUtil {
                 .paymentAmount(100L)
                 .minPaymentAmount(0L)
                 .maxPaymentAmount(10000L)
-                .paymentMethod(PaymentMethod.CP)
+                .paymentType("CP")
                 .onUs(true)
                 .digitalStamp(false)
                 .digitalStampRestriction(false)
