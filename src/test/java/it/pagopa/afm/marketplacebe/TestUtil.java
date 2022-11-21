@@ -10,6 +10,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
+import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.entity.Touchpoint;
 import it.pagopa.afm.marketplacebe.entity.TransferCategoryRelation;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -57,6 +58,8 @@ public class TestUtil {
     private final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8";
 
     private final static String MOCK_ID_OFFER = "acfbc9c6-6c0b-429e-83ca-30ef453504f8";
+
+    private final static String MOCK_ID_PAYMENT_TYPE = "76c16af5-241b-4b9d-bda2-0b5f6b427a4c";
 
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
@@ -129,6 +132,7 @@ public class TestUtil {
         bundle.setIdPsp(getMockIdPsp());
         bundle.setInsertedDate(LocalDateTime.now());
         bundle.setLastUpdatedDate(LocalDateTime.now());
+        bundle.setPaymentType("CP");
         return bundle;
     }
 
@@ -463,5 +467,12 @@ public class TestUtil {
         return it.pagopa.afm.marketplacebe.entity.Touchpoint.builder()
                 .name("IO")
                 .build();
+    }
+
+    public static PaymentType getMockPaymentType(){
+        return PaymentType.builder()
+                .id(MOCK_ID_PAYMENT_TYPE)
+                .name("CP")
+                .createdDate(LocalDateTime.now()).build();
     }
 }

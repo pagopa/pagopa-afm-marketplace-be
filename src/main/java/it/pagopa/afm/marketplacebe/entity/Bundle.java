@@ -53,7 +53,7 @@ public class Bundle {
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
 
-    private PaymentType paymentType;
+    private String paymentType;
 
     // useful only if paymentMethod = CP
     private Boolean onUs;

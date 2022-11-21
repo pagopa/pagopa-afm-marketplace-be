@@ -158,7 +158,7 @@ public class BundleService {
         analyzeBundlesOverlapping(idPsp, bundleRequest);
 
         // verify if paymentType exists with the requested name
-        PaymentType paymentType = getPaymentTypeByName(bundleRequest.getPaymentType());
+        getPaymentTypeByName(bundleRequest.getPaymentType());
 
         // verify no bundle exists with the same name
         if (bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)).isPresent()) {
@@ -175,7 +175,7 @@ public class BundleService {
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
-                .paymentType(paymentType)
+                .paymentType(bundleRequest.getPaymentType())
                 .onUs(bundleRequest.getPaymentType().equals("CP") && CommonUtil.deNull(bundleRequest.getOnUs()))
                 .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
                 .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
@@ -654,7 +654,7 @@ public class BundleService {
         Optional<PaymentType> paymentType = paymentTypeRepository.findByName(paymentTypeName);
 
         if(paymentType.isEmpty()){
-            throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, "PaymentType not found.");
+            throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentTypeName);
         }
 
         return paymentType.get();
