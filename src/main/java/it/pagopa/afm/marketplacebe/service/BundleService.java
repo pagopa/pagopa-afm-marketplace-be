@@ -651,13 +651,8 @@ public class BundleService {
      * Verify if paymentType exists in the related container
      */
     private PaymentType getPaymentTypeByName(String paymentTypeName) {
-        Optional<PaymentType> paymentType = paymentTypeRepository.findByName(paymentTypeName);
-
-        if(paymentType.isEmpty()){
-            throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentTypeName);
-        }
-
-        return paymentType.get();
+        return paymentTypeRepository.findByName(paymentTypeName)
+                .orElseThrow(() -> new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentTypeName));
     }
 
     /**
