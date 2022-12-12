@@ -7,7 +7,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
+import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -31,6 +31,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
@@ -90,6 +91,9 @@ public class BundleService {
 
     @Autowired
     private ValidBundleRepository validBundleRepository;
+
+    @Autowired
+    private PaymentTypeRepository paymentTypeRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -153,6 +157,9 @@ public class BundleService {
         // check if there is overlapping transferCategoryList
         analyzeBundlesOverlapping(idPsp, bundleRequest);
 
+        // verify if paymentType exists with the requested name
+        getPaymentTypeByName(bundleRequest.getPaymentType());
+
         // verify no bundle exists with the same name
         if (bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)).isPresent()) {
             throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
@@ -168,8 +175,8 @@ public class BundleService {
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
-                .paymentMethod(bundleRequest.getPaymentMethod())
-                .onUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()))
+                .paymentType(bundleRequest.getPaymentType())
+                .onUs(bundleRequest.getPaymentType().equals("CP") && CommonUtil.deNull(bundleRequest.getOnUs()))
                 .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
                 .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
                 .touchpoint(bundleRequest.getTouchpoint())
@@ -228,7 +235,7 @@ public class BundleService {
         bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
         bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
         bundle.setLastUpdatedDate(LocalDateTime.now());
-        bundle.setOnUs(bundleRequest.getPaymentMethod().equals(PaymentMethod.CP) && CommonUtil.deNull(bundleRequest.getOnUs()));
+        bundle.setOnUs(bundleRequest.getPaymentType().equals("CP") && CommonUtil.deNull(bundleRequest.getOnUs()));
         bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
         bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
 
@@ -493,8 +500,8 @@ public class BundleService {
     }
 
     private void setPaymentMethodAnyIfNull(BundleRequest bundleRequest) {
-        if (bundleRequest.getPaymentMethod() == null) {
-            bundleRequest.setPaymentMethod(PaymentMethod.ANY);
+        if (bundleRequest.getPaymentType() == null) {
+            bundleRequest.setPaymentType("ANY");
         }
     }
 
@@ -641,6 +648,14 @@ public class BundleService {
     }
 
     /**
+     * Verify if paymentType exists in the related container
+     */
+    private PaymentType getPaymentTypeByName(String paymentTypeName) {
+        return paymentTypeRepository.findByName(paymentTypeName)
+                .orElseThrow(() -> new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentTypeName));
+    }
+
+    /**
      * Verify if the request could be accepted according to the existent bundles
      */
     private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
@@ -649,7 +664,7 @@ public class BundleService {
         // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
 
-        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(idPsp, bundleRequest.getType(), bundleRequest.getPaymentMethod(), bundleRequest.getTouchpoint());
+        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable

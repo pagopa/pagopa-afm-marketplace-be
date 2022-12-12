@@ -49,7 +49,7 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
             validBundle.setPaymentAmount(bundle.getPaymentAmount());
             validBundle.setMinPaymentAmount(bundle.getMinPaymentAmount());
             validBundle.setMaxPaymentAmount(bundle.getMaxPaymentAmount());
-            validBundle.setPaymentMethod(bundle.getPaymentMethod());
+            validBundle.setPaymentType(bundle.getPaymentType());
             validBundle.setTouchpoint(bundle.getTouchpoint());
             validBundle.setType(bundle.getType());
             validBundle.setTransferCategoryList(bundle.getTransferCategoryList());

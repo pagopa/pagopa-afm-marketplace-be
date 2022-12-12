@@ -39,7 +39,7 @@ public class ArchivedBundle {
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
 
-    private PaymentMethod paymentMethod;
+    private PaymentType paymentType;
 
     private Touchpoint touchpoint;
 

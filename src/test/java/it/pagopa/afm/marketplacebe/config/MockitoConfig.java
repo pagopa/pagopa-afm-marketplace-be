@@ -8,6 +8,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 import org.mockito.Mockito;
@@ -77,6 +78,13 @@ public class MockitoConfig {
     @Primary
     public ValidBundleRepository validBundleRepository() {
         return Mockito.mock(ValidBundleRepository.class);
+    }
+
+    @Bean
+
+    @Primary
+    public PaymentTypeRepository paymentTypeRepository(){
+        return Mockito.mock(PaymentTypeRepository.class);
     }
 
 }

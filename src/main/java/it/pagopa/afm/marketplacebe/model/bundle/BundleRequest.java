@@ -1,7 +1,6 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
 import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +26,7 @@ public class BundleRequest {
     private Long paymentAmount;
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
-    private PaymentMethod paymentMethod;
+    private String paymentType;
     private Boolean onUs;
     private Boolean digitalStamp;
     private Boolean digitalStampRestriction;
