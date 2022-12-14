@@ -142,7 +142,7 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
-        setPaymentMethodAnyIfNull(bundleRequest);
+        setPaymentTypeAnyIfNull(bundleRequest);
         setVerifyTouchpointAnyIfNull(bundleRequest);
 
         // verify validityDateFrom, if null set to now +1d
@@ -151,9 +151,9 @@ public class BundleService {
         // verify validityDateFrom and validityDateTo
         analyzeValidityDate(bundleRequest);
 
-        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
-        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
         analyzeBundlesOverlapping(idPsp, bundleRequest);
 
@@ -194,7 +194,7 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
-        setPaymentMethodAnyIfNull(bundleRequest);
+        setPaymentTypeAnyIfNull(bundleRequest);
         setVerifyTouchpointAnyIfNull(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
@@ -210,9 +210,9 @@ public class BundleService {
         // verify validityDateFrom and validityDateTo
         analyzeValidityDate(bundleRequest);
 
-        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
-        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
         analyzeBundlesOverlapping(idPsp, bundleRequest);
 
@@ -499,7 +499,7 @@ public class BundleService {
                 .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
-    private void setPaymentMethodAnyIfNull(BundleRequest bundleRequest) {
+    private void setPaymentTypeAnyIfNull(BundleRequest bundleRequest) {
         if (bundleRequest.getPaymentType() == null) {
             bundleRequest.setPaymentType("ANY");
         }
@@ -659,12 +659,12 @@ public class BundleService {
      * Verify if the request could be accepted according to the existent bundles
      */
     private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
-        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentMethod, touchpoint, type, transferCategoryList)
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
-        // check if the same payment amount range must not have the same tuple (paymentMethod, touchpoint, type, transferCategoryList)
+        // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
 
-        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentMethodAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()), bundleRequest.getTouchpoint());
+        List<Bundle> bundles = bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()), bundleRequest.getTouchpoint());
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable

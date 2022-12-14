@@ -26,7 +26,7 @@ public class CiBundleInfo {
     private Long paymentAmount;
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
-    private String paymentMethod;
+    private String paymentType;
     private String touchpoint;
     private String type;
     private List<String> transferCategoryList;
