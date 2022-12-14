@@ -43,7 +43,7 @@ class PaymentTypeServiceTest {
         PaymentTypes paymentTypes = paymentTypeService.getPaymentTypes();
 
         // Assertions
-        assertEquals(1, paymentTypes.getPaymentTypes().size());
+        assertEquals(1, paymentTypes.getPaymentTypeList().size());
     }
 
     @Test
@@ -57,7 +57,7 @@ class PaymentTypeServiceTest {
         PaymentType paymentType = paymentTypeService.getPaymentType(paymentTypeMock.getName());
 
         // Assertions
-        assertEquals(paymentTypeMock.getName(), paymentType.getPaymentType());
+        assertEquals(paymentTypeMock.getName(), paymentType.getName());
     }
 
 }
