@@ -25,7 +25,7 @@ public class PaymentTypes {
     @Schema(required = true)
     @NotNull
     @Valid
-    private List<PaymentType> paymentTypes;
+    private List<PaymentType> paymentTypeList;
 
 
     @Schema(required = true)

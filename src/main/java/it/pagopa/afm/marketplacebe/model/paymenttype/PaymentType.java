@@ -22,7 +22,7 @@ public class PaymentType {
     @Schema(required = true)
     @NotNull
     @Valid
-    private String paymentType;
+    private String name;
 
 
     @Schema(required = true)

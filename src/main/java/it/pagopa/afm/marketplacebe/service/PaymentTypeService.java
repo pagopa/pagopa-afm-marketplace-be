@@ -42,7 +42,7 @@ public class PaymentTypeService {
                 .build();
 
         return PaymentTypes.builder()
-                .paymentTypes(paymentTypes)
+                .paymentTypeList(paymentTypes)
                 .pageInfo(pageInfo)
                 .build();
     }
@@ -52,7 +52,7 @@ public class PaymentTypeService {
         List<Bundle> bundles = bundleRepository.findByPaymentType(pt.getName());
 
         return it.pagopa.afm.marketplacebe.model.paymenttype.PaymentType.builder()
-                .paymentType(paymentTypeName)
+                .name(paymentTypeName)
                 .used(!bundles.isEmpty())
                 .build();
     }
