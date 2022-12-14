@@ -21,7 +21,7 @@ import java.util.List;
 @ToString
 public class PaymentTypes {
 
-    @JsonProperty("payment_types")
+    @JsonProperty("paymentTypes")
     @Schema(required = true)
     @NotNull
     @Valid
