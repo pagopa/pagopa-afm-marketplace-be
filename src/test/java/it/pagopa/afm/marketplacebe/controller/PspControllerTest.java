@@ -162,6 +162,32 @@ class PspControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+    
+    @Test
+    void createBundleByList_201() throws Exception {
+        when(bundleService.createBundleByList(anyString(), any())).thenReturn(TestUtil.getMockBundleResponseList());
+
+        String url = String.format(BUNDLES+"/massive", TestUtil.getMockIdPsp());
+
+        mvc.perform(post(url)
+                        .content(TestUtil.toJson(TestUtil.getMockBundleRequestList()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createBundleByList_400() throws Exception {
+        AppException exception = new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDate");
+        doThrow(exception).when(bundleService).createBundleByList(anyString(), any());
+
+        String url = String.format(BUNDLES+"/massive", TestUtil.getMockIdPsp());
+
+        mvc.perform(post(url)
+                        .content(TestUtil.toJson(TestUtil.getMockBundleRequestList()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 
     @Test
     void createBundle_409() throws Exception {
