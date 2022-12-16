@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class PaymentType {
 
-    @JsonProperty("payment_type")
+    @JsonProperty("paymentType")
     @Schema(required = true)
     @NotNull
     @Valid
