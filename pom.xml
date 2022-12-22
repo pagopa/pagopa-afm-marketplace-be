@@ -104,6 +104,13 @@
 			<version>${azure-storage-blob-version}</version>
 		</dependency>
 
+		<!-- dependencies to solve vulnerabilities-->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.33</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

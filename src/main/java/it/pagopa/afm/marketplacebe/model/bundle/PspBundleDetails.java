@@ -25,7 +25,7 @@ public class PspBundleDetails {
     private Long paymentAmount;
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
-    private String paymentMethod;
+    private String paymentType;
     private String touchpoint;
     private String type;
     private List<String> transferCategoryList;
@@ -33,5 +33,11 @@ public class PspBundleDetails {
     private LocalDate validityDateTo;
     private LocalDateTime insertedDate;
     private LocalDateTime lastUpdatedDate;
+    private String idChannel;
+
+    private String idBrokerPsp;
+    private Boolean digitalStamp;
+    private Boolean digitalStampRestriction;
+    private Boolean onUs;
 
 }

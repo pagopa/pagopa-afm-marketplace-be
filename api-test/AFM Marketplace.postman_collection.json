@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "621f015b-585a-4fb4-91a3-24717fba833b",
+		"_postman_id": "45cbf671-73b2-4e0e-a02b-5776fad38087",
 		"name": "AFM Marketplace",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "3634782"
@@ -40,7 +40,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"global-2\",\n    \"description\": \"description\",\n    \"paymentAmount\": 200,\n    \"minPaymentAmount\": 10001,\n    \"maxPaymentAmount\": 30000,\n    \"paymentMethod\": \"CP\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"GLOBAL\",\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"raw": "{\n    \"name\": \"global-2\",\n    \"description\": \"description\",\n    \"paymentAmount\": 200,\n    \"minPaymentAmount\": 10001,\n    \"maxPaymentAmount\": 30000,\n    \"paymentType\": \"CP\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"GLOBAL\",\n    \"idChannel\": \"88888888899_01\",\n    \"idBrokerPsp\": \"88888888899\",\n    \"digitalStamp\": false,\n    \"digitalStampRestriction\": false,\n    \"onUs\": false,\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -48,13 +48,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"raw": "{{afm-host}}/{{afm-base-path}}psps/:id_psp/bundles",
 							"host": [
 								"{{afm-host}}"
 							],
 							"path": [
-								"{{afm-base-path}}",
-								"psps",
+								"{{afm-base-path}}psps",
 								":id_psp",
 								"bundles"
 							],
@@ -244,13 +243,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{afm-host}}/{{afm-base-path}}/psps/:id_psp/bundles",
+							"raw": "{{afm-host}}/{{afm-base-path}}psps/:id_psp/bundles",
 							"host": [
 								"{{afm-host}}"
 							],
 							"path": [
-								"{{afm-base-path}}",
-								"psps",
+								"{{afm-base-path}}psps",
 								":id_psp",
 								"bundles"
 							],
@@ -979,7 +977,10 @@
 					"name": "New Request",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": ""
+						}
 					},
 					"response": []
 				}
@@ -1094,6 +1095,64 @@
 								{
 									"key": "id_touchpoint",
 									"value": "7f0bf757-1d76-459d-9a4f-52d72f32bc05"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment Type",
+			"item": [
+				{
+					"name": "getPaymentTypes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{afm-host}}/paymenttypes",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"paymenttypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPaymentType",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"pippo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{afm-host}}/paymenttypes/:payment_type_name",
+							"host": [
+								"{{afm-host}}"
+							],
+							"path": [
+								"paymenttypes",
+								":payment_type_name"
+							],
+							"variable": [
+								{
+									"key": "payment_type_name",
+									"value": "CP"
 								}
 							]
 						}
