@@ -12,7 +12,7 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.8.0</version>
+	<version>0.9.0</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
