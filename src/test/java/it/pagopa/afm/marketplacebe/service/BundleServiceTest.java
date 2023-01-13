@@ -1314,9 +1314,10 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(7));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
-
+        String idPsp = TestUtil.getMockIdPsp();
+        List<BundleRequest> bundleRequestList = List.of(bundleRequest);
         try {
-        	bundleService.createBundleByList(TestUtil.getMockIdPsp(), Arrays.asList(bundleRequest));
+        	bundleService.createBundleByList(idPsp, bundleRequestList);
             fail();
         } catch (AppException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());

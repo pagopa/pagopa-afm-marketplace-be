@@ -190,7 +190,7 @@ public class BundleService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        Bundle bundle = Bundle.builder()
+        return Bundle.builder()
                 .idPsp(idPsp)
                 .idChannel(bundleRequest.getIdChannel())
                 .idBrokerPsp(bundleRequest.getIdBrokerPsp())
@@ -211,7 +211,6 @@ public class BundleService {
                 .insertedDate(now)
                 .lastUpdatedDate(now)
                 .build();
-        return bundle;
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
