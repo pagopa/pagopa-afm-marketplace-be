@@ -96,6 +96,7 @@ public class TestUtil {
         return BundleRequest.builder()
                 .idChannel("idChannel")
                 .idBrokerPsp("idBrokerPsp")
+                .idCdi("idCdi")
                 .name("name")
                 .description("description")
                 .paymentAmount(100L)
@@ -195,6 +196,7 @@ public class TestUtil {
 
     public static Bundle getMockBundle() {
         ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setAmbiguityIgnored(true);
         Bundle bundle = modelMapper.map(getMockBundleRequest(), Bundle.class);
         bundle.setId(getMockIdBundle());
         bundle.setIdPsp(getMockIdPsp());

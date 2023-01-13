@@ -157,8 +157,7 @@ class BundleServiceTest {
         var bundle = getMockBundle();
 
         // Precondition
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.empty());
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
         String idBundle = bundle.getId();
         String idPsp = bundle.getIdPsp();
         AppException exc = assertThrows(AppException.class, () ->

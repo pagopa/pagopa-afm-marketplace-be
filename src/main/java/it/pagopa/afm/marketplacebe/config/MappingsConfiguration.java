@@ -16,7 +16,7 @@ public class MappingsConfiguration {
     public ModelMapper modelMapper() {
 
         ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STANDARD);
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Converter<Bundle, PspBundleDetails> convertBundleToPspBundleDetails = new ConvertBundleToPspBundleDetails();
         mapper.createTypeMap(Bundle.class, PspBundleDetails.class).setConverter(convertBundleToPspBundleDetails);
