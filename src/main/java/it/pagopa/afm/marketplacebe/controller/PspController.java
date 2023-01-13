@@ -185,6 +185,31 @@ public class PspController {
             @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundle(idPsp, bundleRequest));
     }
+    
+    /**
+     * POST /psps/:idpsp/bundles/massive: Create bundles by list 
+     *
+     * @param idPsp : PSP identifier
+     * @return the bundle created
+     */
+    @Operation(summary = "Create new bundles by list", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @PostMapping(
+            value = "/{idpsp}/bundles/massive",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<List<BundleResponse>> createBundleByList(
+            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @RequestBody @Valid @NotNull List<BundleRequest> bundleRequestList) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundleByList(idPsp, bundleRequestList));
+    }
+
 
     /**
      * UPDATE /psps/:idpsp/bundles/:idbundle : Update the bundle with the given id

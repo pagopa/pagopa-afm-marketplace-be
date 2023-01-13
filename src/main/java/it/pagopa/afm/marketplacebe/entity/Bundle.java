@@ -40,6 +40,9 @@ public class Bundle {
 
     @NotNull
     private String idBrokerPsp;
+    
+    @NotNull
+    private String idCdi;
 
     private Boolean digitalStamp;
 

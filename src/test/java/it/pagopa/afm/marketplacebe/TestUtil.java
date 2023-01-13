@@ -44,6 +44,7 @@ import org.modelmapper.ModelMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -95,6 +96,7 @@ public class TestUtil {
         return BundleRequest.builder()
                 .idChannel("idChannel")
                 .idBrokerPsp("idBrokerPsp")
+                .idCdi("idCdi")
                 .name("name")
                 .description("description")
                 .paymentAmount(100L)
@@ -110,6 +112,73 @@ public class TestUtil {
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(LocalDate.now().plusDays(8))
                 .build();
+    }
+    
+    public static List<BundleRequest> getMockBundleRequestList() {
+    	
+    	List<BundleRequest> bundleRequestList = new ArrayList<>();
+    	
+        List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
+        
+        bundleRequestList.add(BundleRequest.builder()
+                .idChannel("idChannel1")
+                .idBrokerPsp("idBrokerPsp1")
+                .idCdi("idCdi")
+                .name("name")
+                .description("description")
+                .paymentAmount(100L)
+                .minPaymentAmount(0L)
+                .maxPaymentAmount(10000L)
+                .paymentType("CP")
+                .onUs(true)
+                .digitalStamp(false)
+                .digitalStampRestriction(false)
+                .touchpoint("IO")
+                .type(BundleType.GLOBAL)
+                .transferCategoryList(transferCategoryList)
+                .validityDateFrom(LocalDate.now().plusDays(1))
+                .validityDateTo(LocalDate.now().plusDays(8))
+                .build());
+        bundleRequestList.add(BundleRequest.builder()
+                .idChannel("idChannel2")
+                .idBrokerPsp("idBrokerPsp2")
+                .idCdi("idCdi")
+                .name("name")
+                .description("description")
+                .paymentAmount(200L)
+                .minPaymentAmount(0L)
+                .maxPaymentAmount(20000L)
+                .paymentType("CP")
+                .onUs(true)
+                .digitalStamp(false)
+                .digitalStampRestriction(false)
+                .touchpoint("IO")
+                .type(BundleType.GLOBAL)
+                .transferCategoryList(transferCategoryList)
+                .validityDateFrom(null)
+                .validityDateTo(null)
+                .build());
+        bundleRequestList.add(BundleRequest.builder()
+                .idChannel("idChannel3")
+                .idBrokerPsp("idBrokerPsp3")
+                .idCdi("idCdi")
+                .name("name")
+                .description("description")
+                .paymentAmount(300L)
+                .minPaymentAmount(0L)
+                .maxPaymentAmount(30000L)
+                .paymentType("CP")
+                .onUs(true)
+                .digitalStamp(false)
+                .digitalStampRestriction(false)
+                .touchpoint("IO")
+                .type(BundleType.GLOBAL)
+                .transferCategoryList(transferCategoryList)
+                .validityDateFrom(LocalDate.now().plusDays(1))
+                .validityDateTo(null)
+                .build());
+
+        return bundleRequestList;
     }
 
     public static BundleRequestEntity getMockBundleRequestEntity() {
@@ -127,6 +196,7 @@ public class TestUtil {
 
     public static Bundle getMockBundle() {
         ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setAmbiguityIgnored(true);
         Bundle bundle = modelMapper.map(getMockBundleRequest(), Bundle.class);
         bundle.setId(getMockIdBundle());
         bundle.setIdPsp(getMockIdPsp());
@@ -134,6 +204,32 @@ public class TestUtil {
         bundle.setLastUpdatedDate(LocalDateTime.now());
         bundle.setPaymentType("CP");
         return bundle;
+    }
+    
+    public static List<Bundle> getMockBundleList() {
+        List<Bundle> bundleList = Arrays.asList(
+        		Bundle.builder()
+        		.id(getMockIdBundle())
+        		.idPsp(getMockIdPsp())
+        		.insertedDate(LocalDateTime.now())
+        		.lastUpdatedDate(LocalDateTime.now())
+        		.paymentType("CP")
+        		.build(),
+        		Bundle.builder()
+        		.id(getMockIdBundle())
+        		.idPsp(getMockIdPsp())
+        		.insertedDate(LocalDateTime.now())
+        		.lastUpdatedDate(LocalDateTime.now())
+        		.paymentType("CP")
+        		.build(),
+        		Bundle.builder()
+        		.id(getMockIdBundle())
+        		.idPsp(getMockIdPsp())
+        		.insertedDate(LocalDateTime.now())
+        		.lastUpdatedDate(LocalDateTime.now())
+        		.paymentType("CP")
+        		.build());
+        return bundleList;
     }
 
     public static List<Bundle> getMockBundleSameConfiguration() {
@@ -283,6 +379,18 @@ public class TestUtil {
         return BundleResponse.builder()
                 .idBundle(getMockIdBundle())
                 .build();
+    }
+    
+    public static List<BundleResponse> getMockBundleResponseList() {
+        return Arrays.asList(BundleResponse.builder()
+                .idBundle(getMockIdBundle())
+                .build(),
+                BundleResponse.builder()
+                .idBundle(getMockIdBundle())
+                .build(),
+                BundleResponse.builder()
+                .idBundle(getMockIdBundle())
+                .build());
     }
 
     public static PspBundleOffer getMockPspBundleOffer() {

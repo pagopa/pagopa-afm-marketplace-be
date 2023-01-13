@@ -1,6 +1,24 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.collections4.ListUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.azure.cosmos.models.PartitionKey;
+
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
@@ -42,19 +60,6 @@ import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -140,8 +145,27 @@ public class BundleService {
 
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
+    
+    public List<BundleResponse> createBundleByList(String idPsp, List<BundleRequest> bundleRequestList) {
+    	List <Bundle> bundles = new ArrayList<>();
+    	for (BundleRequest bundleRequest: ListUtils.emptyIfNull(bundleRequestList)) {
+    		var bundle = generateBundle(idPsp, bundleRequest);
+    		bundles.add(bundle);
+    	}
+    	
+    	return StreamSupport.stream(bundleRepository.saveAll(bundles).spliterator(), true)
+                .map(b -> BundleResponse.builder().idBundle(b.getId()).build()).collect(Collectors.toList());
+    }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
+        var bundle = generateBundle(idPsp, bundleRequest);
+        bundleRepository.save(bundle);
+        return BundleResponse.builder()
+                .idBundle(bundle.getId())
+                .build();
+    }
+
+    private Bundle generateBundle(String idPsp, BundleRequest bundleRequest) {
         setPaymentTypeAnyIfNull(bundleRequest);
         setVerifyTouchpointAnyIfNull(bundleRequest);
 
@@ -166,7 +190,7 @@ public class BundleService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        Bundle bundle = Bundle.builder()
+        return Bundle.builder()
                 .idPsp(idPsp)
                 .idChannel(bundleRequest.getIdChannel())
                 .idBrokerPsp(bundleRequest.getIdBrokerPsp())
@@ -176,7 +200,7 @@ public class BundleService {
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
                 .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
                 .paymentType(bundleRequest.getPaymentType())
-                .onUs(bundleRequest.getPaymentType().equals("CP") && CommonUtil.deNull(bundleRequest.getOnUs()))
+                .onUs(bundleRequest.getPaymentType().equals("CP") && bundleRequest.getIdChannel().endsWith("ONUS"))
                 .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
                 .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
                 .touchpoint(bundleRequest.getTouchpoint())
@@ -186,10 +210,6 @@ public class BundleService {
                 .validityDateTo(bundleRequest.getValidityDateTo())
                 .insertedDate(now)
                 .lastUpdatedDate(now)
-                .build();
-        bundleRepository.save(bundle);
-        return BundleResponse.builder()
-                .idBundle(bundle.getId())
                 .build();
     }
 
@@ -642,7 +662,7 @@ public class BundleService {
 
             // check it is before validityDateTo
             if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom");
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom.");
             }
         }
     }

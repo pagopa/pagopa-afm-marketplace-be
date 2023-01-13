@@ -1,6 +1,45 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+
 import com.azure.cosmos.models.PartitionKey;
+
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
@@ -26,42 +65,6 @@ import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BundleServiceTest {
@@ -154,8 +157,7 @@ class BundleServiceTest {
         var bundle = getMockBundle();
 
         // Precondition
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.empty());
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
         String idBundle = bundle.getId();
         String idPsp = bundle.getIdPsp();
         AppException exc = assertThrows(AppException.class, () ->
@@ -1286,6 +1288,42 @@ class BundleServiceTest {
         when(ciBundleRepository.findAll()).thenReturn(new ArrayList<>());
 
         assertDoesNotThrow(() -> bundleService.getConfiguration());
+    }
+    
+    @Test
+    void createBundleByList_ok() {
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), any(PaymentType.class), anyString())).thenReturn(Collections.emptyList());
+
+        when(bundleRepository.findByNameAndIdPsp(anyString(), anyString(), any())).thenReturn(Optional.empty());
+        when(bundleRepository.saveAll(any())).thenReturn(TestUtil.getMockBundleList());
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        List<BundleResponse> result = bundleService.createBundleByList(TestUtil.getMockIdPsp(), TestUtil.getMockBundleRequestList());
+        assertNotNull(result);
+        assertEquals(3,result.size());
+    }
+    
+    @Test
+    void createBundleByList_ko() {
+    	// validityDateTo before validityDateFrom
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setValidityDateFrom(LocalDate.now().plusDays(8));
+        bundleRequest.setValidityDateTo(LocalDate.now().plusDays(7));
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        String idPsp = TestUtil.getMockIdPsp();
+        List<BundleRequest> bundleRequestList = List.of(bundleRequest);
+        try {
+        	bundleService.createBundleByList(idPsp, bundleRequestList);
+            fail();
+        } catch (AppException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());
+        } catch (Exception e) {
+            fail();
+        }
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {

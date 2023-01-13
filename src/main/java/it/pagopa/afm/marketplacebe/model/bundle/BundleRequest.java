@@ -21,6 +21,8 @@ public class BundleRequest {
     private String idChannel;
     @NotNull
     private String idBrokerPsp;
+    @NotNull
+    private String idCdi;
     private String name;
     private String description;
     private Long paymentAmount;
