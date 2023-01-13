@@ -149,51 +149,7 @@ public class BundleService {
     public List<BundleResponse> createBundleByList(String idPsp, List<BundleRequest> bundleRequestList) {
     	List <Bundle> bundles = new ArrayList<>();
     	for (BundleRequest bundleRequest: ListUtils.emptyIfNull(bundleRequestList)) {
-    		setPaymentTypeAnyIfNull(bundleRequest);
-    		setVerifyTouchpointAnyIfNull(bundleRequest);
-
-    		// verify validityDateFrom, if null set to now +1d
-    		bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
-
-    		// verify validityDateFrom and validityDateTo
-    		analyzeValidityDate(bundleRequest);
-
-    		// check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
-    		// if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
-    		// check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
-    		// check if there is overlapping transferCategoryList
-    		analyzeBundlesOverlapping(idPsp, bundleRequest);
-
-    		// verify if paymentType exists with the requested name
-    		getPaymentTypeByName(bundleRequest.getPaymentType());
-
-    		// verify no bundle exists with the same name
-    		if (bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)).isPresent()) {
-    			throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
-    		}
-
-    		LocalDateTime now = LocalDateTime.now();
-    		Bundle bundle = Bundle.builder()
-    				.idPsp(idPsp)
-    				.idChannel(bundleRequest.getIdChannel())
-    				.idBrokerPsp(bundleRequest.getIdBrokerPsp())
-    				.name(bundleRequest.getName())
-    				.description(bundleRequest.getDescription())
-    				.paymentAmount(bundleRequest.getPaymentAmount())
-    				.minPaymentAmount(bundleRequest.getMinPaymentAmount())
-    				.maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
-    				.paymentType(bundleRequest.getPaymentType())
-    				.onUs(bundleRequest.getPaymentType().equals("CP") && bundleRequest.getIdChannel().endsWith("ONUS"))
-    				.digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
-    				.digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
-    				.touchpoint(bundleRequest.getTouchpoint())
-    				.type(bundleRequest.getType())
-    				.transferCategoryList(bundleRequest.getTransferCategoryList())
-    				.validityDateFrom(bundleRequest.getValidityDateFrom())
-    				.validityDateTo(bundleRequest.getValidityDateTo())
-    				.insertedDate(now)
-    				.lastUpdatedDate(now)
-    				.build();
+    		var bundle = generateBundle(idPsp, bundleRequest);
     		bundles.add(bundle);
     	}
     	
@@ -202,6 +158,14 @@ public class BundleService {
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
+        var bundle = generateBundle(idPsp, bundleRequest);
+        bundleRepository.save(bundle);
+        return BundleResponse.builder()
+                .idBundle(bundle.getId())
+                .build();
+    }
+
+    private Bundle generateBundle(String idPsp, BundleRequest bundleRequest) {
         setPaymentTypeAnyIfNull(bundleRequest);
         setVerifyTouchpointAnyIfNull(bundleRequest);
 
@@ -247,10 +211,7 @@ public class BundleService {
                 .insertedDate(now)
                 .lastUpdatedDate(now)
                 .build();
-        bundleRepository.save(bundle);
-        return BundleResponse.builder()
-                .idBundle(bundle.getId())
-                .build();
+        return bundle;
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
