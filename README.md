@@ -22,7 +22,7 @@ Spring Boot backend for Advanced Fee Management marketplace
 
 ---
 ## Api Documentation 📖
-See the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-afm-marketplacebe-be/main/openapi/openapi.json)
+See the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-afm-marketplace-be/main/openapi/openapi.json)
 
 ---
 
