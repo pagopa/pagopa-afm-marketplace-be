@@ -194,6 +194,7 @@ public class BundleService {
                 .idPsp(idPsp)
                 .idChannel(bundleRequest.getIdChannel())
                 .idBrokerPsp(bundleRequest.getIdBrokerPsp())
+                .abi(bundleRequest.getAbi())
                 .name(bundleRequest.getName())
                 .description(bundleRequest.getDescription())
                 .paymentAmount(bundleRequest.getPaymentAmount())
