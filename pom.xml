@@ -13,13 +13,13 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.10.1</version>
+	<version>0.11.0</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
 	<properties>
 		<java.version>11</java.version>
-		<cosmos-data-version>3.27.0</cosmos-data-version>
+		<cosmos-data-version>3.32.0</cosmos-data-version>
 		<openfeign-version>3.1.3</openfeign-version>
 		<azure-storage-blob-version>12.19.1</azure-storage-blob-version>
 		<commons-collections-version>4.4</commons-collections-version>
