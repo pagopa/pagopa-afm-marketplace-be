@@ -44,6 +44,8 @@ public class Bundle {
     @NotNull
     private String idCdi;
 
+    private String abi;
+
     private Boolean digitalStamp;
 
     // true if bundle must be used only for digital stamp

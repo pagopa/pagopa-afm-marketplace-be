@@ -23,6 +23,7 @@ public class BundleRequest {
     private String idBrokerPsp;
     @NotNull
     private String idCdi;
+    private String abi;
     private String name;
     private String description;
     private Long paymentAmount;
