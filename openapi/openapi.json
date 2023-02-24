@@ -4869,9 +4869,6 @@
           "paymentType": {
             "type": "string"
           },
-          "onUs": {
-            "type": "boolean"
-          },
           "digitalStamp": {
             "type": "boolean"
           },
@@ -5274,9 +5271,6 @@
           "digitalStampRestriction": {
             "type": "boolean"
           },
-          "onUs": {
-            "type": "boolean"
-          },
           "idBundle": {
             "type": "string"
           }
@@ -5616,9 +5610,6 @@
             "type": "boolean"
           },
           "digitalStampRestriction": {
-            "type": "boolean"
-          },
-          "onUs": {
             "type": "boolean"
           },
           "idPsp": {

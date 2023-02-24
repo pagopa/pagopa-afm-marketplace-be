@@ -40,7 +40,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"global-2\",\n    \"description\": \"description\",\n    \"paymentAmount\": 200,\n    \"minPaymentAmount\": 10001,\n    \"maxPaymentAmount\": 30000,\n    \"paymentType\": \"CP\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"GLOBAL\",\n    \"idChannel\": \"88888888899_01\",\n    \"idBrokerPsp\": \"88888888899\",\n    \"digitalStamp\": false,\n    \"digitalStampRestriction\": false,\n    \"onUs\": false,\n    \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
+							"raw": "{\n    \"name\": \"global-2\",\n    \"description\": \"description\",\n    \"paymentAmount\": 200,\n    \"minPaymentAmount\": 10001,\n    \"maxPaymentAmount\": 30000,\n    \"paymentType\": \"CP\",\n    \"touchpoint\": \"IO\",\n    \"type\": \"GLOBAL\",\n    \"idChannel\": \"88888888899_01\",\n    \"idBrokerPsp\": \"88888888899\",\n    \"digitalStamp\": false,\n    \"digitalStampRestriction\": false,\n       \"validityDateFrom\": null,\n    \"validityDateTo\": null\n}",
 							"options": {
 								"raw": {
 									"language": "json"
