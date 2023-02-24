@@ -53,6 +53,8 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     List<Bundle> getValidBundleByType(@Param("type0") String type0, @Param("type1") String type1, @Param("type2") String type2);
 
     List<Bundle> findByIdPspAndTypeAndPaymentTypeAndTouchpoint(String idPsp, BundleType type, PaymentType paymentType, String touchpoint);
+    
+    List<Bundle> findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull (String idPsp, BundleType type, String touchpoint);
 
     List<Bundle> findByPaymentType(String paymentType);
 

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -199,6 +198,30 @@ class BundleServiceTest {
         Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
         assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
     }
+    
+    @Test
+    void shouldCreateBundleWithPaymentTypeNull() {
+        var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)))
+                .thenReturn(Optional.empty());
+
+        when(paymentTypeRepository.findByName(bundle.getPaymentType())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        bundleService.createBundle(idPsp, bundleRequest);
+
+        verify(bundleRepository).save(bundleArgumentCaptor.capture());
+
+        Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
+        assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
+    }
 
     @Test
     void shouldRaiseBadRequestWithInvalidDateBundle() {
@@ -257,6 +280,28 @@ class BundleServiceTest {
         when(bundleRepository.save(Mockito.any()))
                 .thenReturn(bundle);
 
+
+        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest);
+
+        assertEquals(bundleRequest.getName(), updatedBundle.getName());
+    }
+    
+    @Test
+    void shouldUpdateBundleWithPaymentTypeNull() {
+        var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test";
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
+                .thenReturn(Optional.of(bundle));
+        when(bundleRepository.findByNameAndIdPsp(Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(Optional.of(bundle));
+        when(paymentTypeRepository.findByName(bundle.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
 
         Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest);
 
