@@ -246,6 +246,7 @@ public class BundleService {
     bundle.setIdChannel(bundleRequest.getIdChannel());
     bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
     bundle.setIdCdi(bundleRequest.getIdCdi());
+    bundle.setAbi(bundleRequest.getAbi());
     bundle.setName(bundleRequest.getName());
     bundle.setDescription(bundleRequest.getDescription());
     bundle.setPaymentAmount(bundleRequest.getPaymentAmount());

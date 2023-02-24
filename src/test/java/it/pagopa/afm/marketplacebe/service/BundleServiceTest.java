@@ -31,7 +31,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -45,7 +44,6 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
@@ -92,8 +90,7 @@ class BundleServiceTest {
     @Autowired
     @InjectMocks
     private BundleService bundleService;
-    @Autowired
-    private ModelMapper modelMapper;
+    
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
@@ -124,8 +121,6 @@ class BundleServiceTest {
     void shouldGetBundlesByIdPsp() {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
-
-        List<String> requiredTypes = List.of("PRIVATE");
 
         // Precondition
         when(bundleRepository.findByIdPsp(bundle.getIdPsp(), new PartitionKey(bundle.getIdPsp())))
@@ -168,7 +163,7 @@ class BundleServiceTest {
 
     @Test
     void shouldGetBundlesRaiseException() {
-        List bundles = new ArrayList();
+        List<BundleType> bundles = new ArrayList<>();
         AppException exc = assertThrows(AppException.class, () ->
                 bundleService.getBundles(bundles)
         );
@@ -505,7 +500,7 @@ class BundleServiceTest {
         when(ciBundleRepository.save(Mockito.any()))
                 .thenReturn(ciBundle);
 
-        BundleAttributeResponse response = bundleService.createBundleAttributesByCi(
+        bundleService.createBundleAttributesByCi(
                 ciBundle.getCiFiscalCode(),
                 bundle.getId(),
                 getMockBundleAttribute()
@@ -531,7 +526,7 @@ class BundleServiceTest {
 
         when(ciBundleRepository.save(Mockito.any())).thenReturn(ciBundle);
 
-        BundleAttributeResponse response = bundleService.createBundleAttributesByCi(
+        bundleService.createBundleAttributesByCi(
                 ciBundle.getCiFiscalCode(),
                 bundle.getId(),
                 getMockBundleAttribute()

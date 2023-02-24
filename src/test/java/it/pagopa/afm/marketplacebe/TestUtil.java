@@ -303,7 +303,7 @@ public class TestUtil {
   public static CiBundleInfo getMockCiBundleInfo() {
     Bundle bundle = getMockBundle();
     ModelMapper mapper = new ModelMapper();
-    CiBundleInfo ciBundleInfo = mapper.map(bundle, CiBundleInfo.class);
+    mapper.map(bundle, CiBundleInfo.class);
     return CiBundleInfo.builder()
         .build();
   }
