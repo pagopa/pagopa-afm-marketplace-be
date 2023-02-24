@@ -30,7 +30,6 @@ public class BundleRequest {
     private Long minPaymentAmount;
     private Long maxPaymentAmount;
     private String paymentType;
-    private Boolean onUs;
     private Boolean digitalStamp;
     private Boolean digitalStampRestriction;
     private String touchpoint;

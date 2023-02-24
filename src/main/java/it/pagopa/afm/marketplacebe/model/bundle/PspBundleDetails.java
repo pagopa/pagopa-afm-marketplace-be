@@ -38,6 +38,4 @@ public class PspBundleDetails {
     private String idBrokerPsp;
     private Boolean digitalStamp;
     private Boolean digitalStampRestriction;
-    private Boolean onUs;
-
 }

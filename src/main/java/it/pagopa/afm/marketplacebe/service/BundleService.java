@@ -13,7 +13,6 @@ import java.util.stream.StreamSupport;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -202,7 +201,6 @@ public class BundleService {
         .minPaymentAmount(bundleRequest.getMinPaymentAmount())
         .maxPaymentAmount(bundleRequest.getMaxPaymentAmount())
         .paymentType(bundleRequest.getPaymentType())
-        .onUs(StringUtils.equalsIgnoreCase(bundleRequest.getPaymentType(), "CP") && bundleRequest.getIdChannel().endsWith("ONUS"))
         .digitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()))
         .digitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()))
         .touchpoint(bundleRequest.getTouchpoint())
@@ -259,7 +257,6 @@ public class BundleService {
     bundle.setValidityDateFrom(bundleRequest.getValidityDateFrom());
     bundle.setValidityDateTo(bundleRequest.getValidityDateTo());
     bundle.setLastUpdatedDate(LocalDateTime.now());
-    bundle.setOnUs(StringUtils.equalsIgnoreCase(bundleRequest.getPaymentType(),"CP") && CommonUtil.deNull(bundleRequest.getOnUs()));
     bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
     bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
     bundle.setType(bundleRequest.getType());

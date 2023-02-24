@@ -31,7 +31,6 @@ public class ConvertBundleToPspBundleDetails implements Converter<Bundle, PspBun
                 .idBrokerPsp(source.getIdBrokerPsp())
                 .digitalStamp(source.getDigitalStamp())
                 .digitalStampRestriction(source.getDigitalStampRestriction())
-                .onUs(source.getOnUs())
                 .build();
     }
 }
