@@ -13,8 +13,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -57,4 +58,25 @@ public class PaymentTypeService {
                 .build();
     }
 
+    public List<PaymentType> uploadPaymentTypeByList(List<String> paymentTypeList) {
+
+        paymentTypeList.stream()
+                .map(paymentType -> paymentTypeRepository.findByName(paymentType).orElse(null))
+                .filter(paymentTypeEntity -> paymentTypeEntity != null && !bundleRepository.findByPaymentType(paymentTypeEntity.getName()).isEmpty())
+                .findAny()
+                .ifPresent(paymentType -> {
+                    throw new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, paymentType.getName());
+                });
+
+        List<PaymentType> paymentTypeEntityList = paymentTypeList.stream()
+                .map(paymentTypeName -> PaymentType.builder()
+                        .name(paymentTypeName)
+                        .createdDate(LocalDateTime.now())
+                        .build())
+                .collect(Collectors.toList());
+
+        paymentTypeRepository.deleteAll();
+        paymentTypeRepository.saveAll(paymentTypeEntityList);
+        return paymentTypeEntityList;
+    }
 }

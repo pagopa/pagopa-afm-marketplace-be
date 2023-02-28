@@ -12,15 +12,16 @@ import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentType;
 import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypes;
 import it.pagopa.afm.marketplacebe.service.PaymentTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/paymenttypes")
@@ -64,4 +65,20 @@ public class PaymentTypeController {
         return paymentTypeService.getPaymentType(id);
     }
 
+    @Operation(summary = "Upload a set of payment types by list", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Payment Type",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = it.pagopa.afm.marketplacebe.entity.PaymentType.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @PostMapping(
+            value = "/upload",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<List<it.pagopa.afm.marketplacebe.entity.PaymentType>> uploadPaymentTypeByList(
+            @RequestBody @Valid @NotNull List<String> paymentTypeList) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentTypeService.uploadPaymentTypeByList(paymentTypeList));
+    }
 }
