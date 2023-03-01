@@ -68,7 +68,7 @@ class PaymentTypeControllerTest {
 
         when(paymentTypeService.uploadPaymentTypeByList(any())).thenReturn(TestUtil.getMockPaymentTypeList());
 
-        mvc.perform(post(URL)
+        mvc.perform(post(URL + "/upload")
                         .content(TestUtil.toJson(TestUtil.getMockPaymentTypeListForCreate()))
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated());
