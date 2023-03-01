@@ -60,7 +60,8 @@ public class PaymentTypeService {
 
     public List<PaymentType> uploadPaymentTypeByList(List<String> paymentTypeList) {
 
-        paymentTypeList.stream()
+        Set<String> paymentTypes = new HashSet<>(paymentTypeList);
+        paymentTypes.stream()
                 .map(paymentType -> paymentTypeRepository.findByName(paymentType).orElse(null))
                 .filter(paymentTypeEntity -> paymentTypeEntity != null && !bundleRepository.findByPaymentType(paymentTypeEntity.getName()).isEmpty())
                 .findAny()
@@ -70,7 +71,7 @@ public class PaymentTypeService {
 
         List<PaymentType> paymentTypeEntityList = new LinkedList<>();
         int paymentTypeGeneratedId = 1;
-        for (String paymentTypeName : paymentTypeList) {
+        for (String paymentTypeName : paymentTypes) {
             paymentTypeEntityList.add(
                     PaymentType.builder()
                             .id(String.valueOf(paymentTypeGeneratedId))
