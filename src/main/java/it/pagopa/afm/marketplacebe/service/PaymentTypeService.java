@@ -68,12 +68,18 @@ public class PaymentTypeService {
                     throw new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, paymentType.getName());
                 });
 
-        List<PaymentType> paymentTypeEntityList = paymentTypeList.stream()
-                .map(paymentTypeName -> PaymentType.builder()
-                        .name(paymentTypeName)
-                        .createdDate(LocalDateTime.now())
-                        .build())
-                .collect(Collectors.toList());
+        List<PaymentType> paymentTypeEntityList = new LinkedList<>();
+        int paymentTypeGeneratedId = 1;
+        for (String paymentTypeName : paymentTypeList) {
+            paymentTypeEntityList.add(
+                    PaymentType.builder()
+                            .id(String.valueOf(paymentTypeGeneratedId))
+                            .name(paymentTypeName)
+                            .createdDate(LocalDateTime.now())
+                            .build()
+            );
+            paymentTypeGeneratedId++;
+        }
 
         paymentTypeRepository.deleteAll();
         paymentTypeRepository.saveAll(paymentTypeEntityList);
