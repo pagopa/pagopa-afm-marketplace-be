@@ -96,7 +96,7 @@ class PaymentTypeServiceTest {
         it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
         // preconditions
         when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(paymentType));
-        when(bundleRepository.findByPaymentType(paymentType.getName())).thenReturn(List.of(any()));
+        when(bundleRepository.findByPaymentType(paymentType.getName())).thenReturn(List.of(TestUtil.getMockBundle()));
         // tests and assertions
         AppException exception = assertThrows(AppException.class, () -> paymentTypeService.uploadPaymentTypeByList(paymentTypeList));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());

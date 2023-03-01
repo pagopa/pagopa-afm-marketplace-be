@@ -32,6 +32,8 @@ class PaymentTypeControllerTest {
 
     public static final String URL = "/paymenttypes";
 
+    public static final String UPLOAD_URL = URL + "/upload";
+
     @Autowired
     private MockMvc mvc;
 
@@ -68,7 +70,7 @@ class PaymentTypeControllerTest {
 
         when(paymentTypeService.uploadPaymentTypeByList(any())).thenReturn(TestUtil.getMockPaymentTypeList());
 
-        mvc.perform(post(URL + "/upload")
+        mvc.perform(post(UPLOAD_URL)
                         .content(TestUtil.toJson(TestUtil.getMockPaymentTypeListForCreate()))
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated());
@@ -79,9 +81,7 @@ class PaymentTypeControllerTest {
         AppException exception = new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, "PaymentType");
         doThrow(exception).when(paymentTypeService).uploadPaymentTypeByList(any());
 
-        when(paymentTypeService.uploadPaymentTypeByList(any())).thenReturn(TestUtil.getMockPaymentTypeList());
-
-        mvc.perform(post(URL)
+        mvc.perform(post(UPLOAD_URL)
                         .content(TestUtil.toJson(TestUtil.getMockPaymentTypeListForCreate()))
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
