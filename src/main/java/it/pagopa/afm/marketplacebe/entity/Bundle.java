@@ -41,9 +41,9 @@ public class Bundle {
     @NotNull
     private String idBrokerPsp;
     
-    @NotNull
     private String idCdi;
 
+    @NotNull
     private String abi;
 
     private Boolean digitalStamp;
