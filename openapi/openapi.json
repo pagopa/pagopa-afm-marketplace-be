@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.11.3"
+    "version": "0.11.3-3"
   },
   "servers": [
     {
@@ -2187,6 +2187,132 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaymentTypes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Service unavailable",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "X-Request-Id",
+          "in": "header",
+          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/paymenttypes/upload": {
+      "post": {
+        "tags": [
+          "Payment Type"
+        ],
+        "summary": "Upload a set of payment types by list",
+        "operationId": "uploadPaymentTypeByList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentType"
                 }
               }
             }
@@ -4985,6 +5111,21 @@
           }
         }
       },
+      "PaymentType": {
+        "required": [
+          "paymentType",
+          "used"
+        ],
+        "type": "object",
+        "properties": {
+          "used": {
+            "type": "boolean"
+          },
+          "paymentType": {
+            "type": "string"
+          }
+        }
+      },
       "CiBundleSubscriptionRequest": {
         "required": [
           "idBundle"
@@ -5315,21 +5456,6 @@
             "items": {
               "$ref": "#/components/schemas/CiBundleAttribute"
             }
-          }
-        }
-      },
-      "PaymentType": {
-        "required": [
-          "paymentType",
-          "used"
-        ],
-        "type": "object",
-        "properties": {
-          "used": {
-            "type": "boolean"
-          },
-          "paymentType": {
-            "type": "string"
           }
         }
       },

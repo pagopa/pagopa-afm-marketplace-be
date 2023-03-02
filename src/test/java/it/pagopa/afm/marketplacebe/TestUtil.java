@@ -609,4 +609,12 @@ public class TestUtil {
         .name("CP")
         .createdDate(LocalDateTime.now()).build();
   }
+
+  public static List<PaymentType> getMockPaymentTypeList() {
+    return List.of(getMockPaymentType());
+  }
+
+  public static List<String> getMockPaymentTypeListForCreate() {
+    return List.of("CP");
+  }
 }
