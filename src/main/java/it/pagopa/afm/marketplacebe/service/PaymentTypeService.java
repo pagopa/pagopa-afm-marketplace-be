@@ -86,4 +86,32 @@ public class PaymentTypeService {
         paymentTypeRepository.saveAll(paymentTypeEntityList);
         return paymentTypeEntityList;
     }
+
+    public void syncPaymentTypes(List<PaymentType> paymentTypeList) {
+
+        Set<PaymentType> paymentTypes = new HashSet<>(paymentTypeList);
+        paymentTypes.stream()
+                .map(paymentType -> paymentTypeRepository.findByName(paymentType.getName()).orElse(null))
+                .filter(paymentTypeEntity -> paymentTypeEntity != null && !bundleRepository.findByPaymentType(paymentTypeEntity.getName()).isEmpty())
+                .findAny()
+                .ifPresent(paymentType -> {
+                    throw new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, paymentType.getName());
+                });
+
+        List<PaymentType> paymentTypeEntityList = new LinkedList<>();
+        for (PaymentType paymentType : paymentTypes) {
+            paymentTypeEntityList.add(
+                    PaymentType.builder()
+                            .id(paymentType.getId())
+                            .name(paymentType.getName())
+                            .description(paymentType.getDescription())
+                            .createdDate(LocalDateTime.now())
+                            .build()
+            );
+        }
+
+        paymentTypeRepository.deleteAll();
+        paymentTypeRepository.saveAll(paymentTypeEntityList);
+//        return paymentTypeEntityList;
+    }
 }

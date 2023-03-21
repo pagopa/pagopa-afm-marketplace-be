@@ -645,20 +645,22 @@ public class BundleService {
    * Verify if bundleRequest has got acceptable validityDateFrom and validityDateFrom
    */
   private void analyzeValidityDate(BundleRequest bundleRequest) {
-    // verify if validityDateFrom is equal or after now
-    if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
-      throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
-    }
-
-    if (bundleRequest.getValidityDateTo() != null) {
-      // verify if validityDateTo is after now
-      if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
-        throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
+    if (bundleRequest.getIdCdi() == null || bundleRequest.getIdCdi().isEmpty()) {
+      // verify if validityDateFrom is equal or after now
+      if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
+        throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
       }
 
-      // check it is before validityDateTo
-      if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
-        throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom.");
+      if (bundleRequest.getValidityDateTo() != null) {
+        // verify if validityDateTo is after now
+        if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
+          throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
+        }
+
+        // check it is before validityDateTo
+        if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
+          throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom.");
+        }
       }
     }
   }

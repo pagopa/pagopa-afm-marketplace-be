@@ -30,6 +30,8 @@ public class PaymentType {
     @NotNull
     private String name;
 
+    private String description;
+
     @CreatedDate
     private LocalDateTime createdDate;
     }
