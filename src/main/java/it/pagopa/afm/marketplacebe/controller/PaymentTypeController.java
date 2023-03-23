@@ -65,23 +65,6 @@ public class PaymentTypeController {
         return paymentTypeService.getPaymentType(id);
     }
 
-//    @Operation(summary = "Upload a set of payment types by list", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Payment Type",})
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = it.pagopa.afm.marketplacebe.entity.PaymentType.class))),
-//            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
-//            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
-//            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-//    @PostMapping(
-//            value = "/upload",
-//            produces = {MediaType.APPLICATION_JSON_VALUE}
-//    )
-//    public ResponseEntity<List<it.pagopa.afm.marketplacebe.entity.PaymentType>> uploadPaymentTypeByList(
-//            @RequestBody @Valid @NotNull List<String> paymentTypeList) {
-//        return ResponseEntity.status(HttpStatus.CREATED).body(paymentTypeService.uploadPaymentTypeByList(paymentTypeList));
-//    }
-
     @Operation(summary = "Sync payment types", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Payment Type",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE )),

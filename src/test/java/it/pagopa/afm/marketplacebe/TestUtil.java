@@ -98,7 +98,7 @@ public class TestUtil {
     return BundleRequest.builder()
         .idChannel("idChannel")
         .idBrokerPsp("idBrokerPsp")
-        .idCdi("idCdi")
+        .idCdi(null)
         .abi("abi")
         .name("name")
         .description("description")
@@ -614,7 +614,7 @@ public class TestUtil {
     return List.of(getMockPaymentType());
   }
 
-  public static List<String> getMockPaymentTypeListForCreate() {
-    return List.of("CP");
+  public static List<PaymentType> getMockPaymentTypeListForCreate() {
+    return List.of(getMockPaymentType());
   }
 }

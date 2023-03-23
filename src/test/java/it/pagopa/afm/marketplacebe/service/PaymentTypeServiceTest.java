@@ -75,7 +75,6 @@ class PaymentTypeServiceTest {
 
     @Test
     void shouldUploadPaymentTypeList() {
-        List<String> paymentTypeList = getMockPaymentTypeListForCreate();
         List<it.pagopa.afm.marketplacebe.entity.PaymentType> paymentTypeEntityList = getMockPaymentTypeList();
         it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
         // preconditions
@@ -83,22 +82,21 @@ class PaymentTypeServiceTest {
         when(bundleRepository.findByPaymentType(paymentType.getName())).thenReturn(List.of());
         when(paymentTypeRepository.saveAll(Mockito.any())).thenReturn(paymentTypeEntityList);
         // tests
-        paymentTypeService.uploadPaymentTypeByList(paymentTypeList);
+        paymentTypeService.syncPaymentTypes(paymentTypeEntityList);
         verify(paymentTypeRepository).saveAll(paymentTypeArgumentCaptor.capture());
         // assertions
         Mockito.verify(paymentTypeRepository, times(1)).saveAll(Mockito.any());
-        assertEquals(paymentTypeList.size(), paymentTypeArgumentCaptor.getValue().size());
+        assertEquals(paymentTypeEntityList.size(), paymentTypeArgumentCaptor.getValue().size());
     }
 
     @Test
     void shouldRaiseBadRequestWithNotDeletablePaymentType() {
-        List<String> paymentTypeList = getMockPaymentTypeListForCreate();
         it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
         // preconditions
         when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(paymentType));
         when(bundleRepository.findByPaymentType(paymentType.getName())).thenReturn(List.of(TestUtil.getMockBundle()));
         // tests and assertions
-        AppException exception = assertThrows(AppException.class, () -> paymentTypeService.uploadPaymentTypeByList(paymentTypeList));
+        AppException exception = assertThrows(AppException.class, () -> paymentTypeService.syncPaymentTypes(List.of(paymentType)));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
         assertEquals(PAYMENT_TYPE_NOT_DELETABLE.getTitle(), exception.getTitle());
     }
