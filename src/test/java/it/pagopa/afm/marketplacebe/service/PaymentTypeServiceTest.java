@@ -96,7 +96,8 @@ class PaymentTypeServiceTest {
         when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(paymentType));
         when(bundleRepository.findByPaymentType(paymentType.getName())).thenReturn(List.of(TestUtil.getMockBundle()));
         // tests and assertions
-        AppException exception = assertThrows(AppException.class, () -> paymentTypeService.syncPaymentTypes(List.of(paymentType)));
+        List<it.pagopa.afm.marketplacebe.entity.PaymentType> paymentTypeList = List.of(paymentType);
+        AppException exception = assertThrows(AppException.class, () -> paymentTypeService.syncPaymentTypes(paymentTypeList));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
         assertEquals(PAYMENT_TYPE_NOT_DELETABLE.getTitle(), exception.getTitle());
     }
