@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,8 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PaymentTypeControllerTest {
 
     public static final String URL = "/paymenttypes";
-
-    public static final String UPLOAD_URL = URL + "/upload";
 
     @Autowired
     private MockMvc mvc;
@@ -66,22 +65,21 @@ class PaymentTypeControllerTest {
     }
 
     @Test
-    void createPaymentTypeByList_201() throws Exception {
+    void createPaymentTypeByList_200() throws Exception {
+        doNothing().when(paymentTypeService).syncPaymentTypes(any());
 
-        when(paymentTypeService.uploadPaymentTypeByList(any())).thenReturn(TestUtil.getMockPaymentTypeList());
-
-        mvc.perform(post(UPLOAD_URL)
+        mvc.perform(post(URL)
                         .content(TestUtil.toJson(TestUtil.getMockPaymentTypeListForCreate()))
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
     }
 
     @Test
     void createPaymentTypeByList_400() throws Exception {
         AppException exception = new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, "PaymentType");
-        doThrow(exception).when(paymentTypeService).uploadPaymentTypeByList(any());
+        doThrow(exception).when(paymentTypeService).syncPaymentTypes(any());
 
-        mvc.perform(post(UPLOAD_URL)
+        mvc.perform(post(URL)
                         .content(TestUtil.toJson(TestUtil.getMockPaymentTypeListForCreate()))
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())

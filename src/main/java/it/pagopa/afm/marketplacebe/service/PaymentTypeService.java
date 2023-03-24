@@ -58,11 +58,11 @@ public class PaymentTypeService {
                 .build();
     }
 
-    public List<PaymentType> uploadPaymentTypeByList(List<String> paymentTypeList) {
+    public void syncPaymentTypes(List<PaymentType> paymentTypeList) {
 
-        Set<String> paymentTypes = new HashSet<>(paymentTypeList);
+        Set<PaymentType> paymentTypes = new HashSet<>(paymentTypeList);
         paymentTypes.stream()
-                .map(paymentType -> paymentTypeRepository.findByName(paymentType).orElse(null))
+                .map(paymentType -> paymentTypeRepository.findByName(paymentType.getName()).orElse(null))
                 .filter(paymentTypeEntity -> paymentTypeEntity != null && !bundleRepository.findByPaymentType(paymentTypeEntity.getName()).isEmpty())
                 .findAny()
                 .ifPresent(paymentType -> {
@@ -70,20 +70,18 @@ public class PaymentTypeService {
                 });
 
         List<PaymentType> paymentTypeEntityList = new LinkedList<>();
-        int paymentTypeGeneratedId = 1;
-        for (String paymentTypeName : paymentTypes) {
+        for (PaymentType paymentType : paymentTypes) {
             paymentTypeEntityList.add(
                     PaymentType.builder()
-                            .id(String.valueOf(paymentTypeGeneratedId))
-                            .name(paymentTypeName)
+                            .id(paymentType.getId())
+                            .name(paymentType.getName())
+                            .description(paymentType.getDescription())
                             .createdDate(LocalDateTime.now())
                             .build()
             );
-            paymentTypeGeneratedId++;
         }
 
         paymentTypeRepository.deleteAll();
         paymentTypeRepository.saveAll(paymentTypeEntityList);
-        return paymentTypeEntityList;
     }
 }
