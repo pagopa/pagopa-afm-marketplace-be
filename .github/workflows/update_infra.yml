@@ -8,12 +8,11 @@ on:
     paths:
       - 'openapi/openapi.json'
 
-
   workflow_dispatch:
 
 jobs:
-  pull-request:
-    if: ${{ github.event.pull_request.merged }}
+  update_infra:
+    name: Update Infra
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
