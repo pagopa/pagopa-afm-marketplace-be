@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import com.azure.cosmos.implementation.guava25.collect.Iterables;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -58,19 +60,22 @@ public class PaymentTypeService {
                 .build();
     }
 
+    @Transactional
     public void syncPaymentTypes(List<PaymentType> paymentTypeList) {
 
-        Set<PaymentType> paymentTypes = new HashSet<>(paymentTypeList);
+        Set<PaymentType> paymentTypes = new HashSet<>();
+        Iterables.addAll(paymentTypes, paymentTypeRepository.findAll());
+        Set<String> newPaymentTypeNames = paymentTypeList.stream().map(PaymentType::getName).collect(Collectors.toSet());
+
         paymentTypes.stream()
-                .map(paymentType -> paymentTypeRepository.findByName(paymentType.getName()).orElse(null))
-                .filter(paymentTypeEntity -> paymentTypeEntity != null && !bundleRepository.findByPaymentType(paymentTypeEntity.getName()).isEmpty())
+                .filter(existentPaymentType -> !newPaymentTypeNames.contains(existentPaymentType.getName()) && !bundleRepository.findByPaymentType(existentPaymentType.getName()).isEmpty())
                 .findAny()
                 .ifPresent(paymentType -> {
                     throw new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, paymentType.getName());
                 });
 
         List<PaymentType> paymentTypeEntityList = new LinkedList<>();
-        for (PaymentType paymentType : paymentTypes) {
+        for (PaymentType paymentType : paymentTypeList) {
             paymentTypeEntityList.add(
                     PaymentType.builder()
                             .id(paymentType.getId())
