@@ -65,6 +65,7 @@ jobs:
           template: ${{ env.TEMPLATE_DIR }}
           config: .opex/env/${{ matrix.environment }}/config.yaml
 
+
       # we need to set env variables in the folder /azure-dashboard
       - name: Copy Environments
         run: |
