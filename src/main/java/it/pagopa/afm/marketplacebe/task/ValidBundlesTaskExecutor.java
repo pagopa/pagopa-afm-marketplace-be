@@ -43,6 +43,7 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
             List<CiBundle> ciBundleList = ciBundles.stream().filter(ciBundle -> ciBundle.getIdBundle().equals(bundle.getId())).collect(Collectors.toList());
             ValidBundle validBundle = new ValidBundle();
             validBundle.setId(bundle.getId());
+            validBundle.setIdCdi(bundle.getIdCdi());
             validBundle.setIdPsp(bundle.getIdPsp());
             validBundle.setAbi(bundle.getAbi());
             validBundle.setIdBrokerPsp(bundle.getIdBrokerPsp());
