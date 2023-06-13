@@ -3,7 +3,7 @@ microservice-chart:
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: pagopapcommonacr.azurecr.io/pagopaafmmarketplacebe
+    repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
     tag: "0.12.2"
     pullPolicy: Always
   livenessProbe:
