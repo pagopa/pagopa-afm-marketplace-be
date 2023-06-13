@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.12.2"
+    tag: "0.12.2-1-new-actions"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -98,7 +98,7 @@ microservice-chart:
       create: true
       image:
         repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-        tag: "0.12.2"
+        tag: "0.12.2-1-new-actions"
         pullPolicy: Always
-      envConfig: { }
-      envSecret: { }
+      envConfig: {}
+      envSecret: {}
