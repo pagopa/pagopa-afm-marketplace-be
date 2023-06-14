@@ -21,10 +21,6 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
 
     Optional<Bundle> findById(String idBundle, PartitionKey idPsp);
 
-    Optional<Bundle> findByNameAndIdPsp(String name, String idPsp, PartitionKey partitionKey);
-
-    Optional<Bundle> findByNameAndIdNot(String name, String id, PartitionKey idPsp);
-
     List<Bundle> findByIdPsp(String idPsp, PartitionKey partitionKey);
     List<Bundle> findByIdPsp(String idPsp);
 
