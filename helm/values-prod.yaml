@@ -3,8 +3,8 @@ microservice-chart:
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: pagopapcommonacr.azurecr.io/pagopaafmmarketplacebe
-    tag: "0.12.2"
+    repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
+    tag: "0.12.2-1-new-actions"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -83,3 +83,22 @@ microservice-chart:
                 operator: In
                 values:
                   - user
+  canaryDelivery:
+    create: true
+    ingress:
+      create: true
+      canary:
+        type: header
+        headerName: X-Canary
+        headerValue: canary
+        weightPercent: 0
+    service:
+      create: true
+    deployment:
+      create: true
+      image:
+        repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
+        tag: "0.12.2-1-new-actions"
+        pullPolicy: Always
+      envConfig: {}
+      envSecret: {}
