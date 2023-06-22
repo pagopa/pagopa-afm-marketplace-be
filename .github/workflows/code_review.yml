@@ -72,6 +72,7 @@ jobs:
       - name: Run Service on Docker
         shell: bash
         id: run_service_docker
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           cd ./docker
           chmod +x ./run_docker.sh
@@ -80,6 +81,7 @@ jobs:
       - name: Run Integration Tests
         shell: bash
         id: run_integration_test
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           export SUBKEY=${{ secrets.SUBKEY }}      
           export CANARY=${{ inputs.canary }}      
