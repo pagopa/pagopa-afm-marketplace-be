@@ -52,9 +52,16 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
+        
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v2
+        with:
+          files: "./integration-test/run_integration_test.sh" 
 
       - name: Login
         id: login
+        if: steps.check_files.outputs.files_exists == 'true'
         # from https://github.com/Azure/login/commits/master
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
@@ -65,6 +72,7 @@ jobs:
       - name: Run Service on Docker
         shell: bash
         id: run_service_docker
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           cd ./docker
           chmod +x ./run_docker.sh
@@ -73,6 +81,7 @@ jobs:
       - name: Run Integration Tests
         shell: bash
         id: run_integration_test
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           export SUBKEY=${{ secrets.SUBKEY }}      
           export CANARY=${{ inputs.canary }}      

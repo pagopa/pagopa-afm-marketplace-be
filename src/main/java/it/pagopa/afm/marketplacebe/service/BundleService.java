@@ -181,12 +181,7 @@ public class BundleService {
     analyzeBundlesOverlapping(idPsp, bundleRequest);
 
     // verify if paymentType exists with the requested name
-    Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));   
-    
-    // verify no bundle exists with the same name
-    if (bundleRepository.findByNameAndIdPsp(bundleRequest.getName(), idPsp, new PartitionKey(idPsp)).isPresent()) {
-      throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
-    }
+    Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));
 
     LocalDateTime now = LocalDateTime.now();
     return Bundle.builder()
@@ -234,12 +229,6 @@ public class BundleService {
     // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
     // check if there is overlapping transferCategoryList
     analyzeBundlesOverlapping(idPsp, bundleRequest);
-
-    // verify the only other bundle with the same name is the bundle I want to modify
-    Optional<Bundle> duplicateBundle = bundleRepository.findByNameAndIdNot(bundleRequest.getName(), idBundle, new PartitionKey(idPsp));
-    if (duplicateBundle.isPresent()) {
-      throw new AppException(AppError.BUNDLE_NAME_CONFLICT, bundleRequest.getName());
-    }
 
     bundle.setIdChannel(bundleRequest.getIdChannel());
     bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
