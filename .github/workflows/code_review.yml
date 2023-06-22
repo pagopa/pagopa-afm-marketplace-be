@@ -43,12 +43,18 @@ jobs:
           coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*"
           cpd_exclusions: "**/model/**,**/entity/*"
 
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v2
+        with:
+          files: "./integration-test/run_integration_test.sh" 
+          
   smoke-test:
-    if: ./integration-test/run_integration_test.sh.files_exists == 'true'
     name: Smoke Test
     runs-on: ubuntu-latest
     environment:
       name: dev
+    if: steps.check_files.outputs.files_exists == 'true'
     steps:
       - name: Checkout
         id: checkout
