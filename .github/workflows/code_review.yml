@@ -44,6 +44,7 @@ jobs:
           cpd_exclusions: "**/model/**,**/entity/*"
 
   smoke-test:
+    if: ./integration-test/run_integration_test.sh.files_exists == 'true'
     name: Smoke Test
     runs-on: ubuntu-latest
     environment:
