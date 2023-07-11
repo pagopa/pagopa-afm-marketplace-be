@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.13.0"
+    tag: "0.13.0-1-PAGOPA-878-id-channel-errato-in-get-bundle"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -98,7 +98,7 @@ microservice-chart:
       create: true
       image:
         repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-        tag: "0.13.0"
+        tag: "0.13.0-1-PAGOPA-878-id-channel-errato-in-get-bundle"
         pullPolicy: Always
       envConfig: {}
       envSecret: {}
