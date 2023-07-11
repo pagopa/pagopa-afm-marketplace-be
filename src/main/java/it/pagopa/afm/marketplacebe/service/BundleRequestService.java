@@ -1,5 +1,19 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Service;
+
 import it.pagopa.afm.marketplacebe.entity.ArchivedBundleRequest;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
@@ -21,19 +35,6 @@ import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -90,8 +91,8 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        if (!bundle.getType().equals(BundleType.PUBLIC)) {
-            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type not public");
+        if (!bundle.getType().equals(BundleType.PUBLIC) && !bundle.getType().equals(BundleType.PRIVATE)) {
+            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type public or private");
         }
 
         // rule R15: attribute payment amount should be lower than bundle one

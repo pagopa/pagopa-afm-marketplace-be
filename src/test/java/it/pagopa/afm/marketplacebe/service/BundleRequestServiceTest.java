@@ -1,5 +1,33 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
@@ -13,33 +41,6 @@ import it.pagopa.afm.marketplacebe.model.request.PspRequests;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BundleRequestServiceTest {
@@ -101,13 +102,14 @@ class BundleRequestServiceTest {
                 requests.getRequestsList().get(0).getIdBundle());
     }
 
-    @Test
-    void shouldCreateBundleRequest() {
+    @ParameterizedTest
+    @ValueSource(strings = {"PUBLIC", "PRIVATE"})
+    void shouldCreateBundleRequest(String bundleType) {
         CiBundle ciBundle = getMockCiBundle();
         List<BundleRequestEntity> bundleRequest = List.of(getMockBundleRequestE());
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
-        bundle.setType(BundleType.PUBLIC);
+        bundle.setType(BundleType.fromValue(bundleType));
         CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getMockCiBundleSubscriptionRequest();
         ciBundleSubscriptionRequest.setIdBundle(bundle.getId());
 
@@ -123,7 +125,7 @@ class BundleRequestServiceTest {
     @Test
     void shouldRaiseExceptionBundleTypeCreateBundleRequest_1() {
         Bundle bundle = TestUtil.getMockBundle();
-        bundle.setType(BundleType.PRIVATE);
+        bundle.setType(BundleType.GLOBAL);
 
         CiBundleSubscriptionRequest ciBundleSubscriptionRequest = TestUtil.getMockCiBundleSubscriptionRequest();
         ciBundleSubscriptionRequest.setIdBundle(bundle.getId());
@@ -401,7 +403,7 @@ class BundleRequestServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"GLOBAL", "PRIVATE"})
+    @ValueSource(strings = {"GLOBAL"})
     void createBundleRequest_ko_2(String bundleType) {
         // request for a private|global bundle
         Bundle bundle = TestUtil.getMockBundle();
