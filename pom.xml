@@ -12,8 +12,8 @@
 	</parent>
 
 	<groupId>it.pagopa.afm</groupId>
-	<artifactId>marketplace-be</artifactId>
-	<version>0.13.1</version>
+	<artifactId>pagopa-afm-marketplace-fe</artifactId>
+	<version>0.13.2</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
