@@ -45,6 +45,9 @@ public class Bundle {
 
     @NotNull
     private String abi;
+    
+    @NotNull
+    private String pspBusinessName;
 
     private Boolean digitalStamp;
 
