@@ -3,7 +3,7 @@ name: pagopa-afm-marketplace
 description: Microservice that handles marketplace for pagoPA Advanced Fees Management
 type: application
 version: 0.16.0
-appVersion: 0.13.0-1-PAGOPA-878-id-channel-errato-in-get-bundle
+appVersion: 0.13.1
 dependencies:
   - name: microservice-chart
     version: 1.21.0

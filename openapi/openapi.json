@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.13.0-1-PAGOPA-878-id-channel-errato-in-get-bundle"
+    "version": "0.13.1"
   },
   "servers": [
     {
