@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -190,6 +191,7 @@ class BundleServiceTest {
 
         Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
         assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
+        assertEquals(bundleRequest.getPspBusinessName(), bundleArgumentCaptor.getValue().getPspBusinessName());
     }
     
     @Test
@@ -1161,6 +1163,7 @@ class BundleServiceTest {
 
         Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
         assertNotNull(result);
+        assertEquals(result.getPspBusinessName(), TestUtil.getMockBundleRequest().getPspBusinessName());
     }
 
     @Test
@@ -1286,10 +1289,19 @@ class BundleServiceTest {
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
         when(paymentTypeRepository.findByName(anyString()))
                 .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
-
+        
         List<BundleResponse> result = bundleService.createBundleByList(TestUtil.getMockIdPsp(), TestUtil.getMockBundleRequestList());
         assertNotNull(result);
         assertEquals(3,result.size());
+        
+        @SuppressWarnings("unchecked")
+		ArgumentCaptor<Iterable<Bundle>> captor = ArgumentCaptor.forClass(Iterable.class);
+        verify(bundleRepository, times(1)).saveAll(captor.capture());
+        
+        Iterator<Bundle> iter = captor.getAllValues().get(0).iterator();
+        assertEquals(iter.next().getPspBusinessName(), TestUtil.getMockBundleRequestList().get(0).getPspBusinessName());
+        assertEquals(iter.next().getPspBusinessName(), TestUtil.getMockBundleRequestList().get(1).getPspBusinessName());
+        assertEquals(iter.next().getPspBusinessName(), TestUtil.getMockBundleRequestList().get(2).getPspBusinessName());
     }
     
     @Test
