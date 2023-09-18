@@ -16,8 +16,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 
@@ -31,8 +29,6 @@ class HomeControllerTest {
     @MockBean
     private BundleService bundleService;
     
-    @MockBean 
-    private CosmosTemplate cosmosTemplate;
 
     @Test
     void getHome() throws Exception {

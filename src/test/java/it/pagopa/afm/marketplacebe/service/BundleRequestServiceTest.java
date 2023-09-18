@@ -28,8 +28,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
@@ -54,9 +52,6 @@ class BundleRequestServiceTest {
 
     @MockBean
     private BundleRequestRepository bundleRequestRepository;
-    
-    @MockBean 
-    CosmosTemplate cosmosTemplate;
 
     @Autowired
     @InjectMocks
