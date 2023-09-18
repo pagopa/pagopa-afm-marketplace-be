@@ -1,6 +1,8 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
@@ -69,6 +71,9 @@ class BundleOfferServiceTest {
 
     @MockBean
     CiBundleRepository ciBundleRepository;
+    
+    @MockBean 
+    CosmosTemplate cosmosTemplate;
 
     @Captor
     ArgumentCaptor<BundleOffer> bundleOfferArgument;

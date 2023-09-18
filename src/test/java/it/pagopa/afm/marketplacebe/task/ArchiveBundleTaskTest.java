@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -55,6 +57,9 @@ class ArchiveBundleTaskTest {
 
     @MockBean
     ValidBundleRepository validBundleRepository;
+    
+    @MockBean 
+    CosmosTemplate cosmosTemplate;
 
     @Test
     void archiveBundleTask() {
