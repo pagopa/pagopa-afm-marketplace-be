@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -59,6 +62,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
@@ -82,7 +86,8 @@ class BundleServiceTest {
     private ValidBundlesTaskExecutor validBundlesTaskExecutor;
     @MockBean
     private BundleOfferRepository bundleOfferRepository;
-
+    @MockBean
+    private CosmosRepository cosmosRepository;
     @MockBean
     private PaymentTypeRepository paymentTypeRepository;
 
@@ -98,13 +103,11 @@ class BundleServiceTest {
     void shouldGetBundles(int bundleTypeSize) {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
-
+        
         // Precondition
-        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue())).thenReturn(bundleList);
-        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue(), BundleType.PUBLIC.getValue())).thenReturn(bundleList);
-        when(bundleRepository.getValidBundleByType(BundleType.PRIVATE.getValue(), BundleType.PUBLIC.getValue(), BundleType.GLOBAL.getValue())).thenReturn(bundleList);
-
-        List<BundleType> list;
+        when(cosmosRepository.getBundlesByNameAndType(any(), any(), ArgumentMatchers.<BundleType> anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+      
+        List<BundleType> list = new ArrayList<>();
         if (bundleTypeSize == 1) {
             list = List.of(BundleType.PRIVATE);
         } else if (bundleTypeSize == 2) {
@@ -112,7 +115,25 @@ class BundleServiceTest {
         } else {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
         }
-        Bundles bundles = bundleService.getBundles(list);
+        
+        Bundles bundles = bundleService.getBundles(list, null, 50, 0);
+
+        assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
+        assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
+    }
+    
+    @Test
+    void shouldGetBundlesByName() {
+        var bundle = getMockBundle();
+        List<Bundle> bundleList = List.of(bundle);
+        
+        // Precondition
+        when(cosmosRepository.getBundlesByNameAndType(any(), any(String.class), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+
+        List<BundleType> bundleParams = new ArrayList<>();
+        bundleParams.add(BundleType.GLOBAL);
+        String nameParams = "mockName";
+        Bundles bundles = bundleService.getBundles(bundleParams, nameParams, 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -124,10 +145,27 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(bundleRepository.findByIdPsp(bundle.getIdPsp(), new PartitionKey(bundle.getIdPsp())))
-                .thenReturn(bundleList);
+        when(cosmosRepository.getBundlesByNameAndType(anyString(), any(), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
 
-        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), 0, 100);
+        List<BundleType> bundleParams = new ArrayList<>();
+        bundleParams.add(BundleType.GLOBAL);
+        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), bundleParams, null, 0, 50);
+
+        assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
+        assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
+    }
+    
+    @Test
+    void shouldGetBundlesByIdPspAndName() {
+        var bundle = getMockBundle();
+        List<Bundle> bundleList = List.of(bundle);
+
+        // Precondition
+        when(cosmosRepository.getBundlesByNameAndType(anyString(), anyString(), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+
+        List<BundleType> bundleParams = new ArrayList<>();
+        bundleParams.add(BundleType.GLOBAL);
+        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), bundleParams, "mockName", 0, 50);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -160,15 +198,6 @@ class BundleServiceTest {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, exc.getHttpStatus());
-    }
-
-    @Test
-    void shouldGetBundlesRaiseException() {
-        List<BundleType> bundles = new ArrayList<>();
-        AppException exc = assertThrows(AppException.class, () ->
-                bundleService.getBundles(bundles)
-        );
-        assertEquals(HttpStatus.BAD_REQUEST, exc.getHttpStatus());
     }
 
     @Test

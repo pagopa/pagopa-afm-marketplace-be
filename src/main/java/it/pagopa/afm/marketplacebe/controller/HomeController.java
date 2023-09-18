@@ -78,7 +78,7 @@ public class HomeController {
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
 
-    @Operation(summary = "Get bundles by type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
+    @Operation(summary = "Get paginated list of bundles by name and type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -92,9 +92,10 @@ public class HomeController {
     )
     public Bundles getGlobalBundles(
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
-            @Parameter(description = "Bundle type. Default = GLOBAL") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types) {
-        return bundleService.getBundles(types);
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page,
+            @Parameter(description = "Bundle type. Default = GLOBAL") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types,
+            @Parameter(description = "Bundle name.") @RequestParam(required = false) @Valid String name) {
+        return bundleService.getBundles(types, name, limit, page);
     }
 
     @Operation(summary = "Generate the configuration", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Home",})

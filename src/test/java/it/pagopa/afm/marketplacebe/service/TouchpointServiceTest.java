@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +36,8 @@ class TouchpointServiceTest {
     ArgumentCaptor<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpointArgumentCaptor = ArgumentCaptor.forClass(it.pagopa.afm.marketplacebe.entity.Touchpoint.class);
     @MockBean
     private TouchpointRepository touchpointRepository;
-
+    @MockBean 
+    CosmosTemplate cosmosTemplate;
     @MockBean
     private BundleRepository bundleRepository;
     @Autowired

@@ -14,6 +14,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +46,9 @@ class PaymentTypeControllerTest {
 
     @MockBean
     private PaymentTypeService paymentTypeService;
+    
+    @MockBean 
+    private CosmosTemplate cosmosTemplate;
 
     @Test
     void getPaymentTypes() throws Exception {

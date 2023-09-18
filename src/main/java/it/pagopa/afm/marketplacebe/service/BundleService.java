@@ -49,6 +49,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
@@ -99,20 +100,26 @@ public class BundleService {
 
   @Autowired
   private PaymentTypeRepository paymentTypeRepository;
+  
+  @Autowired
+  private CosmosRepository cosmosRepository;
+  
 
   @Autowired
   private ModelMapper modelMapper;
 
-  public Bundles getBundles(List<BundleType> bundleTypes) {
-    List<PspBundleDetails> bundleList = getValidBundleByType(bundleTypes)
+  public Bundles getBundles(List<BundleType> bundleTypes, String name, Integer limit, Integer pageNumber) {
+	// NOT a search by idPsp --> return only valid bundles  
+    List<PspBundleDetails> bundleList = getBundlesByNameAndType(null, name, bundleTypes, limit, pageNumber)
         .stream()
         .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
         .collect(Collectors.toList());
-
+    
     PageInfo pageInfo = PageInfo.builder()
-        .itemsFound(bundleList.size())
-        .totalPages(1)
-        .build();
+            .limit(limit)
+            .page(pageNumber)
+            .itemsFound(bundleList.size())
+            .build();
 
     return Bundles.builder()
         .bundleDetailsList(bundleList)
@@ -120,16 +127,15 @@ public class BundleService {
         .build();
   }
 
-  public Bundles getBundlesByIdPsp(String idPsp, Integer pageNumber, Integer limit) {
-    List<PspBundleDetails> bundleList = bundleRepository
-        .findByIdPsp(idPsp, new PartitionKey(idPsp))
+  public Bundles getBundlesByIdPsp(String idPsp, List<BundleType> bundleTypes, String name, Integer pageNumber, Integer limit) {
+	// Search by idPsp --> return all bundles  
+    List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, limit, pageNumber)
         .stream()
         .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
         .collect(Collectors.toList());
 
     PageInfo pageInfo = PageInfo.builder()
         .itemsFound(bundleList.size())
-        .totalPages(1)
         .limit(limit)
         .page(pageNumber)
         .build();
@@ -693,19 +699,8 @@ public class BundleService {
     });
   }
 
-  private List<Bundle> getValidBundleByType(List<BundleType> types) {
-    switch (types.size()) {
-    case 1:
-      return bundleRepository.getValidBundleByType(types.get(0).getValue());
-    case 2:
-      return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue());
-    case 3:
-      return bundleRepository.getValidBundleByType(types.get(0).getValue(), types.get(1).getValue(),
-          types.get(2).getValue());
-    default:
-      throw new AppException(AppError.BUNDLE_BAD_REQUEST, "BundleType not specified");
-
-    }
+  private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types,  Integer limit, Integer pageNumber) {  
+	  return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, pageNumber, limit);
   }
 
 }

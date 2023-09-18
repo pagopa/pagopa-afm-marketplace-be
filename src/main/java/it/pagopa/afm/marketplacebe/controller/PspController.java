@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
@@ -62,7 +63,7 @@ public class PspController {
      * @param idPsp : PSP identifier
      * @return ResponseEntity with status 200 (OK) and with body the bundle list
      */
-    @Operation(summary = "Get paginated list of bundles of a PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
+    @Operation(summary = "Get paginated list of bundles of a PSP by name and type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -76,9 +77,11 @@ public class PspController {
     )
     public ResponseEntity<Bundles> getBundles(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
+            @Parameter(description = "Bundle type. Default = GLOBAL") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types,
+            @Parameter(description = "Bundle name.") @RequestParam(required = false) @Valid String name,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
-        return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, 0, 100));
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page) {
+        return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, types, name, page, limit));
     }
 
 

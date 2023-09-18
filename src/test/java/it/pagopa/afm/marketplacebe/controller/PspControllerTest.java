@@ -14,10 +14,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -48,10 +51,12 @@ class PspControllerTest {
     private BundleOfferService bundleOfferService;
     @MockBean
     private BundleRequestService bundleRequestService;
+    @MockBean 
+    private CosmosTemplate cosmosTemplate;
 
     @Test
     void getBundles_200() throws Exception {
-        when(bundleService.getBundlesByIdPsp(anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        when(bundleService.getBundlesByIdPsp(anyString(), anyList(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
         String url = String.format(BUNDLES, TestUtil.getMockIdPsp());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -62,7 +67,7 @@ class PspControllerTest {
     @Test
     void getBundles_404() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockBundles());
-        doThrow(exception).when(bundleService).getBundlesByIdPsp(anyString(), anyInt(), anyInt());
+        doThrow(exception).when(bundleService).getBundlesByIdPsp(anyString(), anyList(), any(), anyInt(), anyInt());
 
         String url = String.format(BUNDLES, TestUtil.getMockIdPsp());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -75,6 +80,16 @@ class PspControllerTest {
 
         String url = String.format(BUNDLE, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+    
+    @Test
+    void getBundleByName_200() throws Exception {
+        when(bundleService.getBundleById(anyString(), anyString())).thenReturn(TestUtil.getMockPspBundleDetails());
+
+        String url = String.format(BUNDLE, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
+        mvc.perform(get(url).param("name", "mockName").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
