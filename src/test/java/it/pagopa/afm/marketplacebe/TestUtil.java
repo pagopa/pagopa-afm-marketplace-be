@@ -114,6 +114,8 @@ public class TestUtil {
         .transferCategoryList(transferCategoryList)
         .validityDateFrom(LocalDate.now().plusDays(1))
         .validityDateTo(LocalDate.now().plusDays(8))
+        .digitalStamp(Boolean.TRUE)
+        .digitalStampRestriction(Boolean.FALSE)
         .build();
   }
 

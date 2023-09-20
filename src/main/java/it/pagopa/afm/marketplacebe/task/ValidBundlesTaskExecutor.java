@@ -60,6 +60,8 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
             validBundle.setCiBundleList(ciBundleList);
             validBundle.setValidityDateTo(bundle.getValidityDateTo());
             validBundle.setValidityDateFrom(bundle.getValidityDateFrom());
+            validBundle.setDigitalStamp(bundle.getDigitalStamp());
+            validBundle.setDigitalStampRestriction(bundle.getDigitalStampRestriction());
             return validBundle;
         }).collect(Collectors.toList());
 
