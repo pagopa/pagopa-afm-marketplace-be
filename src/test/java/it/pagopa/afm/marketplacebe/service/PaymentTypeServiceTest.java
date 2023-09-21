@@ -1,12 +1,23 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentType;
-import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypes;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockPaymentType;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockPaymentTypeList;
+import static it.pagopa.afm.marketplacebe.exception.AppError.PAYMENT_TYPE_NOT_DELETABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -17,17 +28,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static it.pagopa.afm.marketplacebe.TestUtil.*;
-import static it.pagopa.afm.marketplacebe.exception.AppError.PAYMENT_TYPE_NOT_DELETABLE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentType;
+import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypes;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 
 @SpringBootTest
 class PaymentTypeServiceTest {
@@ -39,8 +45,6 @@ class PaymentTypeServiceTest {
     ArgumentCaptor<Collection<it.pagopa.afm.marketplacebe.entity.PaymentType>> paymentTypeArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
     @MockBean
     private PaymentTypeRepository paymentTypeRepository;
-    @MockBean 
-    CosmosTemplate cosmosTemplate;
     @MockBean
     private BundleRepository bundleRepository;
     @Autowired

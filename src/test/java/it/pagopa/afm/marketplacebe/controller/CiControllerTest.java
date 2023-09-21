@@ -21,8 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
@@ -49,8 +47,6 @@ class CiControllerTest {
     private BundleOfferService bundleOfferService;
     @MockBean
     private BundleRequestService bundleRequestService;
-    @MockBean 
-    private CosmosTemplate cosmosTemplate;
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
