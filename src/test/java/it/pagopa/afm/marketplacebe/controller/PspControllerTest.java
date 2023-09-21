@@ -1,23 +1,5 @@
 package it.pagopa.afm.marketplacebe.controller;
 
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.exception.AppError;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.service.BundleOfferService;
-import it.pagopa.afm.marketplacebe.service.BundleRequestService;
-import it.pagopa.afm.marketplacebe.service.BundleService;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -30,6 +12,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.service.BundleOfferService;
+import it.pagopa.afm.marketplacebe.service.BundleRequestService;
+import it.pagopa.afm.marketplacebe.service.BundleService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -51,8 +50,6 @@ class PspControllerTest {
     private BundleOfferService bundleOfferService;
     @MockBean
     private BundleRequestService bundleRequestService;
-    @MockBean 
-    private CosmosTemplate cosmosTemplate;
 
     @Test
     void getBundles_200() throws Exception {

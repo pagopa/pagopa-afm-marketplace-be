@@ -1,41 +1,5 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import com.azure.cosmos.models.PartitionKey;
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.exception.AppError;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
-import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockArchivedBundleOffer;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOffer;
@@ -57,6 +21,42 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+
+import com.azure.cosmos.models.PartitionKey;
+
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
+import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+
 @SpringBootTest
 class BundleOfferServiceTest {
 
@@ -71,9 +71,6 @@ class BundleOfferServiceTest {
 
     @MockBean
     CiBundleRepository ciBundleRepository;
-    
-    @MockBean 
-    CosmosTemplate cosmosTemplate;
 
     @Captor
     ArgumentCaptor<BundleOffer> bundleOfferArgument;
