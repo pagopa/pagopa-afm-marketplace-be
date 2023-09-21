@@ -17,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,7 +39,8 @@ class PaymentTypeServiceTest {
     ArgumentCaptor<Collection<it.pagopa.afm.marketplacebe.entity.PaymentType>> paymentTypeArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
     @MockBean
     private PaymentTypeRepository paymentTypeRepository;
-
+    @MockBean 
+    CosmosTemplate cosmosTemplate;
     @MockBean
     private BundleRepository bundleRepository;
     @Autowired

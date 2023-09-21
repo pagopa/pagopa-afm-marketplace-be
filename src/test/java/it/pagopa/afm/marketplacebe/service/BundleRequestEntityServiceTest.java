@@ -17,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -40,6 +42,9 @@ class BundleRequestEntityServiceTest {
 
     @MockBean
     CiBundleRepository ciBundleRepository;
+    
+    @MockBean 
+    CosmosTemplate cosmosTemplate;
 
     @Captor
     ArgumentCaptor<CiBundle> argument;
