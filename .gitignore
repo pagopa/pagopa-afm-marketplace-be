@@ -36,3 +36,6 @@ build/
 .env
 /utilities/emulatorcert.crt
 **/.terraform/
+
+/py-scripts/venv
+/py-scripts/py-scripts.iml
