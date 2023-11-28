@@ -49,6 +49,7 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
             validBundle.setIdBrokerPsp(bundle.getIdBrokerPsp());
             validBundle.setIdChannel(bundle.getIdChannel());
             validBundle.setName(bundle.getName());
+            validBundle.setPspBusinessName(bundle.getPspBusinessName());
             validBundle.setDescription(bundle.getDescription());
             validBundle.setPaymentAmount(bundle.getPaymentAmount());
             validBundle.setMinPaymentAmount(bundle.getMinPaymentAmount());
