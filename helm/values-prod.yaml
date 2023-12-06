@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.14.1"
+    tag: "0.14.2"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -104,7 +104,7 @@ microservice-chart:
             labelSelector:
               matchLabels:
                 app.kubernetes.io/instance: pagopaafmmarketplacebe
-            namespaces: [ "afm" ]
+            namespaces: ["afm"]
             topologyKey: topology.kubernetes.io/zone
   canaryDelivery:
     create: false
