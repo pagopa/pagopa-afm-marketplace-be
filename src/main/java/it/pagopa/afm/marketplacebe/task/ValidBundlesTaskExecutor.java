@@ -34,7 +34,7 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
 
     private void generateConfiguration() {
         List<Bundle> bundles = new ArrayList<>();
-        bundleRepository.findAll().forEach(bundles::add);
+        bundleRepository.findByCurrentDateBetweenValidityDateFromAndTo(now).forEach(bundles::add);
 
         List<CiBundle> ciBundles = new ArrayList<>();
         ciBundleRepository.findAll().forEach(ciBundles::add);
