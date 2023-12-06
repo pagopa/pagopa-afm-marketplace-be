@@ -22,14 +22,25 @@ microservice-chart:
     periodSeconds: 10
   deployment:
     create: true
+  serviceMonitor:
+    create: true
+    endpoints:
+      - interval: 10s #jmx-exporter
+        targetPort: 12345
+        path: /metrics
+  ports:
+    - 80 #http
+    - 12345 #jmx-exporter
   service:
     create: true
     type: ClusterIP
-    port: 8080
+    ports:
+      - 8080
   ingress:
     create: true
     host: "weuprod.afm.internal.platform.pagopa.it"
     path: /pagopa-afm-marketplace-service/(.*)
+    servicePort: 8080
   serviceAccount:
     create: false
     annotations: {}
@@ -58,15 +69,18 @@ microservice-chart:
         metadata:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-          value: "70"
+          value: "75"
+  fileConfig: {}
   envConfig:
     WEBSITE_SITE_NAME: 'pagopaafmmarketplacebe' # required to show cloud role name in application insights
     COSMOS_URI: https://pagopa-p-weu-afm-marketplace-cosmos-account.documents.azure.com:443/
     CORS_CONFIGURATION: "{\"origins\": [\"*\"], \"methods\": [\"*\"]}"
     ENV: "prod"
     LOGGING_LEVEL: "INFO"
+  envFieldRef:
+    APP_NAME: "metadata.labels['app.kubernetes.io/instance']"
+    APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
   envSecret:
-    # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-p-connection-string'
     COSMOS_KEY: afm-marketplace-p-cosmos-pkey
   keyvault:
@@ -83,6 +97,15 @@ microservice-chart:
                 operator: In
                 values:
                   - user
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: pagopaafmmarketplacebe
+            namespaces: [ "afm" ]
+            topologyKey: topology.kubernetes.io/zone
   canaryDelivery:
     create: false
     ingress:
