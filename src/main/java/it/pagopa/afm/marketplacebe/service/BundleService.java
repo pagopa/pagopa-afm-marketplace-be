@@ -638,19 +638,16 @@ public class BundleService {
    */
   private void analyzeValidityDate(BundleRequest bundleRequest, Bundle bundle) {
 	  // if it is a create operation (bundle == null) or an update and the ValidityDateFrom has been changed: its correctness is checked
-	  if (null == bundle || !bundleRequest.getValidityDateFrom().equals(bundle.getValidityDateFrom())) {
-		  // verify if validityDateFrom is equal or after now
-	      if (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true)) {
+	  if ((null == bundle || !bundleRequest.getValidityDateFrom().equals(bundle.getValidityDateFrom())) &&  (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true))) {
 	        throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
-	      }
+	      
 	  }
-	  // if it is an update operation 
-	  if (null != bundle) {
-		    // check if validityDateTo is not expired (is after now)
-		    if (bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
-		      throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
-		    }
-	  }
+	  
+	  // if it is an update operation: check if validityDateTo is not expired (is after now)
+	  if (null != bundle && bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
+		  throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
+      }
+	  
 	  
 	  if (bundleRequest.getValidityDateTo() != null) {
 		  // verify if validityDateTo is after now
