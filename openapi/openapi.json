@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.14.4"
+    "version": "0.14.4-1-PAGOPA-1481-sviluppo-upgrade-ai-with-java-17"
   },
   "servers": [
     {
