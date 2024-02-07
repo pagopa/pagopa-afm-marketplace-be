@@ -18,6 +18,4 @@ RUN chown -R nobody:nobody /app
 
 EXPOSE 8080
 
-# USER 65534
-
 ENTRYPOINT [ "java","-jar","/app/app.jar" ]
