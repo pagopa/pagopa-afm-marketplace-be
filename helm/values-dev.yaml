@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.14.5"
+    tag: "0.14.5-1-VAS-682-afm-market-place-paginazione"
     pullPolicy: Always
   livenessProbe:
     httpGet:
