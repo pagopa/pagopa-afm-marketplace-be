@@ -245,7 +245,7 @@ public class BundleService {
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        if(bundle.getValidityDateTo() != null) {
+        if(LocalDate.now().equals(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
         }
 
