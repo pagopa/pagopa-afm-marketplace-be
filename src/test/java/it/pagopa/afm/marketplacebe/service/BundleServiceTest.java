@@ -428,7 +428,7 @@ class BundleServiceTest {
                 .thenReturn(Optional.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0
+                mockCIBundle.getCiFiscalCode(), 100, 0, null
         );
 
 

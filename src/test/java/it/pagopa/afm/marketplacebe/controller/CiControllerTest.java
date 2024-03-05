@@ -1,9 +1,6 @@
 package it.pagopa.afm.marketplacebe.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -50,7 +47,7 @@ class CiControllerTest {
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
-        when(bundleService.getBundlesByFiscalCode(anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockCiBundles());
+        when(bundleService.getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class))).thenReturn(TestUtil.getMockCiBundles());
 
         String url = String.format(BUNDLES, TestUtil.getMockCiFiscalCode());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -61,7 +58,7 @@ class CiControllerTest {
     @Test
     void getBundles_404() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockIdBundle());
-        doThrow(exception).when(bundleService).getBundlesByFiscalCode(anyString(), anyInt(), anyInt());
+        doThrow(exception).when(bundleService).getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class));
 
         when(bundleService.getBundlesByIdPsp(anyString(), anyList(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
