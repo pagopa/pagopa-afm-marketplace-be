@@ -438,6 +438,28 @@ class BundleServiceTest {
     }
 
     @Test
+    void shouldGetBundlesByFiscalCodeTypeFilter() {
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(ciBundleRepository.findByCiFiscalCode(mockCIBundle.getCiFiscalCode()))
+                .thenReturn(ciBundles);
+
+        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
+                .thenReturn(Optional.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE"
+        );
+
+
+        assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
+    }
+
+    @Test
     void shouldGetBundleByFiscalCode() {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
