@@ -226,6 +226,7 @@ public class BundleOfferService {
             return CiBundle.builder()
                     .ciFiscalCode(entity.getCiFiscalCode())
                     .idBundle(entity.getIdBundle())
+                    .type(bundle.getType())
                     .validityDateTo(bundle.getValidityDateTo())
                     .validityDateFrom(buildTime)
                     .build();
@@ -233,6 +234,7 @@ public class BundleOfferService {
             return CiBundle.builder()
                     .ciFiscalCode(entity.getCiFiscalCode())
                     .idBundle(entity.getIdBundle())
+                    .type(bundle.getType())
                     .validityDateTo(bundle.getValidityDateTo())
                     .validityDateFrom(bundle.getValidityDateFrom().isBefore(buildTime) ?
                             buildTime : bundle.getValidityDateFrom())

@@ -243,6 +243,7 @@ public class BundleRequestService {
         return CiBundle.builder()
                 .ciFiscalCode(entity.getCiFiscalCode())
                 .idBundle(entity.getIdBundle())
+                .type(getBundle(entity.getIdBundle()).getType())
                 .attributes(entity.getCiBundleAttributes())
                 .validityDateFrom(startDate)
                 .validityDateTo(endDate)
