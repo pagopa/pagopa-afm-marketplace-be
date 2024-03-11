@@ -16,7 +16,8 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
 
     List<CiBundle> findByIdBundle(String idBundle);
 
-    List<CiBundle> findByCiFiscalCodeAndType(String ciFiscalCode, String type);
+    @Query(value = "SELECT * FROM cibundles c WHERE c.ciFiscalCode = @ciFiscalCode AND (IS_NULL(@type) OR c.type = @type)")
+    List<CiBundle> findByCiFiscalCodeAndType(@Param("ciFiscalCode") String ciFiscalCode, @Param("type") String type);
 
     Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode);
 
