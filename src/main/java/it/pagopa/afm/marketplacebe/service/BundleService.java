@@ -310,9 +310,9 @@ public class BundleService {
                 .build();
     }
 
-    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber) {
+    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type) {
         var bundleList = ciBundleRepository
-                .findByCiFiscalCode(fiscalCode)
+                .findByCiFiscalCodeAndType(fiscalCode, type)
                 .parallelStream()
                 .map(ciBundle -> {
                     Bundle bundle = getBundle(ciBundle.getIdBundle());

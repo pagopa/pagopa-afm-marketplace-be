@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestEntity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -42,6 +44,9 @@ class BundleRequestEntityServiceTest {
     @MockBean
     CiBundleRepository ciBundleRepository;
 
+    @MockBean
+    BundleRepository bundleRepository;
+
     @Captor
     ArgumentCaptor<CiBundle> argument;
 
@@ -52,7 +57,9 @@ class BundleRequestEntityServiceTest {
     @Test
     void acceptRequestOk() {
         var mockBundleRequestEntity = getMockBundleRequestEntity();
+        var mockBundle = getMockBundle();
         when(bundleRequestRepository.findByIdAndIdPsp(anyString(), anyString())).thenReturn(Optional.of(mockBundleRequestEntity));
+        when(bundleRepository.findById(mockBundleRequestEntity.getIdBundle())).thenReturn(Optional.of(mockBundle));
 
         bundleRequestService.acceptRequest("123", "1");
 

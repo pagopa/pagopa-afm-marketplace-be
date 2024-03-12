@@ -10,10 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -421,20 +418,42 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCode(mockCIBundle.getCiFiscalCode()))
+        when(ciBundleRepository.findByCiFiscalCodeAndType(anyString(), nullable(String.class)))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))
                 .thenReturn(Optional.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0
+                mockCIBundle.getCiFiscalCode(), 100, 0, null
         );
 
 
         assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
         assertEquals(mockCIBundle.getIdBundle(),
                 ciBundlesResult.getBundleDetailsList().get(0).getId());
+    }
+
+    @Test
+    void shouldGetBundlesByFiscalCodeTypeFilter() {
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(ciBundleRepository.findByCiFiscalCodeAndType(mockCIBundle.getCiFiscalCode(), "GLOBAL"))
+                .thenReturn(ciBundles);
+
+        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
+                .thenReturn(Optional.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE"
+        );
+
+
+        assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
     }
 
     @Test

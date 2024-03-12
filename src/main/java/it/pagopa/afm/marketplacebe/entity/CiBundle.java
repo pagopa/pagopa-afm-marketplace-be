@@ -38,6 +38,9 @@ public class CiBundle {
     @NotNull
     private String idBundle;
 
+    @NotNull
+    private BundleType type;
+
     @Valid
     private List<CiBundleAttribute> attributes;
 

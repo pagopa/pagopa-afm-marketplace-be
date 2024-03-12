@@ -70,9 +70,9 @@ public class CiController {
     public CiBundles getBundlesByFiscalCode(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
-
-        return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page);
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
+            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type) {
+        return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page, type);
     }
 
     @Operation(summary = "Get a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
