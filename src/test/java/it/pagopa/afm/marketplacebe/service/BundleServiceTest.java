@@ -1,10 +1,6 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -511,7 +507,7 @@ class BundleServiceTest {
         Bundle bundle = getMockBundle();
         // Valid bundle
         bundle.setValidityDateTo(null);
-        bundle.setType(BundleType.GLOBAL);
+        bundle.setType(BundleType.PUBLIC);
         ciBundle.setIdBundle(bundle.getId());
 
         when(bundleRepository.findById(bundle.getId()))
@@ -538,7 +534,7 @@ class BundleServiceTest {
         Bundle bundle = getMockBundle();
         // Valid bundle
         bundle.setValidityDateTo(null);
-        bundle.setType(BundleType.GLOBAL);
+        bundle.setType(BundleType.PUBLIC);
         ciBundle.setIdBundle(bundle.getId());
 
         when(bundleRepository.findById(bundle.getId()))
@@ -585,7 +581,7 @@ class BundleServiceTest {
         CiBundle ciBundle = getMockCiBundle();
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
-        bundle.setType(BundleType.PRIVATE);
+        bundle.setType(BundleType.GLOBAL);
 
         when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
 
