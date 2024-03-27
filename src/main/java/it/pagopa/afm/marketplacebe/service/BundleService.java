@@ -245,7 +245,7 @@ public class BundleService {
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        if(LocalDate.now().equals(bundle.getValidityDateTo())) {
+        if(bundle.getValidityDateTo() != null && LocalDate.now().plusDays(1).isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
         }
 
@@ -359,12 +359,12 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
-        if(bundle.getValidityDateTo() != null) {
+        if(bundle.getValidityDateTo() != null && LocalDate.now().plusDays(1).isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        if(!bundle.getType().equals(BundleType.GLOBAL)) {
-            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
+        if(bundle.getType().equals(BundleType.GLOBAL)) {
+            throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not private or public.", idBundle));
         }
 
         // rule R15: attribute payment amount should be lower than bundle one
