@@ -39,7 +39,6 @@ import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
