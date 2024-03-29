@@ -1295,6 +1295,22 @@ class BundleServiceTest {
     }
 
     @Test
+    void updateBundle_ko_5() {
+        //update overlaps configuration of an existing bundle
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setId("cbfbc9c6-6c0b-429e-83ca-30ef453504fa");
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+        when(paymentTypeRepository.findByName(bundle.getPaymentType())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        //setting a different id to trigger overlapping
+        bundle.setId("jhk14kl8-4lb6-d49s-s5f9-jk23bnrtk4l3");
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(), any(BundleType.class), anyString(), anyString())).thenReturn(List.of(bundle));
+
+        updateBundle_ko(TestUtil.getMockBundle(), HttpStatus.BAD_REQUEST);
+    }
+
+
+    @Test
     void removeBundle_ko_1() {
         Bundle bundle = TestUtil.getMockBundle();
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
