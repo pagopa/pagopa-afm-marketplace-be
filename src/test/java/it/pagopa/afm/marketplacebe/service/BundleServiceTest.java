@@ -1309,7 +1309,6 @@ class BundleServiceTest {
         updateBundle_ko(TestUtil.getMockBundle(), HttpStatus.BAD_REQUEST);
     }
 
-
     @Test
     void removeBundle_ko_1() {
         Bundle bundle = TestUtil.getMockBundle();
