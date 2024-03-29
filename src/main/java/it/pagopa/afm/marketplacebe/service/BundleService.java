@@ -159,7 +159,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlapping(idPsp, bundleRequest);
+        analyzeBundlesOverlappingCreation(idPsp, bundleRequest);
 
         // verify if paymentType exists with the requested name
         Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));
@@ -205,7 +205,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlapping(idPsp, bundleRequest);
+        analyzeBundlesOverlappingUpdate(idBundle, idPsp, bundleRequest);
 
         bundle.setIdChannel(bundleRequest.getIdChannel());
         bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
@@ -648,19 +648,13 @@ public class BundleService {
     /**
      * Verify if the request could be accepted according to the existent bundles
      */
-    private void analyzeBundlesOverlapping(String idPsp, BundleRequest bundleRequest) {
+    private void analyzeBundlesOverlappingCreation(String idPsp, BundleRequest bundleRequest) {
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
 
-        List<Bundle> bundles;
-
-        if(Optional.ofNullable(bundleRequest.getPaymentType()).isPresent()) {
-            bundles = bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()), bundleRequest.getTouchpoint());
-        } else {
-            bundles = bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
-        }
+        List<Bundle> bundles = getBundlesIdPspTypePaymentTypeTouchPoint(idPsp, bundleRequest);
 
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
@@ -673,8 +667,39 @@ public class BundleService {
         });
     }
 
+    /**
+     * Verify if the request could be accepted according to the existent bundles
+     */
+    private void analyzeBundlesOverlappingUpdate(String idBundle, String idPsp, BundleRequest bundleRequest) {
+        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
+        // in a bundle that is not the one being updated
+        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
+        // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
+        // check if there is overlapping transferCategoryList
+
+        List<Bundle> bundles = getBundlesIdPspTypePaymentTypeTouchPoint(idPsp, bundleRequest);
+
+        bundles.forEach(bundle -> {
+            // verify payment amount range validity and
+            // verify transfer category list overlapping and verify if validityDateFrom is acceptable
+            if(!bundle.getId().equals(idBundle) &&
+                    !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
+            }
+        });
+    }
+
     private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types, Integer pageSize, Integer pageNumber) {
         return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, pageNumber, pageSize);
     }
 
+    private List<Bundle> getBundlesIdPspTypePaymentTypeTouchPoint(String idPsp, BundleRequest bundleRequest) {
+        if (Optional.ofNullable(bundleRequest.getPaymentType()).isPresent()) {
+            return bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()).getName(), bundleRequest.getTouchpoint());
+        } else {
+            return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
+        }
+    }
 }
