@@ -150,15 +150,10 @@ public class BundleRequestService {
     }
 
 
-    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode) {
+    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode, @Nullable String type) {
         // TODO: pageable
 
-        List<BundleRequestEntity> result;
-        if (ciFiscalCode != null) {
-            result = bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciFiscalCode, idPsp);
-        } else {
-            result = bundleRequestRepository.findByIdPsp(idPsp);
-        }
+        List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndType(idPsp, ciFiscalCode, type);
         return PspRequests.builder()
                 .requestsList(result.stream()
                         .filter(Objects::nonNull)

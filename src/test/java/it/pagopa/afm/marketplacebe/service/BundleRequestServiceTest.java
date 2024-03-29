@@ -217,7 +217,7 @@ class BundleRequestServiceTest {
                 .thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
-                100, 0, "", null);
+                100, 0, "", null, null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
         assertEquals(bundleRequests.get(0).getIdBundle(), requests.getRequestsList().get(0).getIdBundle());
@@ -231,7 +231,7 @@ class BundleRequestServiceTest {
                 .thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
-                100, 0, "", bundleRequests.get(0).getCiFiscalCode());
+                100, 0, "", bundleRequests.get(0).getCiFiscalCode(), null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
         assertEquals(bundleRequests.get(0).getIdBundle(), requests.getRequestsList().get(0).getIdBundle());

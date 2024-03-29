@@ -377,8 +377,9 @@ public class PspController {
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
             @PositiveOrZero @Parameter(description = "Cursor") @RequestParam(required = false) String cursor,
-            @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
-        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, cursor, ciFiscalCode);
+            @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode,
+            @Parameter(description = "Filter by type") @RequestParam(required = false) BundleType type) {
+        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, cursor, ciFiscalCode, type.getValue());
     }
 
 
