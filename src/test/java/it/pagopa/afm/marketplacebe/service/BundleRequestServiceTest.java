@@ -237,6 +237,20 @@ class BundleRequestServiceTest {
     }
 
     @Test
+    void shouldGetRequestsByPsp_3() {
+        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
+
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(),
+                        bundleRequests.get(0).getIdBundle(), 0,100)).thenReturn(bundleRequests);
+
+        PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
+                100, 0, "", bundleRequests.get(0).getCiFiscalCode(), bundleRequests.get(0).getIdBundle());
+
+        assertEquals(bundleRequests.size(), requests.getRequestsList().size());
+        assertEquals(bundleRequests.get(0).getIdBundle(), requests.getRequestsList().get(0).getIdBundle());
+    }
+
+    @Test
     void shouldAcceptRequest() {
         BundleRequestEntity bundleRequest = getMockBundleRequestE();
         CiBundle ciBundle = getMockCiBundle();
