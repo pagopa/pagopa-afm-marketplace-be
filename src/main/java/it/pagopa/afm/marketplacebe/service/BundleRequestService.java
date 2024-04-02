@@ -91,8 +91,8 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        if (!bundle.getType().equals(BundleType.PUBLIC) && !bundle.getType().equals(BundleType.PRIVATE)) {
-            throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Type public or private");
+        if (!bundle.getType().equals(BundleType.PUBLIC)) {
+            throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Type not public");
         }
 
         // rule R15: attribute payment amount should be lower than bundle one
@@ -150,10 +150,10 @@ public class BundleRequestService {
     }
 
 
-    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode, @Nullable String type) {
-        // TODO: pageable
+    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode, @Nullable String idBundle) {
+        int offset = limit * pageNumber;
 
-        List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndType(idPsp, ciFiscalCode, type);
+        List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndType(idPsp, ciFiscalCode, idBundle, offset, limit);
         return PspRequests.builder()
                 .requestsList(result.stream()
                         .filter(Objects::nonNull)
