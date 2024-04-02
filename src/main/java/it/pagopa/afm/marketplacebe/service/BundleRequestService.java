@@ -151,7 +151,7 @@ public class BundleRequestService {
 
 
     public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode, @Nullable String idBundle) {
-        int offset = limit * pageNumber;
+        int offset =  0; //= limit * pageNumber;
 
         List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndType(idPsp, ciFiscalCode, idBundle, offset, limit);
         return PspRequests.builder()
