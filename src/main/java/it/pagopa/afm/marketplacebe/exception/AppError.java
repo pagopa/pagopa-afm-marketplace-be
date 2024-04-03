@@ -43,7 +43,7 @@ public enum AppError {
 
     BUNDLE_ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle attribute not found", "Bundle attribute with id %s not found."),
 
-    PAGE_SETTINGS_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "Page settings not allowed", "The inserted page settings are too large"),
+    PAGE_SETTINGS_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "Page settings not allowed", "The inserted page settings are too large or too low"),
 
     CALCULATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something was wrong generating configuration");
 
