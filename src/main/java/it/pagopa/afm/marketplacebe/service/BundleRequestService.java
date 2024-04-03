@@ -42,6 +42,10 @@ public class BundleRequestService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
 
+    public static final int PAGE_NUMBER_MAX_SIZE = 100000;
+
+    public static final int PAGE_LIMIT_MAX_SIZE = 100;
+
     @Autowired
     BundleRepository bundleRepository;
 
@@ -151,7 +155,12 @@ public class BundleRequestService {
 
 
     public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode, @Nullable String idBundle) {
-        int offset =  0; //= limit * pageNumber;
+        int offset =  0;
+        if(pageNumber > PAGE_NUMBER_MAX_SIZE || limit > PAGE_LIMIT_MAX_SIZE) {
+            throw new AppException(AppError.PAGE_SETTINGS_NOT_ALLOWED);
+        } else {
+            offset = limit * pageNumber;
+        }
 
         List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndType(idPsp, ciFiscalCode, idBundle, offset, limit);
         return PspRequests.builder()
