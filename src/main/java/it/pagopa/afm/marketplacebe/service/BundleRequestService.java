@@ -154,7 +154,7 @@ public class BundleRequestService {
     }
 
 
-    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, String cursor, @Nullable String ciFiscalCode, @Nullable String idBundle) {
+    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, @Nullable String ciFiscalCode, @Nullable String idBundle) {
         int offset =  0;
         if(pageNumber > PAGE_NUMBER_MAX_SIZE || limit > PAGE_LIMIT_MAX_SIZE) {
             throw new AppException(AppError.PAGE_SETTINGS_NOT_ALLOWED);
