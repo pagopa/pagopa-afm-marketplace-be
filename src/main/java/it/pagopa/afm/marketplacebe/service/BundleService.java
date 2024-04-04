@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -273,8 +274,8 @@ public class BundleService {
         }
     }
 
-    public CiFiscalCodeList getCIs(String idBundle, String idPSP) {
-        List<CiBundle> subscriptions = ciBundleRepository.findByIdBundle(idBundle);
+    public CiFiscalCodeList getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
+        List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode,limit * pageNumber, limit);
         List<String> ciList = new ArrayList<>();
 
         for (CiBundle ciBundle : subscriptions) {
