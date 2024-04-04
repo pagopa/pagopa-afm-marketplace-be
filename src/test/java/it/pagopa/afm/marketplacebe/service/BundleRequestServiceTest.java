@@ -251,6 +251,20 @@ class BundleRequestServiceTest {
     }
 
     @Test
+    void shouldGetRequestsByPsp_PageOffsetTooSmall() {
+        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
+
+        getBundleRequest_ko(-1, -1, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void shouldGetRequestsByPsp_PageOffsetTooLarge() {
+        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
+
+        getBundleRequest_ko(101, 100001, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     void shouldAcceptRequest() {
         BundleRequestEntity bundleRequest = getMockBundleRequestE();
         CiBundle ciBundle = getMockCiBundle();
@@ -483,6 +497,15 @@ class BundleRequestServiceTest {
         String idPsp = TestUtil.getMockIdPsp();
         AppException appException = assertThrows(AppException.class,
                 () -> bundleRequestService.rejectRequest(idPsp, bundleRequestId)
+        );
+
+        assertEquals(status, appException.getHttpStatus());
+    }
+
+    void getBundleRequest_ko(int limit, int pageNumber, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleRequestService.getRequestsByPsp(idPsp, limit, pageNumber, null, null)
         );
 
         assertEquals(status, appException.getHttpStatus());
