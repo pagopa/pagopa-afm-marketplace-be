@@ -5,7 +5,6 @@ import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import com.azure.spring.data.cosmos.repository.Query;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -30,7 +29,7 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
             "b.validityDateTo[2], 0, 0, 0, 0), 0, 10) > SUBSTRING(GetCurrentDateTime(), 0, 10))")
     List<Bundle> getValidBundle();
 
-    List<Bundle> findByIdPspAndTypeAndPaymentTypeAndTouchpoint(String idPsp, BundleType type, PaymentType paymentType, String touchpoint);
+    List<Bundle> findByIdPspAndTypeAndPaymentTypeAndTouchpoint(String idPsp, BundleType type, String paymentType, String touchpoint);
     
     List<Bundle> findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull (String idPsp, BundleType type, String touchpoint);
 
