@@ -251,20 +251,6 @@ class BundleRequestServiceTest {
     }
 
     @Test
-    void shouldGetRequestsByPsp_PageOffsetTooSmall() {
-        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
-
-        getBundleRequest_ko(-1, -1, HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void shouldGetRequestsByPsp_PageOffsetTooLarge() {
-        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
-
-        getBundleRequest_ko(101, 100001, HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
     void shouldAcceptRequest() {
         BundleRequestEntity bundleRequest = getMockBundleRequestE();
         CiBundle ciBundle = getMockCiBundle();

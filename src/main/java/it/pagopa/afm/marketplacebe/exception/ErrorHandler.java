@@ -16,6 +16,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,6 +143,23 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                 .detail(ex.getMessage())
                 .build();
         return new ResponseEntity<>(errorResponse, ex.getHttpStatus());
+    }
+
+    /**
+     * Handle if a {@link ConstraintViolationException} is raised
+     *
+     * @param ex      {@link ConstraintViolationException} exception raised
+     * @param request from frontend
+     * @return a {@link ProblemJson} as response with the cause and with an appropriated HTTP status
+     */
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<ProblemJson> handleValidationException(final ConstraintViolationException ex, final WebRequest request) {
+        var errorResponse = ProblemJson.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .title(BAD_REQUEST)
+                .detail(ex.getMessage())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
 
