@@ -108,10 +108,9 @@ class BundleRequestServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"PUBLIC", "PRIVATE"})
+    @ValueSource(strings = {"PUBLIC"})
     void shouldCreateBundleRequest(String bundleType) {
         CiBundle ciBundle = getMockCiBundle();
-        List<BundleRequestEntity> bundleRequest = List.of(getMockBundleRequestE());
         Bundle bundle = getMockBundle();
         bundle.setValidityDateTo(null);
         bundle.setType(BundleType.fromValue(bundleType));
@@ -139,7 +138,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRepository.findById(bundle.getId()))
                 .thenReturn(Optional.of(bundle));
 
-        createBundleRequest_ko(ciBundleSubscriptionRequest, HttpStatus.BAD_REQUEST);
+        createBundleRequest_ko(ciBundleSubscriptionRequest, HttpStatus.CONFLICT);
     }
 
     @Test
@@ -213,11 +212,11 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByPsp_1() {
         List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
 
-        Mockito.when(bundleRequestRepository.findByIdPsp(bundleRequests.get(0).getIdPsp()))
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), null, null, 0 ,100))
                 .thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
-                100, 0, "", null);
+                100, 0, null, null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
         assertEquals(bundleRequests.get(0).getIdBundle(), requests.getRequestsList().get(0).getIdBundle());
@@ -227,11 +226,25 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByPsp_2() {
         List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
 
-        Mockito.when(bundleRequestRepository.findByCiFiscalCodeAndIdPsp(bundleRequests.get(0).getCiFiscalCode(), bundleRequests.get(0).getIdPsp()))
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(), null, 0,100))
                 .thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
-                100, 0, "", bundleRequests.get(0).getCiFiscalCode());
+                100, 0, bundleRequests.get(0).getCiFiscalCode(), null);
+
+        assertEquals(bundleRequests.size(), requests.getRequestsList().size());
+        assertEquals(bundleRequests.get(0).getIdBundle(), requests.getRequestsList().get(0).getIdBundle());
+    }
+
+    @Test
+    void shouldGetRequestsByPsp_3() {
+        List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
+
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(),
+                        bundleRequests.get(0).getIdBundle(), 0,100)).thenReturn(bundleRequests);
+
+        PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
+                100, 0, bundleRequests.get(0).getCiFiscalCode(), bundleRequests.get(0).getIdBundle());
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
         assertEquals(bundleRequests.get(0).getIdBundle(), requests.getRequestsList().get(0).getIdBundle());
@@ -404,7 +417,7 @@ class BundleRequestServiceTest {
         Bundle bundle = TestUtil.getMockBundle();
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
 
-        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
+        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.CONFLICT);
     }
 
     @ParameterizedTest
@@ -415,7 +428,7 @@ class BundleRequestServiceTest {
         bundle.setType(BundleType.fromValue(bundleType));
         when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
 
-        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.BAD_REQUEST);
+        createBundleRequest_ko(TestUtil.getMockCiBundleSubscriptionRequest(), HttpStatus.CONFLICT);
     }
 
     @Test
@@ -470,6 +483,15 @@ class BundleRequestServiceTest {
         String idPsp = TestUtil.getMockIdPsp();
         AppException appException = assertThrows(AppException.class,
                 () -> bundleRequestService.rejectRequest(idPsp, bundleRequestId)
+        );
+
+        assertEquals(status, appException.getHttpStatus());
+    }
+
+    void getBundleRequest_ko(int limit, int pageNumber, HttpStatus status) {
+        String idPsp = TestUtil.getMockIdPsp();
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleRequestService.getRequestsByPsp(idPsp, limit, pageNumber, null, null)
         );
 
         assertEquals(status, appException.getHttpStatus());

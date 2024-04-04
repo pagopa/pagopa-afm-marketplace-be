@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,15 +38,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.List;
 
 @RestController()
 @RequestMapping(path = "/psps")
 @Tag(name = "PSP", description = "Everything about PSP")
+@Validated
 public class PspController {
 
     @Autowired
@@ -374,11 +373,11 @@ public class PspController {
     )
     public PspRequests getRequestsByPsp(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
-            @PositiveOrZero @Parameter(description = "Cursor") @RequestParam(required = false) String cursor,
-            @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode) {
-        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, cursor, ciFiscalCode);
+            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") @Max(100) Integer limit,
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") @Max(10000) Integer page,
+            @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode,
+            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle) {
+        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, ciFiscalCode, idBundle);
     }
 
 
