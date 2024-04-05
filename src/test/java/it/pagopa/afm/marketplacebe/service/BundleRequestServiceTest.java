@@ -212,7 +212,7 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByPsp_1() {
         List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
 
-        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), null, null, 0 ,100))
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), null, null, 0 ,100))
                 .thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
@@ -226,7 +226,7 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByPsp_2() {
         List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
 
-        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(), null, 0,100))
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(), null, 0,100))
                 .thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
@@ -240,7 +240,7 @@ class BundleRequestServiceTest {
     void shouldGetRequestsByPsp_3() {
         List<BundleRequestEntity> bundleRequests = List.of(getMockBundleRequestE());
 
-        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndType(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(),
+        Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(),
                         bundleRequests.get(0).getIdBundle(), 0,100)).thenReturn(bundleRequests);
 
         PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
