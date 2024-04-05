@@ -35,8 +35,8 @@ public interface BundleRequestRepository extends CosmosRepository<BundleRequestE
             " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
             " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)" +
             " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
-    List<BundleRequestEntity> findByIdPspAndFiscalCodeAndType(@Param("idPsp") String idPsp,  @Param("ciFiscalCode") String ciFiscalCode, @Param("idBundle") String idBundle,
-                                                              @Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<BundleRequestEntity> findByIdPspAndFiscalCodeAndIdBundle(@Param("idPsp") String idPsp, @Param("ciFiscalCode") String ciFiscalCode, @Param("idBundle") String idBundle,
+                                                                  @Param("offset") int offset, @Param("pageSize") int pageSize);
 
     @Query(value = "SELECT * " +
             "FROM bundlerequests b " +

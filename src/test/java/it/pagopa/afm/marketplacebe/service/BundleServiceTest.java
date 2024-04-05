@@ -327,12 +327,12 @@ class BundleServiceTest {
         List<CiBundle> ciBundles = List.of(getMockCiBundle());
         Bundle bundle = getMockBundle();
 
-        when(ciBundleRepository.findByIdBundle(bundle.getId()))
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), null, 0, 100))
                 .thenReturn(ciBundles);
         when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
                 .thenReturn(Optional.of(bundle));
 
-        CiFiscalCodeList ciFiscalCodeList = bundleService.getCIs(bundle.getId(), bundle.getIdPsp());
+        CiFiscalCodeList ciFiscalCodeList = bundleService.getCIs(bundle.getId(), bundle.getIdPsp(), null, 100, 0);
 
         assertEquals(ciBundles.size(), ciFiscalCodeList.getCiFiscalCodeList().size());
         assertEquals(ciBundles.get(0).getCiFiscalCode(), ciFiscalCodeList.getCiFiscalCodeList().get(0));
@@ -343,14 +343,14 @@ class BundleServiceTest {
         List<CiBundle> ciBundles = List.of(getMockCiBundle());
         Bundle bundle = getMockBundle();
 
-        when(ciBundleRepository.findByIdBundle(bundle.getId()))
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), null, 0, 100))
                 .thenReturn(ciBundles);
         when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
                 .thenReturn(Optional.empty());
 
         AppException appException = assertThrows(
                 AppException.class,
-                () -> bundleService.getCIs(bundle.getId(), bundle.getIdPsp())
+                () -> bundleService.getCIs(bundle.getId(), bundle.getIdPsp(), null, 100, 0)
         );
 
         assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());

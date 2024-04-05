@@ -1,9 +1,6 @@
 package it.pagopa.afm.marketplacebe.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -105,7 +102,7 @@ class PspControllerTest {
 
     @Test
     void getBundleCreditorInstitutions_200() throws Exception {
-        when(bundleService.getCIs(anyString(), anyString())).thenReturn(TestUtil.getMockCiFiscalCodeList());
+        when(bundleService.getCIs(anyString(), anyString(), nullable(String.class), anyInt(), anyInt())).thenReturn(TestUtil.getMockCiFiscalCodeList());
 
         String url = String.format(CI_BUNDLES, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -117,7 +114,7 @@ class PspControllerTest {
     void getBundleCreditorInstitutions_404() throws Exception {
         String idBundle = TestUtil.getMockIdBundle();
         AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        doThrow(exception).when(bundleService).getCIs(anyString(), anyString());
+        doThrow(exception).when(bundleService).getCIs(anyString(), anyString(), nullable(String.class), anyInt(), anyInt());
 
         String url = String.format(CI_BUNDLES, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))

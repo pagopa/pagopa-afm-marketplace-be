@@ -114,6 +114,8 @@ public class PspController {
      *
      * @param idPsp    : PSP identifier
      * @param idBundle : Bundle identifier
+     * @param limit Number of items for page. Default = 50.
+     * @param page  Page number. Default = 0.
      * @return list of CI
      */
     @Operation(summary = "Get paginated list of CI subscribed to a bundle", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
@@ -130,9 +132,11 @@ public class PspController {
     )
     public ResponseEntity<CiFiscalCodeList> getBundleCreditorInstitutions(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle) {
-        // TODO: return pagination
-        return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp));
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
+            @Parameter(description = "CI fiscal code") @RequestParam(required = false) @Valid String ciFiscalCode,
+            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") @Max(100) Integer limit,
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") @Max(10000) Integer page) {
+        return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp, ciFiscalCode, limit, page));
     }
 
     /**
