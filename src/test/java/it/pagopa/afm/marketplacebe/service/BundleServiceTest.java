@@ -327,7 +327,7 @@ class BundleServiceTest {
         List<CiBundle> ciBundles = List.of(getMockCiBundle());
         Bundle bundle = getMockBundle();
 
-        when(ciBundleRepository.findByIdBundle(bundle.getId()))
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), null, 0, 100))
                 .thenReturn(ciBundles);
         when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
                 .thenReturn(Optional.of(bundle));
@@ -343,7 +343,7 @@ class BundleServiceTest {
         List<CiBundle> ciBundles = List.of(getMockCiBundle());
         Bundle bundle = getMockBundle();
 
-        when(ciBundleRepository.findByIdBundle(bundle.getId()))
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), null, 0, 100))
                 .thenReturn(ciBundles);
         when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
                 .thenReturn(Optional.empty());
