@@ -330,4 +330,33 @@ public class CiController {
         bundleOfferService.rejectOffer(ciFiscalCode, idBundleOffer);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * GET /cis/:cifiscalcode/bundles/:pspCompanyName : Get paginated list of bundles
+     *
+     * @param ciFiscalCode CI identifier.
+     * @param limit Number of elements for page. Default = 50.
+     * @param page Page number. Default = 0.
+     * @return OK. (status code 200)
+     * or Service unavailable (status code 500)
+     */
+    @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleCiOffers.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(
+            value = "/{cifiscalcode}/bundles/{pspCompanyName}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<BundleCiOffers> getBundlesByPSPCompanyName(
+            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
+            @Parameter(description = "Psp company name", required = true) @PathVariable("pspCompanyName") String pspCompanyName,
+            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
+            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "1") Integer page) {
+        return ResponseEntity.ok(null);
+    }
 }

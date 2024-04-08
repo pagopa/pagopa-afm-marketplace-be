@@ -489,6 +489,27 @@ public class BundleService {
                 .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
+    public CiBundles getBundlesByPspCompanyName(@NotNull String fiscalCode, @NotNull String pspCompanyName, Integer limit, Integer pageNumber) {
+        var bundleList = ciBundleRepository
+                .findByCiFiscalCodeAndType(fiscalCode, null)
+                .parallelStream()
+                .map(ciBundle -> {
+                    Bundle bundle = getBundle(ciBundle.getIdBundle());
+                    CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
+                    ciBundleInfo.setIdCiBundle(ciBundle.getId());
+                    return ciBundleInfo;
+                })
+                .collect(Collectors.toList());
+
+        return CiBundles.builder()
+                .bundleDetailsList(bundleList)
+                .pageInfo(PageInfo.builder()
+                        .limit(limit)
+                        .page(pageNumber)
+                        .build())
+                .build();
+    }
+
     private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
         String touchpoint = bundleRequest.getTouchpoint();
 
