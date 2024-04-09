@@ -332,9 +332,10 @@ public class CiController {
     }
 
     /**
-     * GET /cis/:cifiscalcode/bundles/:pspCompanyName : Get paginated list of bundles
+     * GET /cis/:cifiscalcode/bundles/:pspBusinessName : Get paginated list of bundles
      *
      * @param ciFiscalCode CI identifier.
+     * @param pspBusinessName business name of the psp identified in the call.
      * @param limit Number of elements for page. Default = 50.
      * @param page Page number. Default = 0.
      * @return OK. (status code 200)
@@ -354,9 +355,9 @@ public class CiController {
     )
     public ResponseEntity<CiBundles> getBundlesByPSPCompanyName(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
-            @Parameter(description = "Psp company name", required = true) @PathVariable("pspCompanyName") String pspCompanyName,
+            @Parameter(description = "Business name of the PSP specified for the operation", required = true) @PathVariable("pspCompanyName") String pspBusinessName,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "1") Integer page) {
-        return ResponseEntity.ok(bundleService.getBundlesByPspCompanyName(ciFiscalCode, pspCompanyName, limit, page));
+        return ResponseEntity.ok(bundleService.getBundlesByPspCompanyName(ciFiscalCode, pspBusinessName, limit, page));
     }
 }

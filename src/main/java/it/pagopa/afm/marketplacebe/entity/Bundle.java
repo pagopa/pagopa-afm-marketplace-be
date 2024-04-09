@@ -49,8 +49,6 @@ public class Bundle {
     @NotNull
     private String pspBusinessName;
 
-    private String pspCompanyName;
-
     private Boolean digitalStamp;
 
     // true if bundle must be used only for digital stamp

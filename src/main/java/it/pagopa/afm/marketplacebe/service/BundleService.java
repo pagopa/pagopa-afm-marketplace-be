@@ -489,9 +489,9 @@ public class BundleService {
                 .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
-    public CiBundles getBundlesByPspCompanyName(@NotNull String fiscalCode, @NotNull String pspCompanyName, Integer limit, Integer pageNumber) {
+    public CiBundles getBundlesByPspCompanyName(@NotNull String fiscalCode, @NotNull String pspBusinessName, Integer limit, Integer pageNumber) {
         // Getting all bundles with pspCompanyName
-        List<String> idBundles = bundleRepository.findByPspCompanyName(pspCompanyName).stream().map(Bundle::getId).toList();
+        List<String> idBundles = bundleRepository.findByPspBusinessName(pspBusinessName).stream().map(Bundle::getId).toList();
 
         // Getting all ciBundles having idBundle present in the previous query
         var bundleList = ciBundleRepository
