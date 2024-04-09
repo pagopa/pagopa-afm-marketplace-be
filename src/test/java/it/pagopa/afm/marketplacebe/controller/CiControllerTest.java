@@ -36,6 +36,8 @@ class CiControllerTest {
     private final String OFFERS = "/cis/%s/offers";
     private final String ACCEPT_OFFER = OFFERS + "/%s/accept";
     private final String REJECT_OFFER = OFFERS + "/%s/reject";
+    private final String BUNDLES_PSP_BUSINESS_NAME = "/cis/%s/pspBusinessName/%s";
+
     @Autowired
     private MockMvc mvc;
     @MockBean
@@ -395,6 +397,16 @@ class CiControllerTest {
         mvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void getBundlesByPspBusinessName_200() throws Exception {
+        when(bundleService.getBundlesByPspCompanyName(anyString(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockCiBundles());
+
+        String url = String.format(BUNDLES_PSP_BUSINESS_NAME, TestUtil.getMockCiFiscalCode(), TestUtil.getMockPspBusinessName());
+        mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
 }

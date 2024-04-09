@@ -341,7 +341,7 @@ public class CiController {
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
-    @Operation(summary = "Get paginated list of PSP offers to the CI regarding private bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
+    @Operation(summary = "Get  list of ciBundles after specifying the psp business name", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleCiOffers.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
@@ -350,12 +350,12 @@ public class CiController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(
-            value = "/{cifiscalcode}/bundles/{pspCompanyName}/test",
+            value = "/{cifiscalcode}/pspBusinessName/{pspBusinessName}",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<CiBundles> getBundlesByPSPCompanyName(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
-            @Parameter(description = "Business name of the PSP specified for the operation", required = true) @PathVariable("pspCompanyName") String pspBusinessName,
+            @Parameter(description = "Business name of the PSP specified for the operation", required = true) @PathVariable("pspBusinessName") String pspBusinessName,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "1") Integer page) {
         return ResponseEntity.ok(bundleService.getBundlesByPspCompanyName(ciFiscalCode, pspBusinessName, limit, page));

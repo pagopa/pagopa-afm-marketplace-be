@@ -1409,4 +1409,44 @@ class BundleServiceTest {
         }
     }
 
+    @Test
+    void shouldGetBundleByPspBusinessName() {
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        ciBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName()))
+                .thenReturn(List.of(bundle));
+        when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.of(bundle));
+        when(ciBundleRepository.findByCiFiscalCodeAndIdBundles(ciBundle.getCiFiscalCode(), List.of(bundle.getId()))).thenReturn(List.of(ciBundle));
+
+        CiBundles ciBundles = bundleService.getBundlesByPspCompanyName(ciBundle.getCiFiscalCode(), bundle.getPspBusinessName(), null, null);
+
+        assertEquals(bundle.getId(), ciBundles.getBundleDetailsList().get(0).getId());
+        assertEquals(ciBundle.getId(), ciBundles.getBundleDetailsList().get(0).getIdCiBundle());
+    }
+
+    @Test
+    void shouldRaiseNotFoundExceptionPspBusinessName() {
+        CiBundle ciBundle = getMockCiBundle();
+        Bundle bundle = getMockBundle();
+        ciBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName()))
+                .thenReturn(List.of(bundle));
+        when(bundleRepository.findById(bundle.getId()))
+                .thenReturn(Optional.empty());
+        when(ciBundleRepository.findByCiFiscalCodeAndIdBundles(ciBundle.getCiFiscalCode(), List.of(bundle.getId()))).thenReturn(List.of(ciBundle));
+
+        String ciFiscalCode = ciBundle.getCiFiscalCode();
+        String pspBusinessName = bundle.getPspBusinessName();
+        AppException exc = assertThrows(AppException.class, () ->
+                bundleService.getBundleById(ciFiscalCode, pspBusinessName)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exc.getHttpStatus());
+    }
 }
