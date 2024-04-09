@@ -413,7 +413,7 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), nullable(List.class)))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), nullable(List.class), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))
@@ -437,7 +437,7 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(mockCIBundle.getCiFiscalCode(), "GLOBAL", null))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(mockCIBundle.getCiFiscalCode(), "GLOBAL", null, 0, 100))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))
@@ -459,7 +459,7 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), any(List.class)))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), any(List.class), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))
@@ -488,7 +488,7 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), any(String.class), any(List.class)))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), any(String.class), any(List.class), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))

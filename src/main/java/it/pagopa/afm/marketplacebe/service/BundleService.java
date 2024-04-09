@@ -314,7 +314,7 @@ public class BundleService {
     public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
         List<String> idBundles = pspBusinessName != null ? bundleRepository.findByPspBusinessName(pspBusinessName).stream().map(Bundle::getId).toList() : null;
         var bundleList = ciBundleRepository
-                .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles)
+                .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles, limit * pageNumber, limit)
                 .parallelStream()
                 .map(ciBundle -> {
                     Bundle bundle = getBundle(ciBundle.getIdBundle());
