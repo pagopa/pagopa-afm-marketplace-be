@@ -349,14 +349,14 @@ public class CiController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(
-            value = "/{cifiscalcode}/bundles/{pspCompanyName}",
+            value = "/{cifiscalcode}/bundles/{pspCompanyName}/test",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<BundleCiOffers> getBundlesByPSPCompanyName(
+    public ResponseEntity<CiBundles> getBundlesByPSPCompanyName(
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
             @Parameter(description = "Psp company name", required = true) @PathVariable("pspCompanyName") String pspCompanyName,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "1") Integer page) {
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(bundleService.getBundlesByPspCompanyName(ciFiscalCode, pspCompanyName, limit, page));
     }
 }

@@ -490,8 +490,12 @@ public class BundleService {
     }
 
     public CiBundles getBundlesByPspCompanyName(@NotNull String fiscalCode, @NotNull String pspCompanyName, Integer limit, Integer pageNumber) {
+        // Getting all bundles with pspCompanyName
+        List<String> idBundles = bundleRepository.findByPspCompanyName(pspCompanyName).stream().map(Bundle::getId).toList();
+
+        // Getting all ciBundles having idBundle present in the previous query
         var bundleList = ciBundleRepository
-                .findByCiFiscalCodeAndType(fiscalCode, null)
+                .findByCiFiscalCodeAndIdBundles(fiscalCode, idBundles)
                 .parallelStream()
                 .map(ciBundle -> {
                     Bundle bundle = getBundle(ciBundle.getIdBundle());

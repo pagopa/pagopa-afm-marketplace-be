@@ -39,4 +39,7 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
             "SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0, 0, 0, 0), 0, 10)" +
             ")")
     List<CiBundle> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
+
+    @Query(value = "SELECT * FROM cibundles c WHERE c.ciFiscalCode = @ciFiscalCode AND array_contains(@idBundles, c.idBundle)")
+    List<CiBundle> findByCiFiscalCodeAndIdBundles(@Param("ciFiscalCode") String ciFiscalCode, @Param("idBundles") List<String> idBundles);
 }
