@@ -503,7 +503,7 @@ public class BundleService {
                     ciBundleInfo.setIdCiBundle(ciBundle.getId());
                     return ciBundleInfo;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return CiBundles.builder()
                 .bundleDetailsList(bundleList)
