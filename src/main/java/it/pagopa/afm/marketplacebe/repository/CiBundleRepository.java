@@ -16,8 +16,11 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
 
     List<CiBundle> findByIdBundle(String idBundle);
 
-    @Query(value = "SELECT * FROM cibundles c WHERE c.ciFiscalCode = @ciFiscalCode AND (IS_NULL(@type) OR c.type = @type)")
-    List<CiBundle> findByCiFiscalCodeAndType(@Param("ciFiscalCode") String ciFiscalCode, @Param("type") String type);
+    @Query(value = "SELECT * FROM cibundles c " +
+            "WHERE c.ciFiscalCode = @ciFiscalCode " +
+            "AND (IS_NULL(@type) OR c.type = @type)" +
+            "AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle))")
+    List<CiBundle> findByCiFiscalCodeAndTypeAndIdBundles(@Param("ciFiscalCode") String ciFiscalCode, @Param("type") String type, @Param("idBundles") List<String> idBundles);
 
     @Query(value = "SELECT * " +
             "FROM cibundles c " +
@@ -39,7 +42,4 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
             "SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0, 0, 0, 0), 0, 10)" +
             ")")
     List<CiBundle> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
-
-    @Query(value = "SELECT * FROM cibundles c WHERE c.ciFiscalCode = @ciFiscalCode AND array_contains(@idBundles, c.idBundle)")
-    List<CiBundle> findByCiFiscalCodeAndIdBundles(@Param("ciFiscalCode") String ciFiscalCode, @Param("idBundles") List<String> idBundles);
 }

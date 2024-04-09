@@ -71,8 +71,9 @@ public class CiController {
             @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String fiscalCode,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page,
-            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type) {
-        return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page, type);
+            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type,
+            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName) {
+        return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page, type, pspBusinessName);
     }
 
     @Operation(summary = "Get a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
@@ -329,35 +330,5 @@ public class CiController {
             @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("idbundleoffer") String idBundleOffer) {
         bundleOfferService.rejectOffer(ciFiscalCode, idBundleOffer);
         return ResponseEntity.ok().build();
-    }
-
-    /**
-     * GET /cis/:cifiscalcode/bundles/:pspBusinessName : Get paginated list of bundles
-     *
-     * @param ciFiscalCode CI identifier.
-     * @param pspBusinessName business name of the psp identified in the call.
-     * @param limit Number of elements for page. Default = 50.
-     * @param page Page number. Default = 0.
-     * @return OK. (status code 200)
-     * or Service unavailable (status code 500)
-     */
-    @Operation(summary = "Get  list of ciBundles after specifying the psp business name", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BundleCiOffers.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
-            value = "/{cifiscalcode}/pspBusinessName/{pspBusinessName}",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<CiBundles> getBundlesByPSPCompanyName(
-            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
-            @Parameter(description = "Business name of the PSP specified for the operation", required = true) @PathVariable("pspBusinessName") String pspBusinessName,
-            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "1") Integer page) {
-        return ResponseEntity.ok(bundleService.getBundlesByPspCompanyName(ciFiscalCode, pspBusinessName, limit, page));
     }
 }

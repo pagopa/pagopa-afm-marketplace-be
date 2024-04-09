@@ -311,9 +311,10 @@ public class BundleService {
                 .build();
     }
 
-    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type) {
+    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
+        List<String> idBundles = pspBusinessName != null ? bundleRepository.findByPspBusinessName(pspBusinessName).stream().map(Bundle::getId).toList() : null;
         var bundleList = ciBundleRepository
-                .findByCiFiscalCodeAndType(fiscalCode, type)
+                .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles)
                 .parallelStream()
                 .map(ciBundle -> {
                     Bundle bundle = getBundle(ciBundle.getIdBundle());
@@ -487,31 +488,6 @@ public class BundleService {
 
         CompletableFuture.runAsync(taskManager)
                 .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
-    }
-
-    public CiBundles getBundlesByPspCompanyName(@NotNull String fiscalCode, @NotNull String pspBusinessName, Integer limit, Integer pageNumber) {
-        // Getting all bundles with pspCompanyName
-        List<String> idBundles = bundleRepository.findByPspBusinessName(pspBusinessName).stream().map(Bundle::getId).toList();
-
-        // Getting all ciBundles having idBundle present in the previous query
-        var bundleList = ciBundleRepository
-                .findByCiFiscalCodeAndIdBundles(fiscalCode, idBundles)
-                .parallelStream()
-                .map(ciBundle -> {
-                    Bundle bundle = getBundle(ciBundle.getIdBundle());
-                    CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
-                    ciBundleInfo.setIdCiBundle(ciBundle.getId());
-                    return ciBundleInfo;
-                })
-                .toList();
-
-        return CiBundles.builder()
-                .bundleDetailsList(bundleList)
-                .pageInfo(PageInfo.builder()
-                        .limit(limit)
-                        .page(pageNumber)
-                        .build())
-                .build();
     }
 
     private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {

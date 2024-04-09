@@ -210,6 +210,14 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "name" : "pspBusinessName",
+          "in" : "query",
+          "description" : "Filtering the ciBundles by pspBusinessName of the corresponding bundle",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -1362,151 +1370,6 @@
             },
             "content" : {
               "application/json" : { }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "headers" : {
-              "X-Request-Id" : {
-                "description" : "This header identifies the call",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            },
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Unauthorized",
-            "headers" : {
-              "X-Request-Id" : {
-                "description" : "This header identifies the call",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "headers" : {
-              "X-Request-Id" : {
-                "description" : "This header identifies the call",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "429" : {
-            "description" : "Too many requests",
-            "headers" : {
-              "X-Request-Id" : {
-                "description" : "This header identifies the call",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Service unavailable",
-            "headers" : {
-              "X-Request-Id" : {
-                "description" : "This header identifies the call",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            },
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "ApiKey" : [ ]
-        } ]
-      },
-      "parameters" : [ {
-        "name" : "X-Request-Id",
-        "in" : "header",
-        "description" : "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
-        "schema" : {
-          "type" : "string"
-        }
-      } ]
-    },
-    "/cis/{cifiscalcode}/pspBusinessName/{pspBusinessName}" : {
-      "get" : {
-        "tags" : [ "CI" ],
-        "summary" : "Get  list of ciBundles after specifying the psp business name",
-        "operationId" : "getBundlesByPSPCompanyName",
-        "parameters" : [ {
-          "name" : "cifiscalcode",
-          "in" : "path",
-          "description" : "CI identifier",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "pspBusinessName",
-          "in" : "path",
-          "description" : "Business name of the PSP specified for the operation",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "Number of items for page. Default = 50",
-          "required" : false,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int32",
-            "default" : 50
-          }
-        }, {
-          "name" : "page",
-          "in" : "query",
-          "description" : "Page number. Page number value starts from 0. Default = 0",
-          "required" : false,
-          "schema" : {
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32",
-            "default" : 1
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "headers" : {
-              "X-Request-Id" : {
-                "description" : "This header identifies the call",
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            },
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/BundleCiOffers"
-                }
-              }
             }
           },
           "400" : {

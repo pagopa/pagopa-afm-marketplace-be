@@ -36,8 +36,6 @@ class CiControllerTest {
     private final String OFFERS = "/cis/%s/offers";
     private final String ACCEPT_OFFER = OFFERS + "/%s/accept";
     private final String REJECT_OFFER = OFFERS + "/%s/reject";
-    private final String BUNDLES_PSP_BUSINESS_NAME = "/cis/%s/pspBusinessName/%s";
-
     @Autowired
     private MockMvc mvc;
     @MockBean
@@ -49,7 +47,7 @@ class CiControllerTest {
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
-        when(bundleService.getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class))).thenReturn(TestUtil.getMockCiBundles());
+        when(bundleService.getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class), nullable(String.class))).thenReturn(TestUtil.getMockCiBundles());
 
         String url = String.format(BUNDLES, TestUtil.getMockCiFiscalCode());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -60,7 +58,7 @@ class CiControllerTest {
     @Test
     void getBundles_404() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockIdBundle());
-        doThrow(exception).when(bundleService).getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class));
+        doThrow(exception).when(bundleService).getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class), nullable(String.class));
 
         when(bundleService.getBundlesByIdPsp(anyString(), anyList(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
@@ -398,15 +396,4 @@ class CiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
     }
-
-    @Test
-    void getBundlesByPspBusinessName_200() throws Exception {
-        when(bundleService.getBundlesByPspCompanyName(anyString(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockCiBundles());
-
-        String url = String.format(BUNDLES_PSP_BUSINESS_NAME, TestUtil.getMockCiFiscalCode(), TestUtil.getMockPspBusinessName());
-        mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
-
 }
