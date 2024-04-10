@@ -64,8 +64,6 @@ public class TestUtil {
 
   private final static String MOCK_ID_PAYMENT_TYPE = "76c16af5-241b-4b9d-bda2-0b5f6b427a4c";
 
-  private final static String MOCK_PSP_BUSINESS_NAME = "MockBusinessName";
-
   public static String getMockIdPsp() {
     return MOCK_ID_PSP;
   }
@@ -80,10 +78,6 @@ public class TestUtil {
 
   public static String getMockBundleOfferId() {
     return MOCK_ID_OFFER;
-  }
-
-  public static String getMockPspBusinessName() {
-    return MOCK_PSP_BUSINESS_NAME;
   }
 
   /**
