@@ -80,7 +80,6 @@ public class TestUtil {
     return MOCK_ID_OFFER;
   }
 
-
   /**
    * @param object to map into the Json string
    * @return object as Json string

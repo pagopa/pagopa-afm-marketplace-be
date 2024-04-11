@@ -413,14 +413,14 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndType(anyString(), nullable(String.class)))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), nullable(List.class), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))
                 .thenReturn(Optional.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, null
+                mockCIBundle.getCiFiscalCode(), 100, 0, null, null
         );
 
 
@@ -437,18 +437,76 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndType(mockCIBundle.getCiFiscalCode(), "GLOBAL"))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(mockCIBundle.getCiFiscalCode(), "GLOBAL", null, 0, 100))
                 .thenReturn(ciBundles);
 
         when(bundleRepository.findById(mockCIBundle.getIdBundle()))
                 .thenReturn(Optional.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE"
+                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE", null
         );
 
 
         assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
+    }
+
+    @Test
+    void shouldGetBundlesByFiscalCodeAndPspBusinessNameFilter() {
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), any(List.class), anyInt(), anyInt()))
+                .thenReturn(ciBundles);
+
+        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
+                .thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName()))
+                .thenReturn(List.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(), 100, 0, null, bundle.getPspBusinessName()
+        );
+
+
+        assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
+        assertEquals(mockCIBundle.getIdBundle(),
+                ciBundlesResult.getBundleDetailsList().get(0).getId());
+        assertEquals(mockCIBundle.getId(),
+                ciBundlesResult.getBundleDetailsList().get(0).getIdCiBundle());
+    }
+
+    @Test
+    void shouldGetBundlesByFiscalCodeAndTypeAndPspBusinessNameFilters() {
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), any(String.class), any(List.class), anyInt(), anyInt()))
+                .thenReturn(ciBundles);
+
+        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
+                .thenReturn(Optional.of(bundle));
+
+        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName()))
+                .thenReturn(List.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE", bundle.getPspBusinessName()
+        );
+
+
+        assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
+        assertEquals(mockCIBundle.getIdBundle(),
+                ciBundlesResult.getBundleDetailsList().get(0).getId());
+        assertEquals(mockCIBundle.getId(),
+                ciBundlesResult.getBundleDetailsList().get(0).getIdCiBundle());
     }
 
     @Test
@@ -1408,5 +1466,4 @@ class BundleServiceTest {
             fail();
         }
     }
-
 }
