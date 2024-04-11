@@ -215,6 +215,7 @@ public class BundleService {
         bundle.setAbi(bundleRequest.getAbi());
         bundle.setName(bundleRequest.getName());
         bundle.setPspBusinessName(bundleRequest.getPspBusinessName());
+        bundle.setUrlPolicyPsp(bundleRequest.getUrlPolicyPsp());
         bundle.setDescription(bundleRequest.getDescription());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
         bundle.setMinPaymentAmount(bundleRequest.getMinPaymentAmount());
