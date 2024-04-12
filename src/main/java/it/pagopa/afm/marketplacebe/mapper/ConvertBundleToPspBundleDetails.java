@@ -32,6 +32,8 @@ public class ConvertBundleToPspBundleDetails implements Converter<Bundle, PspBun
                 .digitalStamp(source.getDigitalStamp())
                 .digitalStampRestriction(source.getDigitalStampRestriction())
                 .idChannel(source.getIdChannel())
+                .pspBusinessName(source.getPspBusinessName())
+                .urlPolicyPsp(source.getUrlPolicyPsp())
                 .build();
     }
 }
