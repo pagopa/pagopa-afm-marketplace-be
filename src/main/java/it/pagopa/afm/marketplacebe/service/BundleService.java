@@ -174,6 +174,7 @@ public class BundleService {
                 .abi(bundleRequest.getAbi())
                 .name(bundleRequest.getName())
                 .pspBusinessName(bundleRequest.getPspBusinessName())
+                .urlPolicyPsp(bundleRequest.getUrlPolicyPsp())
                 .description(bundleRequest.getDescription())
                 .paymentAmount(bundleRequest.getPaymentAmount())
                 .minPaymentAmount(bundleRequest.getMinPaymentAmount())
@@ -214,6 +215,7 @@ public class BundleService {
         bundle.setAbi(bundleRequest.getAbi());
         bundle.setName(bundleRequest.getName());
         bundle.setPspBusinessName(bundleRequest.getPspBusinessName());
+        bundle.setUrlPolicyPsp(bundleRequest.getUrlPolicyPsp());
         bundle.setDescription(bundleRequest.getDescription());
         bundle.setPaymentAmount(bundleRequest.getPaymentAmount());
         bundle.setMinPaymentAmount(bundleRequest.getMinPaymentAmount());

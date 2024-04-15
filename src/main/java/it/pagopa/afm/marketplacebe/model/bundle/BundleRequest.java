@@ -28,6 +28,7 @@ public class BundleRequest {
     private String name;
     @NotNull
     private String pspBusinessName;
+    private String urlPolicyPsp;
     private String description;
     private Long paymentAmount;
     private Long minPaymentAmount;
