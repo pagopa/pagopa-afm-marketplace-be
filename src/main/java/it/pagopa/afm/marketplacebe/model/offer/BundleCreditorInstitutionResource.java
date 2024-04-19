@@ -1,32 +1,26 @@
-package it.pagopa.afm.marketplacebe.model.request;
+package it.pagopa.afm.marketplacebe.model.offer;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@ToString
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class PspRequests {
+@Builder(toBuilder = true)
+public class BundleCreditorInstitutionResource {
 
-    @JsonProperty("requests")
-    @Schema(required = true)
-    @NotNull
-    @Valid
-    private List<PspBundleRequest> requestsList;
+    private List<String> ciTaxCodeList;
 
     @JsonProperty("pageInfo")
     @Schema(required = true)

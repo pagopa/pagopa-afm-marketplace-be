@@ -28,6 +28,7 @@ public interface BundleRequestRepository extends CosmosRepository<BundleRequestE
     List<BundleRequestEntity> findByCiFiscalCode(String fiscalCode);
 
     List<BundleRequestEntity> findByCiFiscalCodeAndIdPsp(String fiscalCode, String idPsp);
+
     @Query(value = "SELECT * " +
             "FROM bundlerequests b" +
             " WHERE " +
@@ -35,8 +36,25 @@ public interface BundleRequestRepository extends CosmosRepository<BundleRequestE
             " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
             " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)" +
             " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
-    List<BundleRequestEntity> findByIdPspAndFiscalCodeAndIdBundle(@Param("idPsp") String idPsp, @Param("ciFiscalCode") String ciFiscalCode, @Param("idBundle") String idBundle,
-                                                                  @Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<BundleRequestEntity> findByIdPspAndFiscalCodeAndIdBundle(
+            @Param("idPsp") String idPsp,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("idBundle") String idBundle,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize
+    );
+
+    @Query(value = "SELECT VALUE COUNT(1) " +
+            "FROM bundlerequests b" +
+            " WHERE " +
+            "b.idPsp = @idPsp" +
+            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
+            " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)")
+    Integer getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(
+            @Param("idPsp") String idPsp,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("idBundle") String idBundle
+    );
 
     @Query(value = "SELECT * " +
             "FROM bundlerequests b " +
