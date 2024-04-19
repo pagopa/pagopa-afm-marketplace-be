@@ -19,6 +19,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import it.pagopa.afm.marketplacebe.config.MappingsConfiguration;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,7 +67,7 @@ import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import it.pagopa.afm.marketplacebe.task.TaskManager;
 import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 
-@SpringBootTest
+@SpringBootTest(classes = {BundleService.class, MappingsConfiguration.class})
 class BundleServiceTest {
     @Captor
     ArgumentCaptor<Bundle> bundleArgumentCaptor = ArgumentCaptor.forClass(Bundle.class);
@@ -82,6 +89,16 @@ class BundleServiceTest {
     private CosmosRepository cosmosRepository;
     @MockBean
     private PaymentTypeRepository paymentTypeRepository;
+    @MockBean
+    private ArchivedBundleRepository archivedBundleRepository;
+    @MockBean
+    private ArchivedBundleOfferRepository archivedBundleOfferRepository;
+    @MockBean
+    private ArchivedBundleRequestRepository archivedBundleRequestRepository;
+    @MockBean
+    private ArchivedCiBundleRepository archivedCiBundleRepository;
+    @MockBean
+    private ValidBundleRepository validBundleRepository;
 
     @MockBean
     private TaskManager taskManager;
@@ -332,10 +349,10 @@ class BundleServiceTest {
         when(bundleRepository.findById(Mockito.anyString(), Mockito.any(PartitionKey.class)))
                 .thenReturn(Optional.of(bundle));
 
-        CiFiscalCodeList ciFiscalCodeList = bundleService.getCIs(bundle.getId(), bundle.getIdPsp(), null, 100, 0);
+        BundleCreditorInstitutionResource ciFiscalCodeList = bundleService.getCIs(bundle.getId(), bundle.getIdPsp(), null, 100, 0);
 
-        assertEquals(ciBundles.size(), ciFiscalCodeList.getCiFiscalCodeList().size());
-        assertEquals(ciBundles.get(0).getCiFiscalCode(), ciFiscalCodeList.getCiFiscalCodeList().get(0));
+        assertEquals(ciBundles.size(), ciFiscalCodeList.getCiTaxCodeList().size());
+        assertEquals(ciBundles.get(0).getCiFiscalCode(), ciFiscalCodeList.getCiTaxCodeList().get(0));
     }
 
     @Test

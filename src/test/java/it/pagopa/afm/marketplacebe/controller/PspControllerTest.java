@@ -39,6 +39,7 @@ class PspControllerTest {
     private final String REQUESTS = "/psps/%s/requests";
     private final String ACCEPT_REQUEST = REQUESTS + "/%s/accept";
     private final String REJECT_REQUEST = REQUESTS + "/%s/reject";
+
     @Autowired
     private MockMvc mvc;
     @MockBean
@@ -102,7 +103,7 @@ class PspControllerTest {
 
     @Test
     void getBundleCreditorInstitutions_200() throws Exception {
-        when(bundleService.getCIs(anyString(), anyString(), nullable(String.class), anyInt(), anyInt())).thenReturn(TestUtil.getMockCiFiscalCodeList());
+        when(bundleService.getCIs(anyString(), anyString(), nullable(String.class), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundleCreditorInstitutionResource());
 
         String url = String.format(CI_BUNDLES, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
