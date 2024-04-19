@@ -1,16 +1,46 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.*;
+import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.*;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.repository.*;
-import it.pagopa.afm.marketplacebe.task.*;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
+import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
+import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
+import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
+import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
+import it.pagopa.afm.marketplacebe.task.TaskManager;
+import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -27,7 +57,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -36,52 +65,69 @@ public class BundleService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
 
-    @Autowired
-    private BundleRepository bundleRepository;
+    private final BundleRepository bundleRepository;
+
+    private final CiBundleRepository ciBundleRepository;
+
+    private final BundleRequestRepository bundleRequestRepository;
+
+    private final BundleOfferRepository bundleOfferRepository;
+
+    private final TouchpointRepository touchpointRepository;
+
+    private final ArchivedBundleRepository archivedBundleRepository;
+
+    private final ArchivedBundleOfferRepository archivedBundleOfferRepository;
+
+    private final ArchivedBundleRequestRepository archivedBundleRequestRepository;
+
+    private final ArchivedCiBundleRepository archivedCiBundleRepository;
+
+    private final ValidBundleRepository validBundleRepository;
+
+    private final PaymentTypeRepository paymentTypeRepository;
+
+    private final CosmosRepository cosmosRepository;
+
+    private final ModelMapper modelMapper;
 
     @Autowired
-    private CiBundleRepository ciBundleRepository;
-
-    @Autowired
-    private BundleRequestRepository bundleRequestRepository;
-
-    @Autowired
-    private BundleOfferRepository bundleOfferRepository;
-
-    @Autowired
-    private TouchpointRepository touchpointRepository;
-
-    @Autowired
-    private ArchivedBundleRepository archivedBundleRepository;
-
-    @Autowired
-    private ArchivedBundleOfferRepository archivedBundleOfferRepository;
-
-    @Autowired
-    private ArchivedBundleRequestRepository archivedBundleRequestRepository;
-
-    @Autowired
-    private ArchivedCiBundleRepository archivedCiBundleRepository;
-
-    @Autowired
-    private ValidBundleRepository validBundleRepository;
-
-    @Autowired
-    private PaymentTypeRepository paymentTypeRepository;
-
-    @Autowired
-    private CosmosRepository cosmosRepository;
-
-
-    @Autowired
-    private ModelMapper modelMapper;
+    public BundleService(
+            BundleRepository bundleRepository,
+            CiBundleRepository ciBundleRepository,
+            BundleRequestRepository bundleRequestRepository,
+            BundleOfferRepository bundleOfferRepository,
+            TouchpointRepository touchpointRepository,
+            ArchivedBundleRepository archivedBundleRepository,
+            ArchivedBundleOfferRepository archivedBundleOfferRepository,
+            ArchivedBundleRequestRepository archivedBundleRequestRepository,
+            ArchivedCiBundleRepository archivedCiBundleRepository,
+            ValidBundleRepository validBundleRepository,
+            PaymentTypeRepository paymentTypeRepository,
+            CosmosRepository cosmosRepository,
+            ModelMapper modelMapper
+    ) {
+        this.bundleRepository = bundleRepository;
+        this.ciBundleRepository = ciBundleRepository;
+        this.bundleRequestRepository = bundleRequestRepository;
+        this.bundleOfferRepository = bundleOfferRepository;
+        this.touchpointRepository = touchpointRepository;
+        this.archivedBundleRepository = archivedBundleRepository;
+        this.archivedBundleOfferRepository = archivedBundleOfferRepository;
+        this.archivedBundleRequestRepository = archivedBundleRequestRepository;
+        this.archivedCiBundleRepository = archivedCiBundleRepository;
+        this.validBundleRepository = validBundleRepository;
+        this.paymentTypeRepository = paymentTypeRepository;
+        this.cosmosRepository = cosmosRepository;
+        this.modelMapper = modelMapper;
+    }
 
     public Bundles getBundles(List<BundleType> bundleTypes, String name, Integer pageSize, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
         List<PspBundleDetails> bundleList = getBundlesByNameAndType(null, name, bundleTypes, pageSize, pageNumber)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
-                .collect(Collectors.toList());
+                .toList();
 
         var totalPages = cosmosRepository.getTotalPages(null, name, bundleTypes, pageSize);
 
@@ -104,7 +150,7 @@ public class BundleService {
         List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, pageSize, pageNumber)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
-                .collect(Collectors.toList());
+                .toList();
 
         var totalPages = cosmosRepository.getTotalPages(idPsp, name, bundleTypes, pageSize);
 
@@ -136,7 +182,7 @@ public class BundleService {
         }
 
         return StreamSupport.stream(bundleRepository.saveAll(bundles).spliterator(), true)
-                .map(b -> BundleResponse.builder().idBundle(b.getId()).build()).collect(Collectors.toList());
+                .map(b -> BundleResponse.builder().idBundle(b.getId()).build()).toList();
     }
 
     public BundleResponse createBundle(String idPsp, BundleRequest bundleRequest) {
@@ -235,7 +281,7 @@ public class BundleService {
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
         ciBundles.parallelStream().forEach(ciBundle ->
                 ciBundle.getAttributes().parallelStream().forEach(attribute -> {
-                    if(attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
+                    if (attribute.getMaxPaymentAmount() > bundle.getPaymentAmount()) {
                         attribute.setMaxPaymentAmount(bundle.getPaymentAmount());
                         ciBundleRepository.save(ciBundle);
                     }
@@ -248,7 +294,7 @@ public class BundleService {
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        if(bundle.getValidityDateTo() != null && LocalDate.now().plusDays(1).isAfter(bundle.getValidityDateTo())) {
+        if (bundle.getValidityDateTo() != null && LocalDate.now().plusDays(1).isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle has been already deleted.");
         }
 
@@ -271,23 +317,42 @@ public class BundleService {
 
         // bundle offers (if not accepted/rejected can be deleted physically)
         BundleOffer offer = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
-        if(offer != null) {
+        if (offer != null) {
             bundleOfferRepository.delete(offer);
         }
     }
 
-    public CiFiscalCodeList getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
-        List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode,limit * pageNumber, limit);
+    /**
+     * Retrieve the paginated list of Creditor Institution subscribed to a public bundle
+     *
+     * @param idBundle     public bundle id
+     * @param idPSP        PSP's code
+     * @param ciFiscalCode Creditor Institution's tax code
+     * @param limit        number of element in one page
+     * @param pageNumber   page number
+     * @return the paginated list of Creditor Institution's tax codes
+     */
+    public BundleCreditorInstitutionResource getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
+        List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode, limit * pageNumber, limit);
         List<String> ciList = new ArrayList<>();
 
         for (CiBundle ciBundle : subscriptions) {
-            if(!checkCiBundle(ciBundle, idPSP)) {
+            if (!checkCiBundle(ciBundle, idPSP)) {
                 throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
             }
             ciList.add(ciBundle.getCiFiscalCode());
         }
-        return CiFiscalCodeList.builder()
-                .ciFiscalCodeList(ciList)
+
+        Integer totalItems = ciBundleRepository.getTotalItemsFindByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
+        int totalPages = calculateTotalPages(limit, totalItems);
+
+        return BundleCreditorInstitutionResource.builder()
+                .ciTaxCodeList(ciList)
+                .pageInfo(PageInfo.builder()
+                        .page(pageNumber)
+                        .limit(limit)
+                        .totalPages(totalPages)
+                        .build())
                 .build();
     }
 
@@ -296,7 +361,7 @@ public class BundleService {
 
         Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
 
-        if(ciBundle.isEmpty()) {
+        if (ciBundle.isEmpty()) {
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
 
@@ -309,7 +374,7 @@ public class BundleService {
                                 ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
                                 attribute -> modelMapper.map(
                                         attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
-                        ).collect(Collectors.toList()))
+                        ).toList())
                 .build();
     }
 
@@ -324,7 +389,7 @@ public class BundleService {
                     ciBundleInfo.setIdCiBundle(ciBundle.getId());
                     return ciBundleInfo;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         return CiBundles.builder()
                 .bundleDetailsList(bundleList)
@@ -363,16 +428,16 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
-        if(bundle.getValidityDateTo() != null && LocalDate.now().plusDays(1).isAfter(bundle.getValidityDateTo())) {
+        if (bundle.getValidityDateTo() != null && LocalDate.now().plusDays(1).isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        if(bundle.getType().equals(BundleType.GLOBAL)) {
+        if (bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not private or public.", idBundle));
         }
 
         // rule R15: attribute payment amount should be lower than bundle one
-        if(bundleAttribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+        if (bundleAttribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, "Payment amount should be lower than or equal to bundle payment amount.");
         }
 
@@ -413,16 +478,16 @@ public class BundleService {
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
 
-        if(bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
+        if (bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        if(!bundle.getType().equals(BundleType.GLOBAL)) {
+        if (!bundle.getType().equals(BundleType.GLOBAL)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global.", idBundle));
         }
 
         // rule R15: attribute payment amount should be lower than bundle one
-        if(bundleAttribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+        if (bundleAttribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, "Payment amount should be lower than or equal to bundle payment amount.");
         }
 
@@ -431,7 +496,7 @@ public class BundleService {
                 .filter(elem -> idAttribute.equals(elem.getId()))
                 .findFirst();
 
-        if(attribute.isPresent()) {
+        if (attribute.isPresent()) {
             attribute.get().setMaxPaymentAmount(bundleAttribute.getMaxPaymentAmount());
             attribute.get().setTransferCategory(bundleAttribute.getTransferCategory());
             attribute.get().setTransferCategoryRelation(bundleAttribute.getTransferCategoryRelation());
@@ -446,11 +511,11 @@ public class BundleService {
         // bundle attribute should be removed only for global and public bundles
         Bundle bundle = getBundle(idBundle);
 
-        if(bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
+        if (bundle.getValidityDateTo() != null && !bundle.getValidityDateTo().isAfter(LocalDate.now())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        if(bundle.getType().equals(BundleType.PRIVATE)) {
+        if (bundle.getType().equals(BundleType.PRIVATE)) {
             throw new AppException(AppError.CI_BUNDLE_BAD_REQUEST, String.format("Bundle with id %s is not global or public.", idBundle));
         }
 
@@ -460,13 +525,13 @@ public class BundleService {
         // remove attribute from CI-Bundle if exists
         var result = ciBundle.getAttributes()
                 .removeIf(attribute -> idAttribute.equals(attribute.getId()));
-        if(!result) {
+        if (!result) {
             throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_FOUND, idAttribute);
         } else {
             ciBundleRepository.save(ciBundle);
             // if bundle is global and there are no attributes -> remove ci-bundle relationship
             // in order to maintain logical relationship instead of physical one
-            if(bundle.getType().equals(BundleType.GLOBAL) && ciBundle.getAttributes().isEmpty()) {
+            if (bundle.getType().equals(BundleType.GLOBAL) && ciBundle.getAttributes().isEmpty()) {
                 ciBundleRepository.delete(ciBundle);
             }
         }
@@ -495,10 +560,10 @@ public class BundleService {
     private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
         String touchpoint = bundleRequest.getTouchpoint();
 
-        if(touchpoint == null) {
+        if (touchpoint == null) {
             bundleRequest.setTouchpoint("ANY");
         } else {
-            if(touchpointRepository.findByName(touchpoint).isEmpty()) {
+            if (touchpointRepository.findByName(touchpoint).isEmpty()) {
                 throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
             }
         }
@@ -536,7 +601,7 @@ public class BundleService {
      */
     private Bundle getBundle(String idBundle) {
         Optional<Bundle> bundle = bundleRepository.findById(idBundle);
-        if(bundle.isEmpty()) {
+        if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
 
@@ -552,7 +617,7 @@ public class BundleService {
      */
     private Bundle getBundle(String idBundle, String idPsp) {
         Optional<Bundle> bundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
-        if(bundle.isEmpty()) {
+        if (bundle.isEmpty()) {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
 
@@ -606,7 +671,7 @@ public class BundleService {
      */
     private LocalDate getNextAcceptableDate(LocalDate date) {
         // verify date: if null set to now +1
-        if(date == null) {
+        if (date == null) {
             date = LocalDate.now().plusDays(1);
         }
         return date;
@@ -617,25 +682,25 @@ public class BundleService {
      */
     private void analyzeValidityDate(BundleRequest bundleRequest, Bundle bundle) {
         // if it is a create operation (bundle == null) or an update and the ValidityDateFrom has been changed: its correctness is checked
-        if((null == bundle || !bundleRequest.getValidityDateFrom().equals(bundle.getValidityDateFrom())) && (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true))) {
+        if ((null == bundle || !bundleRequest.getValidityDateFrom().equals(bundle.getValidityDateFrom())) && (!isDateAcceptable(bundleRequest.getValidityDateFrom(), true))) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateFrom should be set equal or after now.");
 
         }
 
         // if it is an update operation: check if validityDateTo is not expired (is after now)
-        if(null != bundle && bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
+        if (null != bundle && bundle.getValidityDateTo() != null && LocalDate.now().isAfter(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
 
-        if(bundleRequest.getValidityDateTo() != null) {
+        if (bundleRequest.getValidityDateTo() != null) {
             // verify if validityDateTo is after now
-            if(!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
+            if (!isDateAcceptable(bundleRequest.getValidityDateTo(), false)) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo should be set after now.");
             }
 
             // check it is before validityDateTo
-            if(bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
+            if (bundleRequest.getValidityDateTo().isBefore(bundleRequest.getValidityDateFrom())) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDateTo is before of ValidityDateFrom.");
             }
         }
@@ -663,7 +728,7 @@ public class BundleService {
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
-            if(!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
+            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
                     !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
@@ -686,7 +751,7 @@ public class BundleService {
         bundles.forEach(bundle -> {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
-            if(!bundle.getId().equals(idBundle) &&
+            if (!bundle.getId().equals(idBundle) &&
                     !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
                     !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
@@ -705,5 +770,9 @@ public class BundleService {
         } else {
             return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
         }
+    }
+
+    private int calculateTotalPages(Integer limit, double totalItems) {
+        return (int) Math.ceil(totalItems / limit);
     }
 }

@@ -1,19 +1,5 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Service;
-
 import it.pagopa.afm.marketplacebe.entity.ArchivedBundleRequest;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
@@ -35,6 +21,18 @@ import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -42,20 +40,29 @@ public class BundleRequestService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
 
-    @Autowired
-    BundleRepository bundleRepository;
+    private final BundleRepository bundleRepository;
+
+    private final BundleRequestRepository bundleRequestRepository;
+
+    private final ArchivedBundleRequestRepository archivedBundleRequestRepository;
+
+    private final CiBundleRepository ciBundleRepository;
+
+    private final ModelMapper modelMapper;
 
     @Autowired
-    BundleRequestRepository bundleRequestRepository;
-
-    @Autowired
-    ArchivedBundleRequestRepository archivedBundleRequestRepository;
-
-    @Autowired
-    CiBundleRepository ciBundleRepository;
-
-    @Autowired
-    ModelMapper modelMapper;
+    public BundleRequestService(
+            BundleRepository bundleRepository,
+            BundleRequestRepository bundleRequestRepository,
+            ArchivedBundleRequestRepository archivedBundleRequestRepository,
+            CiBundleRepository ciBundleRepository, ModelMapper modelMapper
+    ) {
+        this.bundleRepository = bundleRepository;
+        this.bundleRequestRepository = bundleRequestRepository;
+        this.archivedBundleRequestRepository = archivedBundleRequestRepository;
+        this.ciBundleRepository = ciBundleRepository;
+        this.modelMapper = modelMapper;
+    }
 
     /**
      * Get requests for creditor institution
@@ -72,7 +79,7 @@ public class BundleRequestService {
                 bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciFiscalCode, idPsp);
 
         List<CiBundleRequest> ciBundleRequestList = requests.stream()
-                .map(request -> modelMapper.map(request, CiBundleRequest.class)).collect(Collectors.toList());
+                .map(request -> modelMapper.map(request, CiBundleRequest.class)).toList();
 
         return CiRequests.builder()
                 .requestsList(ciBundleRequestList)
@@ -116,7 +123,7 @@ public class BundleRequestService {
                                         .transferCategory(attribute.getTransferCategory())
                                         .transferCategoryRelation(attribute.getTransferCategoryRelation())
                                         .build()
-                        ).collect(Collectors.toList()) : new ArrayList<>();
+                        ).toList() : new ArrayList<>();
 
         BundleRequestEntity request = BundleRequestEntity.builder()
                 .idBundle(bundle.getId())
@@ -150,17 +157,31 @@ public class BundleRequestService {
     }
 
 
+    /**
+     * Retrieve the paginated list of creditor institutions that have requested a subscription to a public bundle
+     *
+     * @param idPsp        PSP's code
+     * @param limit        page size
+     * @param pageNumber   page number
+     * @param ciFiscalCode creditor institution's tax code
+     * @param idBundle     public bundle id
+     * @return the paginated list of creditor institution's subscription request info
+     */
     public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, @Nullable String ciFiscalCode, @Nullable String idBundle) {
         List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle, limit * pageNumber, limit);
+
+        Integer totalItems = bundleRequestRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return PspRequests.builder()
                 .requestsList(result.stream()
                         .filter(Objects::nonNull)
                         .map(elem -> modelMapper.map(elem, PspBundleRequest.class))
-                        .collect(Collectors.toList()))
+                        .toList())
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)
                         .limit(limit)
+                        .totalPages(totalPages)
                         .build())
                 .build();
     }
@@ -280,5 +301,9 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
         return optBundle.get();
+    }
+
+    private int calculateTotalPages(Integer limit, double totalItems) {
+        return (int) Math.ceil(totalItems / limit);
     }
 }

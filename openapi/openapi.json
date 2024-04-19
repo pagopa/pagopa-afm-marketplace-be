@@ -3414,7 +3414,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Number of items for page. Default = 50",
+            "description": "Number of items for page",
             "required": false,
             "schema": {
               "maximum": 100,
@@ -3426,14 +3426,14 @@
           {
             "name": "page",
             "in": "query",
-            "description": "Page number. Page number value starts from 0. Default = 1",
+            "description": "Page number. Page number value starts from 0",
             "required": false,
             "schema": {
               "maximum": 10000,
               "minimum": 0,
               "type": "integer",
               "format": "int32",
-              "default": 1
+              "default": 0
             }
           }
         ],
@@ -3451,7 +3451,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CiFiscalCodeList"
+                  "$ref": "#/components/schemas/BundleCreditorInstitutionResource"
                 }
               }
             }
@@ -3740,7 +3740,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CiFiscalCodeList"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BundleOffered"
+                  }
                 }
               }
             }
@@ -3882,11 +3885,7 @@
               }
             },
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CiFiscalCodeList"
-                }
-              }
+              "application/json": {}
             }
           },
           "400": {
@@ -4147,7 +4146,7 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Number of items for page. Default = 50",
+            "description": "Number of items for page",
             "required": false,
             "schema": {
               "maximum": 100,
@@ -4159,14 +4158,14 @@
           {
             "name": "page",
             "in": "query",
-            "description": "Page number. Page number value starts from 0. Default = 1",
+            "description": "Page number. Page number value starts from 0",
             "required": false,
             "schema": {
               "maximum": 10000,
               "minimum": 0,
               "type": "integer",
               "format": "int32",
-              "default": 1
+              "default": 0
             }
           },
           {
@@ -5204,6 +5203,17 @@
           }
         }
       },
+      "BundleOffered": {
+        "type": "object",
+        "properties": {
+          "ciFiscalCode": {
+            "type": "string"
+          },
+          "idBundleOffer": {
+            "type": "string"
+          }
+        }
+      },
       "PaymentType": {
         "required": [
           "paymentType",
@@ -5505,8 +5515,31 @@
           "digitalStampRestriction": {
             "type": "boolean"
           },
+          "pspBusinessName": {
+            "type": "string"
+          },
+          "urlPolicyPsp": {
+            "type": "string"
+          },
           "idBundle": {
             "type": "string"
+          }
+        }
+      },
+      "BundleCreditorInstitutionResource": {
+        "required": [
+          "pageInfo"
+        ],
+        "type": "object",
+        "properties": {
+          "ciTaxCodeList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
           }
         }
       },
@@ -5830,6 +5863,12 @@
           },
           "digitalStampRestriction": {
             "type": "boolean"
+          },
+          "pspBusinessName": {
+            "type": "string"
+          },
+          "urlPolicyPsp": {
+            "type": "string"
           },
           "idPsp": {
             "type": "string"

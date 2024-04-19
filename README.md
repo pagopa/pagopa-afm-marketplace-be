@@ -17,7 +17,7 @@ Spring Boot backend for Advanced Fee Management marketplace
             - [Integration testing](#integration-testing)
             - [Load testing](#load-testing)
     * [Contributors 👥](#contributors---)
-        + [Mainteiners](#mainteiners)
+        + [Maintainers](#maintainers)
 
 
 ---
@@ -27,7 +27,7 @@ See the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubuserc
 ---
 
 ## Technology Stack
-- Java 11
+- Java 17
 - Spring Boot
 - Spring WebFlux
 - Spring Data Cosmos
@@ -85,5 +85,5 @@ by `k6` & `postman` collection
 ## Contributors 👥
 Made with ❤️ from PagoPa S.p.A.
 
-### Mainteiners
+### Maintainers
 See `CODEOWNERS` file

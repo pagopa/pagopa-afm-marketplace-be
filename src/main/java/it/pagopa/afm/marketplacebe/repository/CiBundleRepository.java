@@ -29,8 +29,21 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
             "WHERE c.idBundle = @idBundle " +
             "AND (IS_NULL(@ciFiscalCode) OR c.ciFiscalCode = @ciFiscalCode) " +
             "ORDER BY c.id OFFSET @offset LIMIT @pageSize")
-    List<CiBundle> findByIdBundleAndCiFiscalCode(@Param("idBundle") String idBundle, @Param("ciFiscalCode") String ciFiscalCode,
-                                                 @Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<CiBundle> findByIdBundleAndCiFiscalCode(
+            @Param("idBundle") String idBundle,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize
+    );
+
+    @Query(value = "SELECT VALUE COUNT(1) " +
+            "FROM cibundles c " +
+            "WHERE c.idBundle = @idBundle " +
+            "AND (IS_NULL(@ciFiscalCode) OR c.ciFiscalCode = @ciFiscalCode)")
+    Integer getTotalItemsFindByIdBundleAndCiFiscalCode(
+            @Param("idBundle") String idBundle,
+            @Param("ciFiscalCode") String ciFiscalCode
+    );
 
     Optional<CiBundle> findByIdBundleAndCiFiscalCode(String idBundle, String ciFiscalCode);
 
