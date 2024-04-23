@@ -334,20 +334,21 @@ public class BundleService {
      */
     public BundleCreditorInstitutionResource getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
         List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode, limit * pageNumber, limit);
-        List<String> ciList = new ArrayList<>();
 
-        for (CiBundle ciBundle : subscriptions) {
-            if (!checkCiBundle(ciBundle, idPSP)) {
-                throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
-            }
-            ciList.add(ciBundle.getCiFiscalCode());
-        }
+        List<CiBundleDetails> ciBundleDetails = subscriptions.parallelStream()
+                .map(ciBundle -> {
+                    if (!checkCiBundle(ciBundle, idPSP)) {
+                        throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+                    }
+                    return modelMapper.map(ciBundle, CiBundleDetails.class);
+                })
+                .toList();
 
         Integer totalItems = ciBundleRepository.getTotalItemsFindByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return BundleCreditorInstitutionResource.builder()
-                .ciTaxCodeList(ciList)
+                .ciBundleDetails(ciBundleDetails)
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)
                         .limit(limit)

@@ -3,6 +3,7 @@ package it.pagopa.afm.marketplacebe.model.offer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,10 +21,11 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class BundleCreditorInstitutionResource {
 
-    private List<String> ciTaxCodeList;
+    @Schema(description = "List of details about creditor institution's subscription to a bundle", required = true)
+    private List<CiBundleDetails> ciBundleDetails;
 
     @JsonProperty("pageInfo")
-    @Schema(required = true)
+    @Schema(description = "Page info", required = true)
     @NotNull
     @Valid
     private PageInfo pageInfo;

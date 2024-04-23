@@ -55,7 +55,6 @@ import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
-import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
@@ -351,8 +350,8 @@ class BundleServiceTest {
 
         BundleCreditorInstitutionResource ciFiscalCodeList = bundleService.getCIs(bundle.getId(), bundle.getIdPsp(), null, 100, 0);
 
-        assertEquals(ciBundles.size(), ciFiscalCodeList.getCiTaxCodeList().size());
-        assertEquals(ciBundles.get(0).getCiFiscalCode(), ciFiscalCodeList.getCiTaxCodeList().get(0));
+        assertEquals(ciBundles.size(), ciFiscalCodeList.getCiBundleDetails().size());
+        assertEquals(ciBundles.get(0).getCiFiscalCode(), ciFiscalCodeList.getCiBundleDetails().get(0).getCiTaxCode());
     }
 
     @Test

@@ -377,9 +377,9 @@ public class TestUtil {
     }
 
     public static BundleCreditorInstitutionResource getMockBundleCreditorInstitutionResource() {
-        List<String> mockCiFiscalCode = List.of(getMockCiFiscalCode());
+        List<CiBundleDetails> mockCiFiscalCode = List.of(getMockCiBundleDetails());
         return BundleCreditorInstitutionResource.builder()
-                .ciTaxCodeList(mockCiFiscalCode)
+                .ciBundleDetails(mockCiFiscalCode)
                 .pageInfo(PageInfo.builder()
                         .itemsFound(mockCiFiscalCode.size())
                         .totalPages(1)

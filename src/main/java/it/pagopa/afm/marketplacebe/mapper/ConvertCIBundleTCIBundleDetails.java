@@ -23,6 +23,7 @@ public class ConvertCIBundleTCIBundleDetails implements Converter<CiBundle, CiBu
                 .validityDateFrom(source.getValidityDateFrom())
                 .validityDateTo(source.getValidityDateTo())
                 .idCIBundle(source.getId())
+                .ciTaxCode(source.getCiFiscalCode())
                 .attributes(convertAttributes(source.getAttributes()))
                 .build();
     }
