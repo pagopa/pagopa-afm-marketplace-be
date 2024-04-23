@@ -17,5 +17,6 @@ import java.util.List;
 public class CiBundleDetails {
     private LocalDate validityDateFrom;
     private LocalDate validityDateTo;
+    private String idCIBundle;
     private List<CiBundleAttribute> attributes;
 }
