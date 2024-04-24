@@ -5528,14 +5528,16 @@
       },
       "BundleCreditorInstitutionResource": {
         "required": [
+          "ciBundleDetails",
           "pageInfo"
         ],
         "type": "object",
         "properties": {
-          "ciTaxCodeList": {
+          "ciBundleDetails": {
             "type": "array",
+            "description": "List of details about creditor institution's subscription to a bundle",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/CiBundleDetails"
             }
           },
           "pageInfo": {
@@ -5576,6 +5578,12 @@
           "validityDateTo": {
             "type": "string",
             "format": "date"
+          },
+          "idCIBundle": {
+            "type": "string"
+          },
+          "ciTaxCode": {
+            "type": "string"
           },
           "attributes": {
             "type": "array",

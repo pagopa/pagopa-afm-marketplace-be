@@ -334,20 +334,21 @@ public class BundleService {
      */
     public BundleCreditorInstitutionResource getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
         List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode, limit * pageNumber, limit);
-        List<String> ciList = new ArrayList<>();
 
-        for (CiBundle ciBundle : subscriptions) {
-            if (!checkCiBundle(ciBundle, idPSP)) {
-                throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
-            }
-            ciList.add(ciBundle.getCiFiscalCode());
-        }
+        List<CiBundleDetails> ciBundleDetails = subscriptions.parallelStream()
+                .map(ciBundle -> {
+                    if (!checkCiBundle(ciBundle, idPSP)) {
+                        throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+                    }
+                    return modelMapper.map(ciBundle, CiBundleDetails.class);
+                })
+                .toList();
 
         Integer totalItems = ciBundleRepository.getTotalItemsFindByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return BundleCreditorInstitutionResource.builder()
-                .ciTaxCodeList(ciList)
+                .ciBundleDetails(ciBundleDetails)
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)
                         .limit(limit)
@@ -356,26 +357,25 @@ public class BundleService {
                 .build();
     }
 
+    /**
+     * Retrieve the subscription details between the specified creditor institution and bundle
+     *
+     * @param idBundle bundle's id
+     * @param idPsp payment service provider's id
+     * @param ciFiscalCode creditor institution's tax code
+     * @return the details of the subscription
+     */
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
+        Optional<CiBundle> optionalCIBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
 
-        if (ciBundle.isEmpty()) {
+        if (optionalCIBundle.isEmpty()) {
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
 
-        // TODO use model mapper
-        return CiBundleDetails.builder()
-                .validityDateFrom(ciBundle.get().getValidityDateFrom())
-                .validityDateTo(ciBundle.get().getValidityDateTo())
-                .attributes(
-                        ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
-                                ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
-                                attribute -> modelMapper.map(
-                                        attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
-                        ).toList())
-                .build();
+        CiBundle ciBundle = optionalCIBundle.get();
+        return modelMapper.map(ciBundle, CiBundleDetails.class);
     }
 
     public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
