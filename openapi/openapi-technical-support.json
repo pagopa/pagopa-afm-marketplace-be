@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Marketplace API for PagoPA AFM",
-    "description": "marketplace-be",
+    "title": "Marketplace API for Technical Support",
+    "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
     "version": "0.14.15"
   },

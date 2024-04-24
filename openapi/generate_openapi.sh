@@ -15,3 +15,5 @@ do
   cmd="jq 'del(.paths[${element}])' ./openapi/openapi-technical-support.json > ./openapi/temp.json.temp && mv ./openapi/temp.json.temp ./openapi/openapi-technical-support.json"
   eval $cmd
 done
+
+jq '.info.title = "Marketplace API for Technical Support" | .info.description = "marketplace-technical-support"' ./openapi/openapi-technical-support.json > ./openapi/temp.json.temp && mv ./openapi/temp.json.temp ./openapi/openapi-technical-support.json
