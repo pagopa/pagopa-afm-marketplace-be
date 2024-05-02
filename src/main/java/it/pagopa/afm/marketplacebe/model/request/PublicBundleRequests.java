@@ -2,6 +2,8 @@ package it.pagopa.afm.marketplacebe.model.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import it.pagopa.afm.marketplacebe.model.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import java.util.List;
-
-// TODO delete me
 
 @Data
 @NoArgsConstructor
@@ -22,22 +20,18 @@ import java.util.List;
 @Builder
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PspBundleRequest {
-    @JsonProperty("idBundleRequest")
+public class PublicBundleRequests {
+
+    @JsonProperty("requests")
+    @Schema(required = true)
     @NotNull
-    private String id;
-
-    @NotBlank
-    private String idBundle;
-
-    @NotNull
-    private String ciFiscalCode;
-
-    private LocalDateTime acceptedDate;
-
-    private LocalDateTime rejectionDate;
-
     @Valid
-    private List<PspCiBundleAttribute> ciBundleAttributes;
+    private List<PublicBundleRequest> requestsList;
 
+
+    @JsonProperty("pageInfo")
+    @Schema(required = true)
+    @NotNull
+    @Valid
+    private PageInfo pageInfo;
 }

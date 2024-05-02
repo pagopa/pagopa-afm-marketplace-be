@@ -10,9 +10,9 @@ import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiRequests;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
@@ -142,17 +142,17 @@ public class BundleRequestService {
      * @param idBundle     public bundle id
      * @return the paginated list of creditor institution's subscription request info
      */
-    public CiRequests getPublicBundleRequests(String idPsp, Integer limit, Integer pageNumber, @Nullable String ciFiscalCode, @Nullable String idBundle) {
+    public PublicBundleRequests getPublicBundleRequests(String idPsp, Integer limit, Integer pageNumber, @Nullable String ciFiscalCode, @Nullable String idBundle) {
         List<BundleRequestEntity> result = bundleRequestRepository
                 .findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle, limit * pageNumber, limit);
 
         Integer totalItems = bundleRequestRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle);
         int totalPages = calculateTotalPages(limit, totalItems);
 
-        return CiRequests.builder()
+        return PublicBundleRequests.builder()
                 .requestsList(result.stream()
                         .filter(Objects::nonNull)
-                        .map(elem -> modelMapper.map(elem, CiBundleRequest.class))
+                        .map(elem -> modelMapper.map(elem, PublicBundleRequest.class))
                         .toList())
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)

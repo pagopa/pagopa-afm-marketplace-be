@@ -18,7 +18,7 @@ import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiRequests;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
@@ -49,14 +49,18 @@ import javax.validation.constraints.Size;
 @Tag(name = "CI", description = "Everything about CI")
 public class CiController {
 
-    @Autowired
-    private BundleRequestService bundleRequestService;
+    private final BundleRequestService bundleRequestService;
+
+    private final BundleOfferService bundleOfferService;
+
+    private final BundleService bundleService;
 
     @Autowired
-    private BundleOfferService bundleOfferService;
-
-    @Autowired
-    private BundleService bundleService;
+    public CiController(BundleRequestService bundleRequestService, BundleOfferService bundleOfferService, BundleService bundleService) {
+        this.bundleRequestService = bundleRequestService;
+        this.bundleOfferService = bundleOfferService;
+        this.bundleService = bundleService;
+    }
 
     @Operation(summary = "Get paginated list of bundles of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
@@ -191,14 +195,16 @@ public class CiController {
     /**
      * GET /cis/:cifiscalcode/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
-     * @param ciFiscalCode CI identifier.
-     * @param idPsp        PSP identifier. Optional filter.
-     * @return OK. (status code 200)
-     * or Service unavailable (status code 500)
+     * @param ciFiscalCode Creditor institution's tax code
+     * @param idPsp Payment service provider identifier
+     * @param idBundle bundle's identifier
+     * @param limit Number of element in the requested page
+     * @param page Page number
+     * @return the paginated list of CI request to the PSP regarding public bundles
      */
     @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiRequests.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PublicBundleRequests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -208,15 +214,15 @@ public class CiController {
             value = "/{ci-fiscal-code}/requests",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<CiRequests> getRequestsByCI(
+    public ResponseEntity<PublicBundleRequests> getRequestsByCI(
             @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
             @Parameter(description = "Filter by psp identifier") @RequestParam(required = false) @Size(max = 35) String idPsp,
             @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(100) Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) @Max(10000) Integer page
     ) {
-            return ResponseEntity.ok(bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle));
-        }
+        return ResponseEntity.ok(bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle));
+    }
 
     /**
      * POST /cis/:cifiscalcode/requests : Create CI request to the PSP regarding public bundles

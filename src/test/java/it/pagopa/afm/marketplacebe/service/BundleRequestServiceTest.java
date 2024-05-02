@@ -1,5 +1,35 @@
 package it.pagopa.afm.marketplacebe.service;
 
+import com.azure.spring.data.cosmos.core.CosmosTemplate;
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.config.MappingsConfiguration;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
 import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
@@ -12,39 +42,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-
-import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiRequests;
-import it.pagopa.afm.marketplacebe.model.request.PspRequests;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-
-@SpringBootTest
+@SpringBootTest(classes = {BundleRequestService.class, MappingsConfiguration.class})
 class BundleRequestServiceTest {
     @MockBean
     private BundleRepository bundleRepository;
@@ -54,12 +52,14 @@ class BundleRequestServiceTest {
 
     @MockBean
     private BundleRequestRepository bundleRequestRepository;
+
+    @MockBean
+    private ArchivedBundleRequestRepository archivedBundleRequestRepository;
     
-    @MockBean 
-    CosmosTemplate cosmosTemplate;
+    @MockBean
+    private CosmosTemplate cosmosTemplate;
 
     @Autowired
-    @InjectMocks
     private BundleRequestService bundleRequestService;
 
     @ParameterizedTest
@@ -170,7 +170,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), null, null, 0 ,100))
                 .thenReturn(bundleRequests);
 
-        CiRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
+        PublicBundleRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
                 100, 0, null, null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
@@ -184,7 +184,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(), null, 0,100))
                 .thenReturn(bundleRequests);
 
-        CiRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
+        PublicBundleRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
                 100, 0, bundleRequests.get(0).getCiFiscalCode(), null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
@@ -198,7 +198,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(),
                         bundleRequests.get(0).getIdBundle(), 0,100)).thenReturn(bundleRequests);
 
-        CiRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
+        PublicBundleRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
                 100, 0, bundleRequests.get(0).getCiFiscalCode(), bundleRequests.get(0).getIdBundle());
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
