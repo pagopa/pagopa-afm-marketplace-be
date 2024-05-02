@@ -20,7 +20,7 @@ import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.model.request.CiRequests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -379,7 +380,7 @@ public class PspController {
      */
     @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspRequests.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CiRequests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -389,13 +390,14 @@ public class PspController {
             value = "/{idpsp}/requests",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public PspRequests getRequestsByPsp(
-            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Max(100) Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0") @RequestParam(required = false, defaultValue = "0") @Max(10000) Integer page,
+    public CiRequests getPublicBundleRequestsByPsp(
+            @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") @Size(max = 35) String idPsp,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(100) Integer limit,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) @Max(10000) Integer page,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode,
-            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle) {
-        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, ciFiscalCode, idBundle);
+            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle
+    ) {
+        return bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle);
     }
 
 

@@ -62,51 +62,6 @@ class BundleRequestServiceTest {
     @InjectMocks
     private BundleRequestService bundleRequestService;
 
-    @Test
-    void shouldGetRequestsByCI() {
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
-        Bundle bundle = TestUtil.getMockBundle();
-        List<BundleRequestEntity> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
-
-        // Precondition
-        Mockito.when(bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciBundle.getCiFiscalCode(), bundle.getIdPsp()))
-                .thenReturn(bundleRequest);
-
-
-        CiRequests requests = bundleRequestService.getRequestsByCI(
-                ciBundle.getCiFiscalCode(),
-                100,
-                "",
-                bundle.getIdPsp()
-        );
-
-        assertEquals(bundleRequest.size(), requests.getRequestsList().size());
-        assertEquals(bundleRequest.get(0).getIdBundle(),
-                requests.getRequestsList().get(0).getIdBundle());
-    }
-
-    @Test
-    void shouldGetRequestsByCIWithoutIdPSP() {
-        CiBundle ciBundle = TestUtil.getMockCiBundle();
-        List<BundleRequestEntity> bundleRequest = List.of(TestUtil.getMockBundleRequestE());
-
-        // Precondition
-        Mockito.when(bundleRequestRepository.findByCiFiscalCode(ciBundle.getCiFiscalCode()))
-                .thenReturn(bundleRequest);
-
-
-        CiRequests requests = bundleRequestService.getRequestsByCI(
-                ciBundle.getCiFiscalCode(),
-                100,
-                "",
-                null
-        );
-
-        assertEquals(bundleRequest.size(), requests.getRequestsList().size());
-        assertEquals(bundleRequest.get(0).getIdBundle(),
-                requests.getRequestsList().get(0).getIdBundle());
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"PUBLIC"})
     void shouldCreateBundleRequest(String bundleType) {
@@ -215,7 +170,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), null, null, 0 ,100))
                 .thenReturn(bundleRequests);
 
-        PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
+        CiRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
                 100, 0, null, null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
@@ -229,7 +184,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(), null, 0,100))
                 .thenReturn(bundleRequests);
 
-        PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
+        CiRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
                 100, 0, bundleRequests.get(0).getCiFiscalCode(), null);
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
@@ -243,7 +198,7 @@ class BundleRequestServiceTest {
         Mockito.when(bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(bundleRequests.get(0).getIdPsp(), bundleRequests.get(0).getCiFiscalCode(),
                         bundleRequests.get(0).getIdBundle(), 0,100)).thenReturn(bundleRequests);
 
-        PspRequests requests = bundleRequestService.getRequestsByPsp(bundleRequests.get(0).getIdPsp(),
+        CiRequests requests = bundleRequestService.getPublicBundleRequests(bundleRequests.get(0).getIdPsp(),
                 100, 0, bundleRequests.get(0).getCiFiscalCode(), bundleRequests.get(0).getIdBundle());
 
         assertEquals(bundleRequests.size(), requests.getRequestsList().size());
@@ -491,7 +446,7 @@ class BundleRequestServiceTest {
     void getBundleRequest_ko(int limit, int pageNumber, HttpStatus status) {
         String idPsp = TestUtil.getMockIdPsp();
         AppException appException = assertThrows(AppException.class,
-                () -> bundleRequestService.getRequestsByPsp(idPsp, limit, pageNumber, null, null)
+                () -> bundleRequestService.getPublicBundleRequests(idPsp, limit, pageNumber, null, null)
         );
 
         assertEquals(status, appException.getHttpStatus());

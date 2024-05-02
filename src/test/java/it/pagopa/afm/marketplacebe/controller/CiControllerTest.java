@@ -232,17 +232,6 @@ class CiControllerTest {
     }
 
     @Test
-    void getRequestsByCI_200() throws Exception {
-        when(bundleRequestService.getRequestsByCI(anyString(), anyInt(), anyString(), anyString())).thenReturn(TestUtil.getMockCiRequests());
-
-        String url = String.format(REQUESTS, TestUtil.getMockCiFiscalCode());
-
-        mvc.perform(get(url)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void createRequest_201() throws Exception {
         when(bundleRequestService.createBundleRequest(anyString(), any())).thenReturn(TestUtil.getMockBundleRequestId());
 

@@ -14,6 +14,8 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// TODO delete me
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +23,6 @@ import java.util.List;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PspBundleRequest {
-
     @JsonProperty("idBundleRequest")
     @NotNull
     private String id;

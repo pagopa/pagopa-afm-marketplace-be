@@ -37,9 +37,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
 
 @RestController()
 @RequestMapping(path = "/cis")
@@ -189,8 +192,6 @@ public class CiController {
      * GET /cis/:cifiscalcode/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
      * @param ciFiscalCode CI identifier.
-     * @param size         Number of elements for page. Default = 50.
-     * @param cursor       Cursor from which starts counting.
      * @param idPsp        PSP identifier. Optional filter.
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
@@ -204,16 +205,18 @@ public class CiController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(
-            value = "/{cifiscalcode}/requests",
+            value = "/{ci-fiscal-code}/requests",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<CiRequests> getRequestsByCI(
-            @Parameter(description = "CI identifier", required = true) @PathVariable("cifiscalcode") String ciFiscalCode,
-            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
-            @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
-            @Parameter(description = "Filter by psp") @RequestParam(required = false) String idPsp) {
-        return ResponseEntity.ok(bundleRequestService.getRequestsByCI(ciFiscalCode, size, cursor, idPsp));
-    }
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
+            @Parameter(description = "Filter by psp identifier") @RequestParam(required = false) @Size(max = 35) String idPsp,
+            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(100) Integer limit,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) @Max(10000) Integer page
+    ) {
+            return ResponseEntity.ok(bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle));
+        }
 
     /**
      * POST /cis/:cifiscalcode/requests : Create CI request to the PSP regarding public bundles
