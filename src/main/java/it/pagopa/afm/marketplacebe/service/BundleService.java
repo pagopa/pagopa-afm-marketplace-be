@@ -353,6 +353,7 @@ public class BundleService {
                         .page(pageNumber)
                         .limit(limit)
                         .totalPages(totalPages)
+                        .totalItems(Long.valueOf(totalItems))
                         .build())
                 .build();
     }

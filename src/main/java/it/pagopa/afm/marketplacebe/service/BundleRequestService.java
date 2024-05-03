@@ -157,6 +157,7 @@ public class BundleRequestService {
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)
                         .limit(limit)
+                        .totalItems(Long.valueOf(totalItems))
                         .totalPages(totalPages)
                         .build())
                 .build();
