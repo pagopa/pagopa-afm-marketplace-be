@@ -5326,6 +5326,10 @@
             "type": "integer",
             "description": "Total number of pages",
             "format": "int32"
+          },
+          "total_items": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
