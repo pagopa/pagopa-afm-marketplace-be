@@ -190,6 +190,175 @@
         }
       ]
     },
+    "/cis/{ci-fiscal-code}/requests": {
+      "get": {
+        "tags": [
+          "CI"
+        ],
+        "summary": "Get paginated list of CI request to the PSP regarding public bundles",
+        "operationId": "getRequestsByCI",
+        "parameters": [
+          {
+            "name": "ci-fiscal-code",
+            "in": "path",
+            "description": "Creditor institution's tax code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idPsp",
+            "in": "query",
+            "description": "Filter by psp identifier",
+            "required": false,
+            "schema": {
+              "maxLength": 35,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "idBundle",
+            "in": "query",
+            "description": "Filter by bundle id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items for page",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicBundleRequests"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Service unavailable",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "X-Request-Id",
+          "in": "header",
+          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
     "/cis/{cifiscalcode}/bundles": {
       "get": {
         "tags": [
@@ -1571,147 +1740,6 @@
       ]
     },
     "/cis/{cifiscalcode}/requests": {
-      "get": {
-        "tags": [
-          "CI"
-        ],
-        "summary": "Get paginated list of CI request to the PSP regarding public bundles",
-        "operationId": "getRequestsByCI",
-        "parameters": [
-          {
-            "name": "cifiscalcode",
-            "in": "path",
-            "description": "CI identifier",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "description": "Number of elements for one page. Default = 50",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "description": "Starting cursor",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "idPsp",
-            "in": "query",
-            "description": "Filter by psp",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CiRequests"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Service unavailable",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemJson"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKey": []
-          }
-        ]
-      },
       "post": {
         "tags": [
           "CI"
@@ -4130,7 +4158,7 @@
           "PSP"
         ],
         "summary": "Get paginated list of CI request to the PSP regarding public bundles",
-        "operationId": "getRequestsByPsp",
+        "operationId": "getPublicBundleRequestsByPsp",
         "parameters": [
           {
             "name": "idpsp",
@@ -4141,31 +4169,6 @@
               "maxLength": 35,
               "minLength": 0,
               "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Number of items for page",
-            "required": false,
-            "schema": {
-              "maximum": 100,
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Page number. Page number value starts from 0",
-            "required": false,
-            "schema": {
-              "maximum": 10000,
-              "minimum": 0,
-              "type": "integer",
-              "format": "int32",
-              "default": 0
             }
           },
           {
@@ -4185,6 +4188,31 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items for page",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
           }
         ],
         "responses": {
@@ -4201,7 +4229,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PspRequests"
+                  "$ref": "#/components/schemas/PublicBundleRequests"
                 }
               }
             }
@@ -5319,7 +5347,7 @@
           }
         }
       },
-      "PspBundleRequest": {
+      "PublicBundleRequest": {
         "required": [
           "ciFiscalCode",
           "idBundle",
@@ -5328,6 +5356,9 @@
         "type": "object",
         "properties": {
           "idBundle": {
+            "type": "string"
+          },
+          "idPsp": {
             "type": "string"
           },
           "ciFiscalCode": {
@@ -5341,10 +5372,14 @@
             "type": "string",
             "format": "date-time"
           },
-          "ciBundleAttributes": {
+          "insertedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ciBundleAttributeModels": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PspCiBundleAttribute"
+              "$ref": "#/components/schemas/CiBundleAttributeModel"
             }
           },
           "idBundleRequest": {
@@ -5352,26 +5387,7 @@
           }
         }
       },
-      "PspCiBundleAttribute": {
-        "type": "object",
-        "properties": {
-          "maxPaymentAmount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transferCategory": {
-            "type": "string"
-          },
-          "transferCategoryRelation": {
-            "type": "string",
-            "enum": [
-              "EQUAL",
-              "NOT_EQUAL"
-            ]
-          }
-        }
-      },
-      "PspRequests": {
+      "PublicBundleRequests": {
         "required": [
           "pageInfo",
           "requests"
@@ -5381,7 +5397,7 @@
           "requests": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PspBundleRequest"
+              "$ref": "#/components/schemas/PublicBundleRequest"
             }
           },
           "pageInfo": {
@@ -5630,56 +5646,6 @@
           },
           "dbConnection": {
             "type": "string"
-          }
-        }
-      },
-      "CiBundleRequest": {
-        "type": "object",
-        "properties": {
-          "idBundle": {
-            "type": "string"
-          },
-          "idPsp": {
-            "type": "string"
-          },
-          "acceptedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "rejectionDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "insertedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "ciBundleAttributeModels": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CiBundleAttributeModel"
-            }
-          },
-          "idBundleRequest": {
-            "type": "string"
-          }
-        }
-      },
-      "CiRequests": {
-        "required": [
-          "pageInfo",
-          "requests"
-        ],
-        "type": "object",
-        "properties": {
-          "requests": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CiBundleRequest"
-            }
-          },
-          "pageInfo": {
-            "$ref": "#/components/schemas/PageInfo"
           }
         }
       },
