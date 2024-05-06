@@ -5368,6 +5368,16 @@
           "ciFiscalCode": {
             "type": "string"
           },
+          "validityDateFrom": {
+            "type": "string",
+            "description": "the start date of the bundle if accepted",
+            "format": "date"
+          },
+          "validityDateTo": {
+            "type": "string",
+            "description": "the end date of the bundle if accepted",
+            "format": "date"
+          },
           "acceptedDate": {
             "type": "string",
             "format": "date-time"
@@ -5380,14 +5390,14 @@
             "type": "string",
             "format": "date-time"
           },
-          "ciBundleAttributeModels": {
+          "idBundleRequest": {
+            "type": "string"
+          },
+          "attributes": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CiBundleAttributeModel"
             }
-          },
-          "idBundleRequest": {
-            "type": "string"
           }
         }
       },
