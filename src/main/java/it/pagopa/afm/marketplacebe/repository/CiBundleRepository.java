@@ -16,7 +16,8 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
 
     List<CiBundle> findByIdBundle(String idBundle);
 
-    @Query(value = "SELECT * FROM cibundles c " +
+    @Query(value = "SELECT * " +
+            "FROM cibundles c " +
             "WHERE c.ciFiscalCode = @ciFiscalCode " +
             "AND (IS_NULL(@type) OR c.type = @type)" +
             "AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle)) " +
@@ -29,7 +30,8 @@ public interface CiBundleRepository extends CosmosRepository<CiBundle, String> {
             @Param("pageSize") int pageSize
     );
 
-    @Query(value = "SELECT * FROM cibundles c " +
+    @Query(value = "SELECT VALUE COUNT(1) " +
+            "FROM cibundles c " +
             "WHERE c.ciFiscalCode = @ciFiscalCode " +
             "AND (IS_NULL(@type) OR c.type = @type)" +
             "AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle))")

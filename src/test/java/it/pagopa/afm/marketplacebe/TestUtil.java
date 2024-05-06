@@ -310,7 +310,7 @@ public class TestUtil {
     }
 
     public static CiBundles getMockCiBundles() {
-        List<CiBundleInfo> list = List.of(getMockCiBundleInfo());
+        List<CiBundleDetails> list = List.of(getMockCiBundleDetails());
 
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(list.size())
