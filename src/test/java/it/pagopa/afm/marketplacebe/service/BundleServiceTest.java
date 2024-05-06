@@ -1,15 +1,47 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.azure.cosmos.models.PartitionKey;
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.config.MappingsConfiguration;
+import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
+import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
+import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
+import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
+import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
+import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
+import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
+import it.pagopa.afm.marketplacebe.task.TaskManager;
+import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,52 +51,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import it.pagopa.afm.marketplacebe.config.MappingsConfiguration;
-import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-
-import com.azure.cosmos.models.PartitionKey;
-
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
-import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
-import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
-import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
-import it.pagopa.afm.marketplacebe.task.TaskManager;
-import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = {BundleService.class, MappingsConfiguration.class})
 class BundleServiceTest {
@@ -102,19 +106,18 @@ class BundleServiceTest {
     @MockBean
     private TaskManager taskManager;
     @Autowired
-    @InjectMocks
     private BundleService bundleService;
-    
+
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
     void shouldGetBundles(int bundleTypeSize) {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
-        
+
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndType(any(), any(), ArgumentMatchers.<BundleType> anyList(), anyInt(), anyInt())).thenReturn(bundleList);
-      
+        when(cosmosRepository.getBundlesByNameAndType(any(), any(), ArgumentMatchers.<BundleType>anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+
         List<BundleType> list = new ArrayList<>();
         if (bundleTypeSize == 1) {
             list = List.of(BundleType.PRIVATE);
@@ -123,18 +126,18 @@ class BundleServiceTest {
         } else {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
         }
-        
+
         Bundles bundles = bundleService.getBundles(list, null, 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
     }
-    
+
     @Test
     void shouldGetBundlesByName() {
         var bundle = getMockBundle();
         List<Bundle> bundleList = List.of(bundle);
-        
+
         // Precondition
         when(cosmosRepository.getBundlesByNameAndType(any(), any(String.class), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
 
@@ -162,7 +165,7 @@ class BundleServiceTest {
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
     }
-    
+
     @Test
     void shouldGetBundlesByIdPspAndName() {
         var bundle = getMockBundle();
@@ -230,7 +233,7 @@ class BundleServiceTest {
         assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
         assertEquals(bundleRequest.getPspBusinessName(), bundleArgumentCaptor.getValue().getPspBusinessName());
     }
-    
+
     @Test
     void shouldCreateBundleWithPaymentTypeNull() {
         var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
@@ -294,7 +297,7 @@ class BundleServiceTest {
 
         assertEquals(bundleRequest.getName(), updatedBundle.getName());
     }
-    
+
     @Test
     void shouldUpdateBundleWithPaymentTypeNull() {
         var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
@@ -429,11 +432,10 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), nullable(List.class), anyInt(), anyInt()))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), eq(null), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
-
-        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
-                .thenReturn(Optional.of(bundle));
+        when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), eq(null)))
+                .thenReturn(1);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
                 mockCIBundle.getCiFiscalCode(), 100, 0, null, null
@@ -442,29 +444,32 @@ class BundleServiceTest {
 
         assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
         assertEquals(mockCIBundle.getIdBundle(),
-                ciBundlesResult.getBundleDetailsList().get(0).getId());
+                ciBundlesResult.getBundleDetailsList().get(0).getIdBundle());
+        assertEquals(0, ciBundlesResult.getPageInfo().getPage());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalItems());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalPages());
     }
 
     @Test
     void shouldGetBundlesByFiscalCodeTypeFilter() {
         CiBundle mockCIBundle = getMockCiBundle();
-        List<CiBundle> ciBundles = List.of(mockCIBundle);
         Bundle bundle = getMockBundle();
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
         when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(mockCIBundle.getCiFiscalCode(), "GLOBAL", null, 0, 100))
-                .thenReturn(ciBundles);
-
-        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
-                .thenReturn(Optional.of(bundle));
+                .thenReturn(new ArrayList<>());
+        when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(mockCIBundle.getCiFiscalCode(), "GLOBAL", null))
+                .thenReturn(0);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE", null
+                mockCIBundle.getCiFiscalCode(), 100, 0, "GLOBAL", null
         );
 
-
         assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
+        assertEquals(0, ciBundlesResult.getPageInfo().getPage());
+        assertEquals(0, ciBundlesResult.getPageInfo().getTotalItems());
+        assertEquals(0, ciBundlesResult.getPageInfo().getTotalPages());
     }
 
     @Test
@@ -475,14 +480,11 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), nullable(String.class), any(List.class), anyInt(), anyInt()))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), anyList(), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
-
-        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
-                .thenReturn(Optional.of(bundle));
-
-        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName()))
-                .thenReturn(List.of(bundle));
+        when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), anyList()))
+                .thenReturn(1);
+        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName())).thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
                 mockCIBundle.getCiFiscalCode(), 100, 0, null, bundle.getPspBusinessName()
@@ -491,9 +493,12 @@ class BundleServiceTest {
 
         assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
         assertEquals(mockCIBundle.getIdBundle(),
-                ciBundlesResult.getBundleDetailsList().get(0).getId());
+                ciBundlesResult.getBundleDetailsList().get(0).getIdBundle());
         assertEquals(mockCIBundle.getId(),
-                ciBundlesResult.getBundleDetailsList().get(0).getIdCiBundle());
+                ciBundlesResult.getBundleDetailsList().get(0).getIdCIBundle());
+        assertEquals(0, ciBundlesResult.getPageInfo().getPage());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalItems());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalPages());
     }
 
     @Test
@@ -504,14 +509,11 @@ class BundleServiceTest {
         mockCIBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), any(String.class), any(List.class), anyInt(), anyInt()))
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList(), anyInt(), anyInt()))
                 .thenReturn(ciBundles);
-
-        when(bundleRepository.findById(mockCIBundle.getIdBundle()))
-                .thenReturn(Optional.of(bundle));
-
-        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName()))
-                .thenReturn(List.of(bundle));
+        when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
+                .thenReturn(1);
+        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName())).thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
                 mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE", bundle.getPspBusinessName()
@@ -520,9 +522,12 @@ class BundleServiceTest {
 
         assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
         assertEquals(mockCIBundle.getIdBundle(),
-                ciBundlesResult.getBundleDetailsList().get(0).getId());
+                ciBundlesResult.getBundleDetailsList().get(0).getIdBundle());
         assertEquals(mockCIBundle.getId(),
-                ciBundlesResult.getBundleDetailsList().get(0).getIdCiBundle());
+                ciBundlesResult.getBundleDetailsList().get(0).getIdCIBundle());
+        assertEquals(0, ciBundlesResult.getPageInfo().getPage());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalItems());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalPages());
     }
 
     @Test
@@ -532,14 +537,13 @@ class BundleServiceTest {
         ciBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(),
                 ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
-        when(bundleRepository.findById(bundle.getId()))
-                .thenReturn(Optional.of(bundle));
+        when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
 
-        BundleDetailsForCi bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
+        CiBundleDetails bundleDetails = bundleService.getBundleByFiscalCode(ciBundle.getCiFiscalCode(), bundle.getId());
 
-        assertEquals(bundle.getId(), bundleDetails.getId());
+        assertEquals(bundle.getId(), bundleDetails.getIdBundle());
     }
 
     @Test
@@ -1125,10 +1129,10 @@ class BundleServiceTest {
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
         assertNotNull(result);
     }
-    
+
     @Test
     void createBundle_ok_8() {
-    	// create two bundle with same idPsp and same Name
+        // create two bundle with same idPsp and same Name
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
                 any(BundleType.class), anyString(), anyString())).thenReturn(Collections.emptyList());
 
@@ -1331,7 +1335,7 @@ class BundleServiceTest {
         Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), bundleRequest);
         assertNotNull(result);
     }
-    
+
 
     @Test
     void updateBundle_ko_2() {
@@ -1411,7 +1415,7 @@ class BundleServiceTest {
 
         assertDoesNotThrow(() -> bundleService.getConfiguration());
     }
-    
+
     @Test
     void createBundleByList_ok() {
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
@@ -1421,24 +1425,24 @@ class BundleServiceTest {
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
         when(paymentTypeRepository.findByName(anyString()))
                 .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
-        
+
         List<BundleResponse> result = bundleService.createBundleByList(TestUtil.getMockIdPsp(), TestUtil.getMockBundleRequestList());
         assertNotNull(result);
-        assertEquals(3,result.size());
-        
+        assertEquals(3, result.size());
+
         @SuppressWarnings("unchecked")
-		ArgumentCaptor<Iterable<Bundle>> captor = ArgumentCaptor.forClass(Iterable.class);
+        ArgumentCaptor<Iterable<Bundle>> captor = ArgumentCaptor.forClass(Iterable.class);
         verify(bundleRepository, times(1)).saveAll(captor.capture());
-        
+
         Iterator<Bundle> iter = captor.getAllValues().get(0).iterator();
         assertEquals(iter.next().getPspBusinessName(), TestUtil.getMockBundleRequestList().get(0).getPspBusinessName());
         assertEquals(iter.next().getPspBusinessName(), TestUtil.getMockBundleRequestList().get(1).getPspBusinessName());
         assertEquals(iter.next().getPspBusinessName(), TestUtil.getMockBundleRequestList().get(2).getPspBusinessName());
     }
-    
+
     @Test
     void createBundleByList_ko() {
-    	// validityDateTo before validityDateFrom
+        // validityDateTo before validityDateFrom
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         bundleRequest.setValidityDateFrom(LocalDate.now().plusDays(8));
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(7));
@@ -1447,7 +1451,7 @@ class BundleServiceTest {
         String idPsp = TestUtil.getMockIdPsp();
         List<BundleRequest> bundleRequestList = List.of(bundleRequest);
         try {
-        	bundleService.createBundleByList(idPsp, bundleRequestList);
+            bundleService.createBundleByList(idPsp, bundleRequestList);
             fail();
         } catch (AppException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());

@@ -1,15 +1,11 @@
 package it.pagopa.afm.marketplacebe.controller;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.service.BundleOfferService;
+import it.pagopa.afm.marketplacebe.service.BundleRequestService;
+import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,12 +14,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.exception.AppError;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.service.BundleOfferService;
-import it.pagopa.afm.marketplacebe.service.BundleRequestService;
-import it.pagopa.afm.marketplacebe.service.BundleService;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -69,7 +72,7 @@ class CiControllerTest {
 
     @Test
     void getBundleByFiscalCode_200() throws Exception {
-        when(bundleService.getBundleByFiscalCode(anyString(), anyString())).thenReturn(TestUtil.getMockBundleDetailsForCi());
+        when(bundleService.getBundleByFiscalCode(anyString(), anyString())).thenReturn(TestUtil.getMockCiBundleDetails());
 
         String url = String.format(BUNDLE, TestUtil.getMockCiFiscalCode(), TestUtil.getMockIdBundle());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
