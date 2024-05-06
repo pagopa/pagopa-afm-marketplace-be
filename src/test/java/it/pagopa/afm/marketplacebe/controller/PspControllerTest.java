@@ -404,7 +404,7 @@ class PspControllerTest {
 
     @Test
     void getRequestsByPsp_200() throws Exception {
-        when(bundleRequestService.getRequestsByPsp(anyString(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(TestUtil.getMockPspRequests());
+        when(bundleRequestService.getPublicBundleRequests(anyString(), anyInt(), anyInt(), anyString(), anyString())).thenReturn(TestUtil.getMockPublicBundleRequests());
 
         String url = String.format(REQUESTS, TestUtil.getMockIdPsp());
 

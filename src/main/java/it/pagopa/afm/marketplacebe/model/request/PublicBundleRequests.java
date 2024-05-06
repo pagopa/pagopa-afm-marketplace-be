@@ -20,13 +20,14 @@ import java.util.List;
 @Builder
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PspRequests {
+public class PublicBundleRequests {
 
     @JsonProperty("requests")
     @Schema(required = true)
     @NotNull
     @Valid
-    private List<PspBundleRequest> requestsList;
+    private List<PublicBundleRequest> requestsList;
+
 
     @JsonProperty("pageInfo")
     @Schema(required = true)

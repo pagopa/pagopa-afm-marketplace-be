@@ -1,5 +1,6 @@
 package it.pagopa.afm.marketplacebe.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,4 +40,8 @@ public class PageInfo {
     @Schema(description = "Total number of pages", required = true)
     @PositiveOrZero
     Integer totalPages;
+
+    @JsonProperty("total_items")
+    @JsonAlias("totalItems")
+    Long totalItems;
 }
