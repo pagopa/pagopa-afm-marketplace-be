@@ -24,8 +24,7 @@ public class CiBundles {
     @Schema(required = true)
     @NotNull
     @Valid
-    private List<CiBundleInfo> bundleDetailsList;
-
+    private List<CiBundleDetails> bundleDetailsList;
 
     @Schema(required = true)
     @NotNull

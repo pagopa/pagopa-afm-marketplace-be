@@ -13,12 +13,10 @@ import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
@@ -361,8 +359,8 @@ public class BundleService {
     /**
      * Retrieve the subscription details between the specified creditor institution and bundle
      *
-     * @param idBundle bundle's id
-     * @param idPsp payment service provider's id
+     * @param idBundle     bundle's id
+     * @param idPsp        payment service provider's id
      * @param ciFiscalCode creditor institution's tax code
      * @return the details of the subscription
      */
@@ -379,34 +377,53 @@ public class BundleService {
         return modelMapper.map(ciBundle, CiBundleDetails.class);
     }
 
+    /**
+     * Retrieve the paginated list of information about the relation between a bundle and a creditor institution
+     *
+     * @param fiscalCode      creditor institution's tax code
+     * @param limit           the number of element in the page
+     * @param pageNumber      the page number
+     * @param type            the type of bundle
+     * @param pspBusinessName payment service provider's business name
+     * @return the paginated list the details about the relation between a bundle and a creditor institution
+     */
     public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
-        List<String> idBundles = pspBusinessName != null ? bundleRepository.findByPspBusinessName(pspBusinessName).stream().map(Bundle::getId).toList() : null;
+        List<String> idBundles = pspBusinessName != null
+                ? this.bundleRepository.findByPspBusinessName(pspBusinessName).stream()
+                .map(Bundle::getId)
+                .toList()
+                : null;
+
         var bundleList = ciBundleRepository
                 .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles, limit * pageNumber, limit)
                 .parallelStream()
-                .map(ciBundle -> {
-                    Bundle bundle = getBundle(ciBundle.getIdBundle());
-                    CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
-                    ciBundleInfo.setIdCiBundle(ciBundle.getId());
-                    return ciBundleInfo;
-                })
+                .map(ciBundle -> this.modelMapper.map(ciBundle, CiBundleDetails.class))
                 .toList();
+
+        Integer totalItems = this.ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return CiBundles.builder()
                 .bundleDetailsList(bundleList)
                 .pageInfo(PageInfo.builder()
                         .limit(limit)
                         .page(pageNumber)
+                        .totalItems(Long.valueOf(totalItems))
+                        .totalPages(totalPages)
                         .build())
                 .build();
     }
 
-    public BundleDetailsForCi getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+    /**
+     * Retrieve the information about the relation between a bundle and a creditor institution
+     *
+     * @param fiscalCode creditor institution's tax code
+     * @param idBundle   bundle's id
+     * @return the details about the relation between a bundle and a creditor institution
+     */
+    public CiBundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
-
-        var bundle = getBundle(ciBundle.getIdBundle());
-
-        return modelMapper.map(bundle, BundleDetailsForCi.class);
+        return this.modelMapper.map(ciBundle, CiBundleDetails.class);
     }
 
     public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {
