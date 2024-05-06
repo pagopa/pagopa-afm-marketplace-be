@@ -504,7 +504,7 @@ public class TestUtil {
                 .acceptedDate(null)
                 .rejectionDate(null)
                 .insertedDate(LocalDateTime.now())
-                .ciBundleAttributeModels(Collections.emptyList())
+                .ciBundleAttributes(Collections.emptyList())
                 .build();
     }
 
