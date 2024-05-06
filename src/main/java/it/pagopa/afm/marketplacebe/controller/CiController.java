@@ -77,7 +77,7 @@ public class CiController {
     public CiBundles getBundlesByFiscalCode(
             @Parameter(description = "CI identifier", required = true) @PathVariable("ci-fiscal-code") String fiscalCode,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
-            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "1") @Min(0) @PositiveOrZero Integer page,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page,
             @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type,
             @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName) {
         return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page, type, pspBusinessName);

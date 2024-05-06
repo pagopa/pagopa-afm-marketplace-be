@@ -537,7 +537,7 @@ class BundleServiceTest {
         ciBundle.setIdBundle(bundle.getId());
 
         // Preconditions
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(),
                 ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
         when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
 

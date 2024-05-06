@@ -422,7 +422,8 @@ public class BundleService {
      * @return the details about the relation between a bundle and a creditor institution
      */
     public CiBundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
-        var ciBundle = findCiBundle(fiscalCode, idBundle);
+        var ciBundle = this.ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
         return this.modelMapper.map(ciBundle, CiBundleDetails.class);
     }
 
