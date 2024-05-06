@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.15.4"
+    "version": "0.15.4-1-VAS-957-fix-get-ci-bundle-api"
   },
   "servers": [
     {
