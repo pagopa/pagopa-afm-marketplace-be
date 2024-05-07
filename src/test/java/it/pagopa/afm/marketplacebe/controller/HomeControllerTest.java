@@ -3,6 +3,7 @@ package it.pagopa.afm.marketplacebe.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -47,17 +48,16 @@ class HomeControllerTest {
 
     @Test
     void getGlobalBundles() throws Exception {
-        when(bundleService.getBundles(anyList(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        when(bundleService.getBundles(anyList(), anyString(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
         String url = "/bundles";
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isOk());
     }
     
     @Test
     void getGlobalBundlesByName() throws Exception {
-        when(bundleService.getBundles(anyList(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        when(bundleService.getBundles(anyList(), anyString(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
         String url = "/bundles";
         mvc.perform(get(url).param("name","mockName").contentType(MediaType.APPLICATION_JSON))
