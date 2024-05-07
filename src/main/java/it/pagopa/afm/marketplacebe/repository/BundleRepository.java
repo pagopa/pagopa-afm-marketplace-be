@@ -69,41 +69,4 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
     List<Bundle> findByCurrentDateBetweenValidityDateFromAndTo(@Param("currentDate") LocalDate currentDate);
 
     List<Bundle> findByPspBusinessName(String pspBusinessName);
-
-    @Query(value = "SELECT * " +
-            "FROM bundles b " +
-            "WHERE " +
-            "(IS_NULL(@name) OR b.name = @name) " +
-            "AND (IS_NULL(@types) OR array_contains(@types, b.type)) " +
-            "AND (" +
-            "   IS_NULL(@validFrom) " +
-            "   OR (" +
-            "        SUBSTRING(DateTimeFromParts(b.validityDateFrom[0], b.validityDateFrom[1], b.validityDateFrom[2], 0, 0, 0, 0), 0, 10) " +
-            "        <= SUBSTRING(DateTimeFromParts(@validFrom[0], @validFrom[1], @validFrom[2], 0, 0, 0, 0), 0, 10)" +
-            ") " +
-            "ORDER BY b.id OFFSET @offset LIMIT @pageSize")
-    List<Bundle> findByNameAndTypeAndValidityDateFrom(
-            @Param("name") String name,
-            @Param("types") List<BundleType> types,
-            @Param("validFrom") LocalDate validFrom,
-            @Param("offset") int offset,
-            @Param("pageSize") int pageSize
-    );
-
-    @Query(value = "SELECT VALUE COUNT(1) " +
-            "FROM bundles b " +
-            "WHERE " +
-            "(IS_NULL(@name) OR b.name = @name) " +
-            "AND (IS_NULL(@types) OR array_contains(@types, b.type)) " +
-            "AND (" +
-            "   IS_NULL(@validFrom) " +
-            "   OR (" +
-            "        SUBSTRING(DateTimeFromParts(b.validityDateFrom[0], b.validityDateFrom[1], b.validityDateFrom[2], 0, 0, 0, 0), 0, 10) " +
-            "        <= SUBSTRING(DateTimeFromParts(@validFrom[0], @validFrom[1], @validFrom[2], 0, 0, 0, 0), 0, 10)" +
-            ")")
-    Integer getTotalItemsFindByNameAndTypeAndValidityDateFrom(
-            @Param("name") String name,
-            @Param("types") List<BundleType> types,
-            @Param("validFrom") LocalDate validFrom
-    );
 }

@@ -120,15 +120,25 @@ public class BundleService {
         this.modelMapper = modelMapper;
     }
 
+    /**
+     * Retrieve the paginated list of bundles given the type, name and valid date
+     *
+     * @param bundleTypes list of bundle's type
+     * @param name        bundle's name
+     * @param validFrom   validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param limit       page size
+     * @param pageNumber  page number
+     * @return a paginated list of bundles
+     */
     public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, Integer limit, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
-        List<PspBundleDetails> bundleList = this.bundleRepository
-                .findByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
+        List<PspBundleDetails> bundleList = this.cosmosRepository
+                .getBundlesByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
+                .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        Integer totalItems = this.bundleRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
+        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return Bundles.builder()
@@ -137,7 +147,7 @@ public class BundleService {
                         .limit(limit)
                         .page(pageNumber)
                         .itemsFound(bundleList.size())
-                        .totalItems(Long.valueOf(totalItems))
+                        .totalItems(totalItems)
                         .totalPages(totalPages)
                         .build())
                 .build();

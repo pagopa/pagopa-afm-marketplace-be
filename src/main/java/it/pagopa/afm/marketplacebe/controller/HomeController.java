@@ -89,6 +89,16 @@ public class HomeController {
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
 
+    /**
+     * Retrieve the paginated list of bundles given the type, name and valid date
+     *
+     * @param types     list of bundle's type
+     * @param name      bundle's name
+     * @param validFrom validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param limit     page size
+     * @param page      page number
+     * @return a paginated list of bundles
+     */
     @Operation(summary = "Get paginated list of bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Bundles.class))),
@@ -104,10 +114,10 @@ public class HomeController {
     public Bundles getGlobalBundles(
             @Parameter(description = "Bundle's type") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types,
             @Parameter(description = "Bundle's name") @RequestParam(required = false) @Valid String name,
-            @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid from the specified date") @RequestParam(required = false) @Valid LocalDate validFrom,
+            @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid from the specified date") @RequestParam(required = false) LocalDate validFrom,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
-            ) {
+    ) {
         return bundleService.getBundles(types, name, validFrom, limit, page);
     }
 
