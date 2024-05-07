@@ -120,26 +120,26 @@ public class BundleService {
         this.modelMapper = modelMapper;
     }
 
-    public Bundles getBundles(List<BundleType> bundleTypes, String name, Integer pageSize, Integer pageNumber) {
+    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, Integer limit, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
-        List<PspBundleDetails> bundleList = getBundlesByNameAndType(null, name, bundleTypes, pageSize, pageNumber)
+        List<PspBundleDetails> bundleList = this.bundleRepository
+                .findByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        var totalPages = cosmosRepository.getTotalPages(null, name, bundleTypes, pageSize);
-
-
-        PageInfo pageInfo = PageInfo.builder()
-                .limit(pageSize)
-                .page(pageNumber)
-                .itemsFound(bundleList.size())
-                .totalPages(totalPages)
-                .build();
+        Integer totalItems = this.bundleRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return Bundles.builder()
                 .bundleDetailsList(bundleList)
-                .pageInfo(pageInfo)
+                .pageInfo(PageInfo.builder()
+                        .limit(limit)
+                        .page(pageNumber)
+                        .itemsFound(bundleList.size())
+                        .totalItems(Long.valueOf(totalItems))
+                        .totalPages(totalPages)
+                        .build())
                 .build();
     }
 
