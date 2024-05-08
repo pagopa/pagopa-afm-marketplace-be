@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,9 +115,12 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndType(any(), any(), ArgumentMatchers.<BundleType>anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFrom(eq(null), anyList(), eq(null), anyInt(), anyInt()))
+                .thenReturn(bundleList);
+        when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(eq(null), anyList(), eq(null)))
+                .thenReturn((long) bundleList.size());
 
-        List<BundleType> list = new ArrayList<>();
+        List<BundleType> list;
         if (bundleTypeSize == 1) {
             list = List.of(BundleType.PRIVATE);
         } else if (bundleTypeSize == 2) {
@@ -127,10 +129,11 @@ class BundleServiceTest {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
         }
 
-        Bundles bundles = bundleService.getBundles(list, null, 50, 0);
+        Bundles bundles = assertDoesNotThrow(() -> bundleService.getBundles(list, null, null, 50, 0));
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
+        assertEquals(bundleList.size(), bundles.getPageInfo().getTotalItems());
     }
 
     @Test
@@ -139,15 +142,39 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndType(any(), any(String.class), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFrom(anyString(), anyList(), eq(null), anyInt(), anyInt()))
+                .thenReturn(bundleList);
+        when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(anyString(), anyList(), eq(null)))
+                .thenReturn((long) bundleList.size());
 
-        List<BundleType> bundleParams = new ArrayList<>();
-        bundleParams.add(BundleType.GLOBAL);
+        List<BundleType> bundleTypeList = new ArrayList<>();
+        bundleTypeList.add(BundleType.GLOBAL);
         String nameParams = "mockName";
-        Bundles bundles = bundleService.getBundles(bundleParams, nameParams, 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, nameParams, null, 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
+        assertEquals(bundleList.size(), bundles.getPageInfo().getTotalItems());
+    }
+
+    @Test
+    void shouldGetBundlesByValidDate() {
+        var bundle = getMockBundle();
+        List<Bundle> bundleList = List.of(bundle);
+
+        // Precondition
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFrom(eq(null), anyList(), any(), anyInt(), anyInt()))
+                .thenReturn(bundleList);
+        when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(eq(null), anyList(), any()))
+                .thenReturn((long) bundleList.size());
+
+        List<BundleType> bundleTypeList = new ArrayList<>();
+        bundleTypeList.add(BundleType.GLOBAL);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), 50, 0);
+
+        assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
+        assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
+        assertEquals(bundleList.size(), bundles.getPageInfo().getTotalItems());
     }
 
     @Test

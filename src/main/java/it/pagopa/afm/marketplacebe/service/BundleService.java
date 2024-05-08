@@ -120,26 +120,36 @@ public class BundleService {
         this.modelMapper = modelMapper;
     }
 
-    public Bundles getBundles(List<BundleType> bundleTypes, String name, Integer pageSize, Integer pageNumber) {
+    /**
+     * Retrieve the paginated list of bundles given the type, name and valid date
+     *
+     * @param bundleTypes list of bundle's type
+     * @param name        bundle's name
+     * @param validFrom   validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param limit       page size
+     * @param pageNumber  page number
+     * @return a paginated list of bundles
+     */
+    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, Integer limit, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
-        List<PspBundleDetails> bundleList = getBundlesByNameAndType(null, name, bundleTypes, pageSize, pageNumber)
+        List<PspBundleDetails> bundleList = this.cosmosRepository
+                .getBundlesByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
+                .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        var totalPages = cosmosRepository.getTotalPages(null, name, bundleTypes, pageSize);
-
-
-        PageInfo pageInfo = PageInfo.builder()
-                .limit(pageSize)
-                .page(pageNumber)
-                .itemsFound(bundleList.size())
-                .totalPages(totalPages)
-                .build();
+        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return Bundles.builder()
                 .bundleDetailsList(bundleList)
-                .pageInfo(pageInfo)
+                .pageInfo(PageInfo.builder()
+                        .limit(limit)
+                        .page(pageNumber)
+                        .itemsFound(bundleList.size())
+                        .totalItems(totalItems)
+                        .totalPages(totalPages)
+                        .build())
                 .build();
     }
 
