@@ -20,7 +20,7 @@ import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
-import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -96,7 +97,6 @@ public class PspController {
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page) {
         return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, types, name, page, limit));
     }
-
 
     /**
      * GET /psps/:idpsp/bundle/:idbundle : Get a bundle
@@ -181,7 +181,6 @@ public class PspController {
         return ResponseEntity.ok(bundleService.getCIDetails(idBundle, idPsp, ciFiscalCode));
     }
 
-
     /**
      * POST /psps/:idpsp/bundles : Create a bundle
      *
@@ -229,7 +228,6 @@ public class PspController {
             @RequestBody @Valid @NotNull List<BundleRequest> bundleRequestList) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bundleService.createBundleByList(idPsp, bundleRequestList));
     }
-
 
     /**
      * UPDATE /psps/:idpsp/bundles/:idbundle : Update the bundle with the given id
@@ -311,7 +309,6 @@ public class PspController {
         return ResponseEntity.ok(bundleOfferService.getPspOffers(idPsp));
     }
 
-
     /**
      * POST /psps/:idpsp/bunldes/:idbundle/offers : PSP offers a private bundle to a creditor institution
      *
@@ -367,19 +364,19 @@ public class PspController {
         return ResponseEntity.ok().build();
     }
 
-
     /**
      * GET /psps/:idpsp/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
-     * @param idPsp PSP identifier.
-     * @param limit Number of elements for page. Default = 50.
-     * @param page  Page number. Default = 1.
-     * @return OK. (status code 200)
-     * or Service unavailable (status code 500)
+     * @param idPsp Payment service provider identifier
+     * @param ciFiscalCode Creditor institution's tax code
+     * @param idBundle bundle's identifier
+     * @param limit Number of element in the requested page
+     * @param page Page number
+     * @return the paginated list of CI request to the PSP regarding public bundles
      */
     @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspRequests.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PublicBundleRequests.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
@@ -389,15 +386,15 @@ public class PspController {
             value = "/{idpsp}/requests",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public PspRequests getRequestsByPsp(
-            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Max(100) Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0") @RequestParam(required = false, defaultValue = "0") @Max(10000) Integer page,
+    public PublicBundleRequests getPublicBundleRequestsByPsp(
+            @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") @Size(max = 35) String idPsp,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode,
-            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle) {
-        return bundleRequestService.getRequestsByPsp(idPsp, limit, page, ciFiscalCode, idBundle);
+            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(100) Integer limit,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) @Max(10000) Integer page
+            ) {
+        return bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle);
     }
-
 
     @Operation(summary = "the PSP accepts a request of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
@@ -417,7 +414,6 @@ public class PspController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-
     @Operation(summary = "the PSP rejects a request of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
@@ -435,5 +431,4 @@ public class PspController {
         bundleRequestService.rejectRequest(idPsp, idBundleRequest);
         return ResponseEntity.ok().build();
     }
-
 }

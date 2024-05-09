@@ -10,11 +10,9 @@ import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiRequests;
-import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
-import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
@@ -62,28 +60,6 @@ public class BundleRequestService {
         this.archivedBundleRequestRepository = archivedBundleRequestRepository;
         this.ciBundleRepository = ciBundleRepository;
         this.modelMapper = modelMapper;
-    }
-
-    /**
-     * Get requests for creditor institution
-     *
-     * @param ciFiscalCode
-     * @param size
-     * @param cursor
-     * @param idPsp        optional
-     * @return
-     */
-    public CiRequests getRequestsByCI(String ciFiscalCode, Integer size, String cursor, String idPsp) {
-        List<BundleRequestEntity> requests = (idPsp == null) ?
-                bundleRequestRepository.findByCiFiscalCode(ciFiscalCode) :
-                bundleRequestRepository.findByCiFiscalCodeAndIdPsp(ciFiscalCode, idPsp);
-
-        List<CiBundleRequest> ciBundleRequestList = requests.stream()
-                .map(request -> modelMapper.map(request, CiBundleRequest.class)).toList();
-
-        return CiRequests.builder()
-                .requestsList(ciBundleRequestList)
-                .build();
     }
 
     public BundleRequestId createBundleRequest(String ciFiscalCode, CiBundleSubscriptionRequest ciBundleSubscriptionRequest) {
@@ -156,31 +132,32 @@ public class BundleRequestService {
         archiveBundleRequest(bundleRequest.get(), null);
     }
 
-
     /**
-     * Retrieve the paginated list of creditor institutions that have requested a subscription to a public bundle
+     * Retrieve the paginated list of creditor institutions subscription request to a public bundle
      *
-     * @param idPsp        PSP's code
+     * @param idPsp        payment service provider's code
      * @param limit        page size
      * @param pageNumber   page number
      * @param ciFiscalCode creditor institution's tax code
      * @param idBundle     public bundle id
      * @return the paginated list of creditor institution's subscription request info
      */
-    public PspRequests getRequestsByPsp(String idPsp, Integer limit, Integer pageNumber, @Nullable String ciFiscalCode, @Nullable String idBundle) {
-        List<BundleRequestEntity> result = bundleRequestRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle, limit * pageNumber, limit);
+    public PublicBundleRequests getPublicBundleRequests(String idPsp, Integer limit, Integer pageNumber, @Nullable String ciFiscalCode, @Nullable String idBundle) {
+        List<BundleRequestEntity> result = bundleRequestRepository
+                .findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle, limit * pageNumber, limit);
 
         Integer totalItems = bundleRequestRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(idPsp, ciFiscalCode, idBundle);
         int totalPages = calculateTotalPages(limit, totalItems);
 
-        return PspRequests.builder()
+        return PublicBundleRequests.builder()
                 .requestsList(result.stream()
                         .filter(Objects::nonNull)
-                        .map(elem -> modelMapper.map(elem, PspBundleRequest.class))
+                        .map(elem -> modelMapper.map(elem, PublicBundleRequest.class))
                         .toList())
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)
                         .limit(limit)
+                        .totalItems(Long.valueOf(totalItems))
                         .totalPages(totalPages)
                         .build())
                 .build();

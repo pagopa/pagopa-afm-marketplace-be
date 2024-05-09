@@ -13,12 +13,10 @@ import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsForCi;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
@@ -122,26 +120,36 @@ public class BundleService {
         this.modelMapper = modelMapper;
     }
 
-    public Bundles getBundles(List<BundleType> bundleTypes, String name, Integer pageSize, Integer pageNumber) {
+    /**
+     * Retrieve the paginated list of bundles given the type, name and valid date
+     *
+     * @param bundleTypes list of bundle's type
+     * @param name        bundle's name
+     * @param validFrom   validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param limit       page size
+     * @param pageNumber  page number
+     * @return a paginated list of bundles
+     */
+    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, Integer limit, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
-        List<PspBundleDetails> bundleList = getBundlesByNameAndType(null, name, bundleTypes, pageSize, pageNumber)
+        List<PspBundleDetails> bundleList = this.cosmosRepository
+                .getBundlesByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
+                .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        var totalPages = cosmosRepository.getTotalPages(null, name, bundleTypes, pageSize);
-
-
-        PageInfo pageInfo = PageInfo.builder()
-                .limit(pageSize)
-                .page(pageNumber)
-                .itemsFound(bundleList.size())
-                .totalPages(totalPages)
-                .build();
+        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return Bundles.builder()
                 .bundleDetailsList(bundleList)
-                .pageInfo(pageInfo)
+                .pageInfo(PageInfo.builder()
+                        .limit(limit)
+                        .page(pageNumber)
+                        .itemsFound(bundleList.size())
+                        .totalItems(totalItems)
+                        .totalPages(totalPages)
+                        .build())
                 .build();
     }
 
@@ -334,78 +342,99 @@ public class BundleService {
      */
     public BundleCreditorInstitutionResource getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
         List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode, limit * pageNumber, limit);
-        List<String> ciList = new ArrayList<>();
 
-        for (CiBundle ciBundle : subscriptions) {
-            if (!checkCiBundle(ciBundle, idPSP)) {
-                throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
-            }
-            ciList.add(ciBundle.getCiFiscalCode());
-        }
+        List<CiBundleDetails> ciBundleDetails = subscriptions.parallelStream()
+                .map(ciBundle -> {
+                    if (!checkCiBundle(ciBundle, idPSP)) {
+                        throw new AppException(AppError.BUNDLE_PSP_CONFLICT, idBundle, idPSP);
+                    }
+                    return modelMapper.map(ciBundle, CiBundleDetails.class);
+                })
+                .toList();
 
         Integer totalItems = ciBundleRepository.getTotalItemsFindByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return BundleCreditorInstitutionResource.builder()
-                .ciTaxCodeList(ciList)
+                .ciBundleDetails(ciBundleDetails)
                 .pageInfo(PageInfo.builder()
                         .page(pageNumber)
                         .limit(limit)
                         .totalPages(totalPages)
+                        .totalItems(Long.valueOf(totalItems))
                         .build())
                 .build();
     }
 
+    /**
+     * Retrieve the subscription details between the specified creditor institution and bundle
+     *
+     * @param idBundle     bundle's id
+     * @param idPsp        payment service provider's id
+     * @param ciFiscalCode creditor institution's tax code
+     * @return the details of the subscription
+     */
     public CiBundleDetails getCIDetails(String idBundle, String idPsp, String ciFiscalCode) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
-        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
+        Optional<CiBundle> optionalCIBundle = ciBundleRepository.findByIdBundleAndCiFiscalCode(bundle.getId(), ciFiscalCode);
 
-        if (ciBundle.isEmpty()) {
+        if (optionalCIBundle.isEmpty()) {
             throw new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, ciFiscalCode);
         }
 
-        // TODO use model mapper
-        return CiBundleDetails.builder()
-                .validityDateFrom(ciBundle.get().getValidityDateFrom())
-                .validityDateTo(ciBundle.get().getValidityDateTo())
-                .attributes(
-                        ciBundle.get().getAttributes() == null || ciBundle.get().getAttributes().isEmpty()
-                                ? new ArrayList<>() : ciBundle.get().getAttributes().stream().map(
-                                attribute -> modelMapper.map(
-                                        attribute, it.pagopa.afm.marketplacebe.model.bundle.CiBundleAttribute.class)
-                        ).toList())
-                .build();
+        CiBundle ciBundle = optionalCIBundle.get();
+        return modelMapper.map(ciBundle, CiBundleDetails.class);
     }
 
+    /**
+     * Retrieve the paginated list of information about the relation between a bundle and a creditor institution
+     *
+     * @param fiscalCode      creditor institution's tax code
+     * @param limit           the number of element in the page
+     * @param pageNumber      the page number
+     * @param type            the type of bundle
+     * @param pspBusinessName payment service provider's business name
+     * @return the paginated list the details about the relation between a bundle and a creditor institution
+     */
     public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
-        List<String> idBundles = pspBusinessName != null ? bundleRepository.findByPspBusinessName(pspBusinessName).stream().map(Bundle::getId).toList() : null;
+        List<String> idBundles = pspBusinessName != null
+                ? this.bundleRepository.findByPspBusinessName(pspBusinessName).stream()
+                .map(Bundle::getId)
+                .toList()
+                : null;
+
         var bundleList = ciBundleRepository
                 .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles, limit * pageNumber, limit)
                 .parallelStream()
-                .map(ciBundle -> {
-                    Bundle bundle = getBundle(ciBundle.getIdBundle());
-                    CiBundleInfo ciBundleInfo = modelMapper.map(bundle, CiBundleInfo.class);
-                    ciBundleInfo.setIdCiBundle(ciBundle.getId());
-                    return ciBundleInfo;
-                })
+                .map(ciBundle -> this.modelMapper.map(ciBundle, CiBundleDetails.class))
                 .toList();
+
+        Integer totalItems = this.ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return CiBundles.builder()
                 .bundleDetailsList(bundleList)
                 .pageInfo(PageInfo.builder()
                         .limit(limit)
                         .page(pageNumber)
+                        .totalItems(Long.valueOf(totalItems))
+                        .totalPages(totalPages)
                         .build())
                 .build();
     }
 
-    public BundleDetailsForCi getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
-        var ciBundle = findCiBundle(fiscalCode, idBundle);
-
-        var bundle = getBundle(ciBundle.getIdBundle());
-
-        return modelMapper.map(bundle, BundleDetailsForCi.class);
+    /**
+     * Retrieve the information about the relation between a bundle and a creditor institution
+     *
+     * @param fiscalCode creditor institution's tax code
+     * @param idBundle   bundle's id
+     * @return the details about the relation between a bundle and a creditor institution
+     */
+    public CiBundleDetails getBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+        var ciBundle = this.ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, fiscalCode)
+                .orElseThrow(() -> new AppException(AppError.CI_BUNDLE_NOT_FOUND, idBundle, fiscalCode));
+        return this.modelMapper.map(ciBundle, CiBundleDetails.class);
     }
 
     public void removeBundleByFiscalCode(@NotNull String fiscalCode, @NotNull String idCiBundle) {

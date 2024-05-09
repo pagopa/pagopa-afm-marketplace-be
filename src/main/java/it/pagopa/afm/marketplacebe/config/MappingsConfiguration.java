@@ -1,9 +1,11 @@
 package it.pagopa.afm.marketplacebe.config;
 
 import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.mapper.ConvertBundleToPspBundleDetails;
+import it.pagopa.afm.marketplacebe.mapper.ConvertCIBundleTCIBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
-import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +20,8 @@ public class MappingsConfiguration {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        Converter<Bundle, PspBundleDetails> convertBundleToPspBundleDetails = new ConvertBundleToPspBundleDetails();
-        mapper.createTypeMap(Bundle.class, PspBundleDetails.class).setConverter(convertBundleToPspBundleDetails);
+        mapper.createTypeMap(Bundle.class, PspBundleDetails.class).setConverter(new ConvertBundleToPspBundleDetails());
+        mapper.createTypeMap(CiBundle.class, CiBundleDetails.class).setConverter(new ConvertCIBundleTCIBundleDetails());
 
         return mapper;
     }

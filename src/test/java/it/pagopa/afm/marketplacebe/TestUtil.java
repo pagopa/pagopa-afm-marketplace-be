@@ -1,21 +1,8 @@
 package it.pagopa.afm.marketplacebe;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
-import org.assertj.core.util.Lists;
-import org.modelmapper.ModelMapper;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
@@ -38,6 +25,7 @@ import it.pagopa.afm.marketplacebe.model.bundle.CiBundleInfo;
 import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
 import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
@@ -46,12 +34,20 @@ import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.model.request.CiBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
-import it.pagopa.afm.marketplacebe.model.request.CiRequests;
-import it.pagopa.afm.marketplacebe.model.request.PspBundleRequest;
-import it.pagopa.afm.marketplacebe.model.request.PspRequests;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequest;
+import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
 import lombok.experimental.UtilityClass;
+import org.assertj.core.util.Lists;
+import org.modelmapper.ModelMapper;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 
 @UtilityClass
@@ -314,7 +310,7 @@ public class TestUtil {
     }
 
     public static CiBundles getMockCiBundles() {
-        List<CiBundleInfo> list = List.of(getMockCiBundleInfo());
+        List<CiBundleDetails> list = List.of(getMockCiBundleDetails());
 
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(list.size())
@@ -377,9 +373,9 @@ public class TestUtil {
     }
 
     public static BundleCreditorInstitutionResource getMockBundleCreditorInstitutionResource() {
-        List<String> mockCiFiscalCode = List.of(getMockCiFiscalCode());
+        List<CiBundleDetails> mockCiFiscalCode = List.of(getMockCiBundleDetails());
         return BundleCreditorInstitutionResource.builder()
-                .ciTaxCodeList(mockCiFiscalCode)
+                .ciBundleDetails(mockCiFiscalCode)
                 .pageInfo(PageInfo.builder()
                         .itemsFound(mockCiFiscalCode.size())
                         .totalPages(1)
@@ -488,30 +484,6 @@ public class TestUtil {
                 .build();
     }
 
-    public static PspBundleRequest getMockPspBundleRequest() {
-        return PspBundleRequest.builder()
-                .id(UUID.randomUUID().toString())
-                .idBundle(getMockIdBundle())
-                .ciFiscalCode(getMockCiFiscalCode())
-                .acceptedDate(null)
-                .rejectionDate(null)
-                .ciBundleAttributes(Collections.emptyList())
-                .build();
-    }
-
-    public static PspRequests getMockPspRequests() {
-        List<PspBundleRequest> list = List.of(getMockPspBundleRequest());
-        PageInfo pageInfo = PageInfo.builder()
-                .itemsFound(list.size())
-                .totalPages(1)
-                .build();
-
-        return PspRequests.builder()
-                .requestsList(list)
-                .pageInfo(pageInfo)
-                .build();
-    }
-
     public static BundleDetailsAttributes getMockBundleDetailsAttributes() {
         CiBundle ciBundle = getMockCiBundle();
         ModelMapper modelMapper = new ModelMapper();
@@ -524,26 +496,26 @@ public class TestUtil {
                 .build();
     }
 
-    public static CiBundleRequest getMockCiBundleRequest() {
-        return CiBundleRequest.builder()
+    public static PublicBundleRequest getMockPublicBundleRequest() {
+        return PublicBundleRequest.builder()
                 .id(UUID.randomUUID().toString())
                 .idBundle(getMockIdBundle())
                 .idPsp(getMockIdPsp())
                 .acceptedDate(null)
                 .rejectionDate(null)
                 .insertedDate(LocalDateTime.now())
-                .ciBundleAttributeModels(Collections.emptyList())
+                .ciBundleAttributes(Collections.emptyList())
                 .build();
     }
 
-    public static CiRequests getMockCiRequests() {
-        List<CiBundleRequest> list = List.of(getMockCiBundleRequest());
+    public static PublicBundleRequests getMockPublicBundleRequests() {
+        List<PublicBundleRequest> list = List.of(getMockPublicBundleRequest());
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(list.size())
                 .totalPages(1)
                 .build();
 
-        return CiRequests.builder()
+        return PublicBundleRequests.builder()
                 .requestsList(list)
                 .pageInfo(pageInfo)
                 .build();
