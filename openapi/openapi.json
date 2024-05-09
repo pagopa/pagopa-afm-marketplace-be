@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.15.7-1-VAS-1025-fix-validity-date-from-filter"
+    "version": "0.15.7-2-VAS-1025-fix-validity-date-from-filter"
   },
   "servers": [
     {
