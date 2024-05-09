@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.14.15"
+    "version": "0.15.7"
   },
   "servers": [
     {
@@ -25,7 +25,9 @@
   "paths": {
     "/bundles": {
       "get": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Get paginated list of bundles",
         "operationId": "getGlobalBundles",
         "parameters": [
@@ -61,9 +63,15 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["GLOBAL", "PUBLIC", "PRIVATE"]
+                "enum": [
+                  "GLOBAL",
+                  "PUBLIC",
+                  "PRIVATE"
+                ]
               },
-              "default": ["GLOBAL"]
+              "default": [
+                "GLOBAL"
+              ]
             }
           },
           {
@@ -184,7 +192,9 @@
     },
     "/cis/{cifiscalcode}/bundles": {
       "get": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Get paginated list of bundles of a CI",
         "operationId": "getBundlesByFiscalCode",
         "parameters": [
@@ -347,7 +357,9 @@
     },
     "/cis/{cifiscalcode}/bundles/{idbundle}": {
       "get": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Get a bundle of a CI",
         "operationId": "getBundleByFiscalCode",
         "parameters": [
@@ -478,7 +490,9 @@
     },
     "/cis/{cifiscalcode}/bundles/{idbundle}/attributes": {
       "get": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Get attributes of a bundle of a CI",
         "operationId": "getBundleAttributesByFiscalCode",
         "parameters": [
@@ -597,7 +611,9 @@
         ]
       },
       "post": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Create a new bundle attribute",
         "operationId": "createBundleAttributesByCi",
         "parameters": [
@@ -738,7 +754,9 @@
     },
     "/cis/{cifiscalcode}/bundles/{idbundle}/attributes/{idattribute}": {
       "put": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Update an attribute of a bundle",
         "operationId": "updateBundleAttributesByCi",
         "parameters": [
@@ -872,7 +890,9 @@
         ]
       },
       "delete": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Delete an attribute of a bundle",
         "operationId": "removeBundleAttributesByCi",
         "parameters": [
@@ -1008,7 +1028,9 @@
     },
     "/cis/{cifiscalcode}/bundles/{idcibundle}": {
       "delete": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Remove a bundle of a CI",
         "operationId": "removeBundleByFiscalCode",
         "parameters": [
@@ -1135,7 +1157,9 @@
     },
     "/cis/{cifiscalcode}/offers": {
       "get": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Get paginated list of PSP offers to the CI regarding private bundles",
         "operationId": "getOffersByCI",
         "parameters": [
@@ -1286,7 +1310,9 @@
     },
     "/cis/{cifiscalcode}/offers/{idbundleoffer}/accept": {
       "post": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "The CI accepts an offer of a PSP",
         "operationId": "acceptOffer",
         "parameters": [
@@ -1417,7 +1443,9 @@
     },
     "/cis/{cifiscalcode}/offers/{idbundleoffer}/reject": {
       "post": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "The CI rejects the offer of the PSP",
         "operationId": "rejectOffer",
         "parameters": [
@@ -1544,7 +1572,9 @@
     },
     "/cis/{cifiscalcode}/requests": {
       "get": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Get paginated list of CI request to the PSP regarding public bundles",
         "operationId": "getRequestsByCI",
         "parameters": [
@@ -1683,7 +1713,9 @@
         ]
       },
       "post": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Create CI request to the PSP regarding public bundles",
         "operationId": "createRequest",
         "parameters": [
@@ -1826,7 +1858,9 @@
     },
     "/cis/{cifiscalcode}/requests/{idbundlerequest}": {
       "delete": {
-        "tags": ["CI"],
+        "tags": [
+          "CI"
+        ],
         "summary": "Delete CI request regarding a public bundles",
         "operationId": "removeRequest",
         "parameters": [
@@ -1953,7 +1987,9 @@
     },
     "/configuration": {
       "get": {
-        "tags": ["Home"],
+        "tags": [
+          "Home"
+        ],
         "summary": "Generate the configuration",
         "operationId": "getConfiguration",
         "responses": {
@@ -2031,7 +2067,9 @@
     },
     "/info": {
       "get": {
-        "tags": ["Home"],
+        "tags": [
+          "Home"
+        ],
         "summary": "Return OK if application is started",
         "operationId": "healthCheck",
         "responses": {
@@ -2142,7 +2180,9 @@
     },
     "/paymenttypes": {
       "get": {
-        "tags": ["Payment Type"],
+        "tags": [
+          "Payment Type"
+        ],
         "summary": "Get payment types",
         "operationId": "getPaymentTypes",
         "parameters": [
@@ -2266,7 +2306,9 @@
         ]
       },
       "post": {
-        "tags": ["Payment Type"],
+        "tags": [
+          "Payment Type"
+        ],
         "summary": "Sync payment types",
         "operationId": "syncPaymentTypes",
         "requestBody": {
@@ -2386,7 +2428,9 @@
     },
     "/paymenttypes/{id}": {
       "get": {
-        "tags": ["Payment Type"],
+        "tags": [
+          "Payment Type"
+        ],
         "summary": "Get payment types",
         "operationId": "getPaymentType",
         "parameters": [
@@ -2508,7 +2552,9 @@
     },
     "/psps/{idpsp}/bundles": {
       "get": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Get paginated list of bundles of a PSP",
         "operationId": "getBundles",
         "parameters": [
@@ -2532,9 +2578,15 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["GLOBAL", "PUBLIC", "PRIVATE"]
+                "enum": [
+                  "GLOBAL",
+                  "PUBLIC",
+                  "PRIVATE"
+                ]
               },
-              "default": ["GLOBAL"]
+              "default": [
+                "GLOBAL"
+              ]
             }
           },
           {
@@ -2666,7 +2718,9 @@
         ]
       },
       "post": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Create a new bundle",
         "operationId": "createBundle",
         "parameters": [
@@ -2800,7 +2854,9 @@
     },
     "/psps/{idpsp}/bundles/massive": {
       "post": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Create new bundles by list",
         "operationId": "createBundleByList",
         "parameters": [
@@ -2937,7 +2993,9 @@
     },
     "/psps/{idpsp}/bundles/{idbundle}": {
       "get": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Get a bundle",
         "operationId": "getBundle",
         "parameters": [
@@ -3058,7 +3116,9 @@
         ]
       },
       "put": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Update a bundle",
         "operationId": "updateBundle",
         "parameters": [
@@ -3185,7 +3245,9 @@
         ]
       },
       "delete": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Delete the bundle with the given id",
         "operationId": "removeBundle",
         "parameters": [
@@ -3314,7 +3376,9 @@
     },
     "/psps/{idpsp}/bundles/{idbundle}/creditorInstitutions": {
       "get": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Get paginated list of CI subscribed to a bundle",
         "operationId": "getBundleCreditorInstitutions",
         "parameters": [
@@ -3481,7 +3545,9 @@
     },
     "/psps/{idpsp}/bundles/{idbundle}/creditorInstitutions/{cifiscalcode}": {
       "get": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Get details of a relationship between a bundle and a creditor institution",
         "operationId": "getBundleCreditorInstitutionDetails",
         "parameters": [
@@ -3623,7 +3689,9 @@
     },
     "/psps/{idpsp}/bundles/{idbundle}/offers": {
       "post": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "PSP offers a private bundle to a creditor institution",
         "operationId": "sendBundleOffer",
         "parameters": [
@@ -3769,7 +3837,9 @@
     },
     "/psps/{idpsp}/bundles/{idbundle}/offers/{idbundleoffer}": {
       "delete": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "PSP deletes a private bundle offered",
         "operationId": "removeBundleOffer",
         "parameters": [
@@ -3907,7 +3977,9 @@
     },
     "/psps/{idpsp}/offers": {
       "get": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Get paginated list of PSP offers regarding private bundles",
         "operationId": "getOffers",
         "parameters": [
@@ -4054,7 +4126,9 @@
     },
     "/psps/{idpsp}/requests": {
       "get": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "Get paginated list of CI request to the PSP regarding public bundles",
         "operationId": "getRequestsByPsp",
         "parameters": [
@@ -4221,7 +4295,9 @@
     },
     "/psps/{idpsp}/requests/{idBundleRequest}/accept": {
       "post": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "the PSP accepts a request of a CI",
         "operationId": "acceptRequest",
         "parameters": [
@@ -4350,7 +4426,9 @@
     },
     "/psps/{idpsp}/requests/{idBundleRequest}/reject": {
       "post": {
-        "tags": ["PSP"],
+        "tags": [
+          "PSP"
+        ],
         "summary": "the PSP rejects a request of a CI",
         "operationId": "rejectRequest",
         "parameters": [
@@ -4479,7 +4557,9 @@
     },
     "/touchpoints": {
       "get": {
-        "tags": ["Touchpoint"],
+        "tags": [
+          "Touchpoint"
+        ],
         "summary": "Get touchpoints",
         "operationId": "getTouchpoints",
         "parameters": [
@@ -4603,7 +4683,9 @@
         ]
       },
       "post": {
-        "tags": ["Touchpoint"],
+        "tags": [
+          "Touchpoint"
+        ],
         "summary": "Create touchpoint",
         "operationId": "createTouchpoint",
         "requestBody": {
@@ -4724,7 +4806,9 @@
     },
     "/touchpoints/{id}": {
       "get": {
-        "tags": ["Touchpoint"],
+        "tags": [
+          "Touchpoint"
+        ],
         "summary": "Get touchpoint",
         "operationId": "getTouchpoint",
         "parameters": [
@@ -4834,7 +4918,9 @@
         ]
       },
       "delete": {
-        "tags": ["Touchpoint"],
+        "tags": [
+          "Touchpoint"
+        ],
         "summary": "Delete touchpoint",
         "operationId": "deleteTouchpoint",
         "parameters": [
@@ -4954,7 +5040,12 @@
   "components": {
     "schemas": {
       "BundleRequest": {
-        "required": ["abi", "idBrokerPsp", "idChannel", "pspBusinessName"],
+        "required": [
+          "abi",
+          "idBrokerPsp",
+          "idChannel",
+          "pspBusinessName"
+        ],
         "type": "object",
         "properties": {
           "idChannel": {
@@ -5007,7 +5098,11 @@
           },
           "type": {
             "type": "string",
-            "enum": ["GLOBAL", "PUBLIC", "PRIVATE"]
+            "enum": [
+              "GLOBAL",
+              "PUBLIC",
+              "PRIVATE"
+            ]
           },
           "transferCategoryList": {
             "type": "array",
@@ -5059,7 +5154,10 @@
           },
           "transferCategoryRelation": {
             "type": "string",
-            "enum": ["EQUAL", "NOT_EQUAL"]
+            "enum": [
+              "EQUAL",
+              "NOT_EQUAL"
+            ]
           }
         }
       },
@@ -5117,7 +5215,10 @@
         }
       },
       "PaymentType": {
-        "required": ["paymentType", "used"],
+        "required": [
+          "paymentType",
+          "used"
+        ],
         "type": "object",
         "properties": {
           "used": {
@@ -5129,7 +5230,9 @@
         }
       },
       "CiBundleSubscriptionRequest": {
-        "required": ["idBundle"],
+        "required": [
+          "idBundle"
+        ],
         "type": "object",
         "properties": {
           "idBundle": {
@@ -5168,7 +5271,12 @@
         }
       },
       "PageInfo": {
-        "required": ["itemsFound", "limit", "page", "totalPages"],
+        "required": [
+          "itemsFound",
+          "limit",
+          "page",
+          "totalPages"
+        ],
         "type": "object",
         "properties": {
           "page": {
@@ -5194,7 +5302,10 @@
         }
       },
       "Touchpoints": {
-        "required": ["pageInfo", "touchpoints"],
+        "required": [
+          "pageInfo",
+          "touchpoints"
+        ],
         "type": "object",
         "properties": {
           "pageInfo": {
@@ -5209,7 +5320,11 @@
         }
       },
       "PspBundleRequest": {
-        "required": ["ciFiscalCode", "idBundle", "idBundleRequest"],
+        "required": [
+          "ciFiscalCode",
+          "idBundle",
+          "idBundleRequest"
+        ],
         "type": "object",
         "properties": {
           "idBundle": {
@@ -5249,12 +5364,18 @@
           },
           "transferCategoryRelation": {
             "type": "string",
-            "enum": ["EQUAL", "NOT_EQUAL"]
+            "enum": [
+              "EQUAL",
+              "NOT_EQUAL"
+            ]
           }
         }
       },
       "PspRequests": {
-        "required": ["pageInfo", "requests"],
+        "required": [
+          "pageInfo",
+          "requests"
+        ],
         "type": "object",
         "properties": {
           "requests": {
@@ -5269,7 +5390,10 @@
         }
       },
       "BundleOffers": {
-        "required": ["offers", "pageInfo"],
+        "required": [
+          "offers",
+          "pageInfo"
+        ],
         "type": "object",
         "properties": {
           "offers": {
@@ -5310,7 +5434,10 @@
         }
       },
       "Bundles": {
-        "required": ["bundles", "pageInfo"],
+        "required": [
+          "bundles",
+          "pageInfo"
+        ],
         "type": "object",
         "properties": {
           "pageInfo": {
@@ -5400,7 +5527,9 @@
         }
       },
       "BundleCreditorInstitutionResource": {
-        "required": ["pageInfo"],
+        "required": [
+          "pageInfo"
+        ],
         "type": "object",
         "properties": {
           "ciTaxCodeList": {
@@ -5426,7 +5555,10 @@
           },
           "transferCategoryRelation": {
             "type": "string",
-            "enum": ["EQUAL", "NOT_EQUAL"]
+            "enum": [
+              "EQUAL",
+              "NOT_EQUAL"
+            ]
           },
           "insertedDate": {
             "type": "string",
@@ -5454,7 +5586,10 @@
         }
       },
       "PaymentTypes": {
-        "required": ["pageInfo", "paymentTypes"],
+        "required": [
+          "pageInfo",
+          "paymentTypes"
+        ],
         "type": "object",
         "properties": {
           "pageInfo": {
@@ -5469,7 +5604,11 @@
         }
       },
       "AppInfo": {
-        "required": ["environment", "name", "version"],
+        "required": [
+          "environment",
+          "name",
+          "version"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -5519,7 +5658,10 @@
         }
       },
       "CiRequests": {
-        "required": ["pageInfo", "requests"],
+        "required": [
+          "pageInfo",
+          "requests"
+        ],
         "type": "object",
         "properties": {
           "requests": {
@@ -5534,7 +5676,10 @@
         }
       },
       "BundleCiOffers": {
-        "required": ["offers", "pageInfo"],
+        "required": [
+          "offers",
+          "pageInfo"
+        ],
         "type": "object",
         "properties": {
           "offers": {
@@ -5638,7 +5783,10 @@
         }
       },
       "CiBundles": {
-        "required": ["bundles", "pageInfo"],
+        "required": [
+          "bundles",
+          "pageInfo"
+        ],
         "type": "object",
         "properties": {
           "pageInfo": {
@@ -5731,7 +5879,10 @@
         }
       },
       "BundleAttribute": {
-        "required": ["idBundleAttribute", "insertedDate"],
+        "required": [
+          "idBundleAttribute",
+          "insertedDate"
+        ],
         "type": "object",
         "properties": {
           "maxPaymentAmount": {
@@ -5743,7 +5894,10 @@
           },
           "transferCategoryRelation": {
             "type": "string",
-            "enum": ["EQUAL", "NOT_EQUAL"]
+            "enum": [
+              "EQUAL",
+              "NOT_EQUAL"
+            ]
           },
           "validityDateTo": {
             "type": "string",
@@ -5759,7 +5913,10 @@
         }
       },
       "BundleDetailsAttributes": {
-        "required": ["attributes", "insertedDate"],
+        "required": [
+          "attributes",
+          "insertedDate"
+        ],
         "type": "object",
         "properties": {
           "validityDateFrom": {
