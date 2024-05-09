@@ -4,7 +4,7 @@
     "title": "Marketplace API for Technical Support",
     "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.15.7"
+    "version": "0.15.7-1-VAS-1025-fix-validity-date-from-filter"
   },
   "servers": [
     {
