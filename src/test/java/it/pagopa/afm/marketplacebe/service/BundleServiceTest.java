@@ -42,6 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -170,7 +171,7 @@ class BundleServiceTest {
 
         List<BundleType> bundleTypeList = new ArrayList<>();
         bundleTypeList.add(BundleType.GLOBAL);
-        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, null, Instant.now(), 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
