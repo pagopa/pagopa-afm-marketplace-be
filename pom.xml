@@ -13,7 +13,7 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.15.7-2-VAS-1025-fix-validity-date-from-filter</version>
+	<version>0.15.9</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
