@@ -132,16 +132,15 @@ public class BundleService {
      * @param pageNumber  page number
      * @return a paginated list of bundles
      */
-    public Bundles getBundles(List<BundleType> bundleTypes, String name, Instant validFrom, Integer limit, Integer pageNumber) {
-        LocalDate localValidFromDate = validFrom != null ? validFrom.atZone(ZoneId.of("Europe/Paris")).toLocalDate() : null;
+    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, Integer limit, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
         List<PspBundleDetails> bundleList = this.cosmosRepository
-                .getBundlesByNameAndTypeAndValidityDateFrom(name, bundleTypes, localValidFromDate, limit * pageNumber, limit)
+                .getBundlesByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
                 .stream()
                 .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, localValidFromDate);
+        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return Bundles.builder()

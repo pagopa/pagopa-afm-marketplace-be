@@ -78,11 +78,11 @@
           {
             "name": "validFrom",
             "in": "query",
-            "description": "Validity date of bundles, used to retrieve all bundles valid from the specified date",
+            "description": "Validity date of bundles, used to retrieve all bundles valid from the specified date (Example = yyyy-MM-dd)",
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date"
             }
           },
           {

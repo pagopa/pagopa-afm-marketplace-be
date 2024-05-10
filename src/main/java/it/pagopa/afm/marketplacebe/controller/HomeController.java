@@ -15,6 +15,7 @@ import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -114,7 +115,7 @@ public class HomeController {
     public Bundles getGlobalBundles(
             @Parameter(description = "Bundle's type") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types,
             @Parameter(description = "Bundle's name") @RequestParam(required = false) @Valid String name,
-            @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid from the specified date") @RequestParam(required = false) Instant validFrom,
+            @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid from the specified date (Example = yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate validFrom,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
     ) {

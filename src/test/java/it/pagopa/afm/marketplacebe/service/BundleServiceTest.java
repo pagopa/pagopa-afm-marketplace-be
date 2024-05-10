@@ -171,7 +171,7 @@ class BundleServiceTest {
 
         List<BundleType> bundleTypeList = new ArrayList<>();
         bundleTypeList.add(BundleType.GLOBAL);
-        Bundles bundles = bundleService.getBundles(bundleTypeList, null, Instant.now(), 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
