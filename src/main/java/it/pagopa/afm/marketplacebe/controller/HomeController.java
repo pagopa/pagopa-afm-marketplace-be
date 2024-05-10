@@ -28,7 +28,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 @RestController
@@ -86,7 +85,6 @@ public class HomeController {
                 .version(version)
                 .environment(environment)
                 .build();
-        ZoneId.of()
 
         return ResponseEntity.status(HttpStatus.OK).body(info);
     }
