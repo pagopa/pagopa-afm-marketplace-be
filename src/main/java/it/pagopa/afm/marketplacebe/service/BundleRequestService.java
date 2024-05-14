@@ -10,6 +10,7 @@ import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
 import it.pagopa.afm.marketplacebe.model.request.BundleRequestId;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequest;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleSubscriptionRequest;
 import it.pagopa.afm.marketplacebe.model.request.PublicBundleRequests;
@@ -62,11 +63,16 @@ public class BundleRequestService {
         this.modelMapper = modelMapper;
     }
 
+    /**
+     * Create a public bundle's request with the provided info
+     *
+     * @param ciFiscalCode creditor institution's tax code
+     * @param ciBundleSubscriptionRequest object that contain the request info
+     * @return bundle request id
+     */
     public BundleRequestId createBundleRequest(String ciFiscalCode, CiBundleSubscriptionRequest ciBundleSubscriptionRequest) {
         // retrieve bundle by idBundle and check if it is public
-
         String idBundle = ciBundleSubscriptionRequest.getIdBundle();
-
         Bundle bundle = getBundle(idBundle);
 
         // a bundle request is acceptable if validityDateTo is after now
@@ -78,28 +84,12 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, idBundle, "Type not public");
         }
 
-        // rule R15: attribute payment amount should be lower than bundle one
-        if (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null) {
-            ciBundleSubscriptionRequest.getCiBundleAttributeModelList().parallelStream().forEach(attribute -> {
-                if (attribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
-                    throw new AppException(AppError.BUNDLE_REQUEST_BAD_REQUEST, idBundle, "Payment amount should be lower than or equal to bundle payment amount.");
-                }
-            });
+        List<CiBundleAttributeModel> attributeModelList = ciBundleSubscriptionRequest.getCiBundleAttributeModelList();
+        List<CiBundleAttribute> attributes = new ArrayList<>();
+        if (attributeModelList != null && !attributeModelList.isEmpty()) {
+            validateCIBundleAttributes(attributeModelList, bundle, idBundle);
+            attributes = buildCiBundleAttributes(idBundle, attributeModelList);
         }
-
-        List<CiBundleAttribute> attributes = (ciBundleSubscriptionRequest.getCiBundleAttributeModelList() != null
-                && !ciBundleSubscriptionRequest.getCiBundleAttributeModelList().isEmpty()) ?
-                ciBundleSubscriptionRequest.getCiBundleAttributeModelList()
-                        .stream()
-                        .map(attribute ->
-                                CiBundleAttribute.builder()
-                                        .id(idBundle + "-" + UUID.randomUUID())
-                                        .insertedDate(LocalDateTime.now())
-                                        .maxPaymentAmount(attribute.getMaxPaymentAmount())
-                                        .transferCategory(attribute.getTransferCategory())
-                                        .transferCategoryRelation(attribute.getTransferCategoryRelation())
-                                        .build()
-                        ).toList() : new ArrayList<>();
 
         BundleRequestEntity request = BundleRequestEntity.builder()
                 .idBundle(bundle.getId())
@@ -108,8 +98,7 @@ public class BundleRequestService {
                 .ciBundleAttributes(attributes)
                 .build();
 
-        bundleRequestRepository.save(request);
-
+        this.bundleRequestRepository.save(request);
         return BundleRequestId.builder().idBundleRequest(request.getId()).build();
     }
 
@@ -282,5 +271,38 @@ public class BundleRequestService {
 
     private int calculateTotalPages(Integer limit, double totalItems) {
         return (int) Math.ceil(totalItems / limit);
+    }
+
+    private List<CiBundleAttribute> buildCiBundleAttributes(String idBundle, List<CiBundleAttributeModel> ciBundleAttributeModelList) {
+        return ciBundleAttributeModelList.parallelStream()
+                .map(attribute -> CiBundleAttribute.builder()
+                        .id(String.format("%s-%s", idBundle, UUID.randomUUID()))
+                        .insertedDate(LocalDateTime.now())
+                        .maxPaymentAmount(attribute.getMaxPaymentAmount())
+                        .transferCategory(attribute.getTransferCategory())
+                        .transferCategoryRelation(attribute.getTransferCategoryRelation())
+                        .build()).toList();
+    }
+
+    private void validateCIBundleAttributes(List<CiBundleAttributeModel> attributeModelList, Bundle bundle, String idBundle) {
+        attributeModelList.parallelStream().forEach(
+                attribute -> {
+                    // rule R15: attribute payment amount should be lower than bundle one
+                    if (attribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+                        throw new AppException(
+                                AppError.BUNDLE_REQUEST_BAD_REQUEST,
+                                idBundle,
+                                "Payment amount should be lower than or equal to bundle payment amount."
+                        );
+                    }
+                    if (attribute.getTransferCategory() == null && attributeModelList.size() > 1) {
+                        throw new AppException(
+                                AppError.BUNDLE_REQUEST_BAD_ATTRIBUTE,
+                                idBundle,
+                                "Only one attribute can be specified if the attribute has transfer category null"
+                        );
+                    }
+
+                });
     }
 }
