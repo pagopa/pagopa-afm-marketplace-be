@@ -492,7 +492,11 @@ public class BundleService {
                 .insertedDate(LocalDateTime.now())
                 .build();
 
-        ciBundle.getAttributes().add(attribute);
+        if(ciBundle.getAttributes() != null) {
+            ciBundle.getAttributes().add(attribute);
+        } else {
+            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_INITIALIZED, ciBundle.getIdBundle());
+        }
 
         // save CI-Bundle with new attribute
         ciBundleRepository.save(ciBundle);

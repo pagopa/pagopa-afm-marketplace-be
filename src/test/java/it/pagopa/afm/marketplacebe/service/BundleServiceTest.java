@@ -50,11 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleAttribute;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequest;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleRequestE;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -724,6 +720,32 @@ class BundleServiceTest {
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+    }
+
+    @Test
+    void shouldRaiseConflictCreateBundleAttributesByCi_1() {
+        CiBundle ciBundle = getMockCiBundleNoAttributes();
+        Bundle bundle = getMockBundle();
+        bundle.setType(BundleType.PUBLIC);
+
+        when(bundleRepository.findById(bundle.getId())).thenReturn(Optional.of(bundle));
+
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(bundle.getId(),
+                ciBundle.getCiFiscalCode())).thenReturn(Optional.of(ciBundle));
+
+        String fiscalCode = ciBundle.getCiFiscalCode();
+        String idBundle = bundle.getId();
+        CiBundleAttributeModel attributes = getMockBundleAttribute();
+        attributes.setMaxPaymentAmount(50L);
+        AppException appException = assertThrows(
+                AppException.class,
+                () -> bundleService.createBundleAttributesByCi(
+                        fiscalCode,
+                        idBundle,
+                        attributes)
+        );
+
+        assertEquals(HttpStatus.CONFLICT, appException.getHttpStatus());
     }
 
     @Test
