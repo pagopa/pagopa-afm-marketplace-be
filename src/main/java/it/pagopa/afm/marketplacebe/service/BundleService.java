@@ -495,7 +495,7 @@ public class BundleService {
         if(ciBundle.getAttributes() != null) {
             ciBundle.getAttributes().add(attribute);
         } else {
-            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_INITIALIZED, ciBundle.getIdBundle());
+            throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_INITIALIZED, ciBundle.getId());
         }
 
         // save CI-Bundle with new attribute
