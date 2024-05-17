@@ -329,6 +329,28 @@ class BundleOfferServiceTest {
     }
 
     @Test
+    void acceptOfferValidityDateFromNullOk() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateFrom(null);
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(getMockBundleOffer()));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
+                .thenReturn(Optional.of(bundle));
+
+        when(ciBundleRepository.save(any())).thenReturn(
+                getMockCiBundle()
+        );
+
+        bundleOfferService.acceptOffer(getMockCiFiscalCode(), getMockBundleOfferId());
+
+        verify(ciBundleRepository, times(1)).save(ciBundleArgument.capture());
+        assertEquals(getMockBundleOffer().getIdBundle(), ciBundleArgument.getValue().getIdBundle());
+    }
+
+    @Test
     void acceptOfferRejected() {
         BundleOffer mockBundleOffer = getMockBundleOffer();
         mockBundleOffer.setRejectionDate(LocalDateTime.now());
