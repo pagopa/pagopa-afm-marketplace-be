@@ -229,6 +229,7 @@ public class BundleOfferService {
                     .type(bundle.getType())
                     .validityDateTo(bundle.getValidityDateTo())
                     .validityDateFrom(buildTime)
+                    .attributes(new ArrayList<>())
                     .build();
         } else {
             return CiBundle.builder()
@@ -238,6 +239,7 @@ public class BundleOfferService {
                     .validityDateTo(bundle.getValidityDateTo())
                     .validityDateFrom(bundle.getValidityDateFrom().isBefore(buildTime) ?
                             buildTime : bundle.getValidityDateFrom())
+                    .attributes(new ArrayList<>())
                     .build();
         }
     }

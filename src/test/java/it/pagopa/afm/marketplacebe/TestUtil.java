@@ -301,6 +301,16 @@ public class TestUtil {
                 .build();
     }
 
+    public static CiBundle getMockCiBundleNoAttributes() {
+        return CiBundle.builder()
+                .id(UUID.randomUUID().toString())
+                .ciFiscalCode(getMockCiFiscalCode())
+                .validityDateTo(LocalDate.now())
+                .insertedDate(LocalDateTime.now())
+                .idBundle(UUID.randomUUID().toString())
+                .build();
+    }
+
     public static CiBundleInfo getMockCiBundleInfo() {
         Bundle bundle = getMockBundle();
         ModelMapper mapper = new ModelMapper();

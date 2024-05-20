@@ -44,6 +44,8 @@ public enum AppError {
 
     BUNDLE_ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle attribute not found", "Bundle attribute with id %s not found."),
 
+    BUNDLE_ATTRIBUTE_NOT_INITIALIZED(HttpStatus.CONFLICT, "Bundle attribute element is null", "CiBundle with id %s has attribute field null. Contact tech support"),
+
     CALCULATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something was wrong generating configuration");
 
     public final HttpStatus httpStatus;
