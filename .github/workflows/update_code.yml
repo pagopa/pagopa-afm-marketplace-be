@@ -19,35 +19,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.ref }}
           token: ${{ secrets.BOT_TOKEN_GITHUB }}
 
-      - name: Checkout Pull Request
-        run: hub pr checkout ${{ github.event.issue.number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
           java-version: 17
 
-      - name: Run Service on Docker
-        shell: bash
-        run: |
-          cd ./docker
-          chmod +x ./run_docker.sh
-          ./run_docker.sh local
-
-      - name: Update OpenApi/Swagger file
-        run: |
-          cd ./openapi
-          chmod +x ./generate_openapi.sh
-          ./generate_openapi.sh
+      #      - name: Update OpenApi/Swagger file
+      #        run: |
+      #          cd ./docker
+      #          chmod +x ./run_docker.sh
+      #          ./run_docker.sh local
+      #
+      #          cd ../openapi
+      #          chmod +x ./generate_openapi.sh
+      #          ./generate_openapi.sh
 
       - name: Formatting
-        uses: axel-op/googlejavaformat-action@v3
+        id: format
+        uses: findologic/intellij-format-action@main
         with:
-          args: "--replace"
-          commit-message: "Google Java format"
+          path: .
+          fail-on-changes: false
+
+      - name: Commit files
+        run: |
+          git config --local user.email "pagopa-github-bot@pagopa.it"
+          git config --local user.name "pagopa-github-bot"
+          git commit -a -m "Formatting [skip ci]"
+          git push
 
   notify:
     needs: [ update ]
