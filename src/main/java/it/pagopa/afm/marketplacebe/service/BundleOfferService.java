@@ -65,7 +65,7 @@ public class BundleOfferService {
 
     public BundleOffers getPspOffers(String idPsp, String ciTaxCode, String idBundle, Integer limit, Integer page) {
         List<PspBundleOffer> bundleOfferList =
-                this.bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, idBundle, limit, page).stream()
+                this.bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, idBundle, limit * page, limit).stream()
                         .map(bo -> this.modelMapper.map(bo, PspBundleOffer.class))
                         .toList();
 
