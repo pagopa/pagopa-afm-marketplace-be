@@ -4037,11 +4037,30 @@
             }
           },
           {
-            "name": "limit",
+            "name": "ciTaxCode",
             "in": "query",
-            "description": "Number of items for page. Default = 50",
+            "description": "Filter by creditor institution",
             "required": false,
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idBundle",
+            "in": "query",
+            "description": "Filter by bundle id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items for page",
+            "required": false,
+            "schema": {
+              "maximum": 100,
               "type": "integer",
               "format": "int32",
               "default": 50
@@ -4050,13 +4069,14 @@
           {
             "name": "page",
             "in": "query",
-            "description": "Page number. Page number value starts from 0. Default = 1",
+            "description": "Page number",
             "required": false,
             "schema": {
+              "maximum": 10000,
               "minimum": 0,
               "type": "integer",
               "format": "int32",
-              "default": 1
+              "default": 0
             }
           }
         ],
