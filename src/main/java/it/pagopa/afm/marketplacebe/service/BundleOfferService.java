@@ -30,42 +30,56 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static it.pagopa.afm.marketplacebe.util.CommonUtil.calculateTotalPages;
 
 @Service
 public class BundleOfferService {
 
     public static final String ALREADY_DELETED = "Bundle has been deleted.";
-    @Autowired
-    BundleRepository bundleRepository;
+
+    private final BundleRepository bundleRepository;
+
+    private final BundleOfferRepository bundleOfferRepository;
+
+    private final CiBundleRepository ciBundleRepository;
+
+    private final ArchivedBundleOfferRepository archivedBundleOfferRepository;
+
+    private final ModelMapper modelMapper;
 
     @Autowired
-    BundleOfferRepository bundleOfferRepository;
+    public BundleOfferService(
+            BundleRepository bundleRepository,
+            BundleOfferRepository bundleOfferRepository,
+            CiBundleRepository ciBundleRepository,
+            ArchivedBundleOfferRepository archivedBundleOfferRepository,
+            ModelMapper modelMapper
+    ) {
+        this.bundleRepository = bundleRepository;
+        this.bundleOfferRepository = bundleOfferRepository;
+        this.ciBundleRepository = ciBundleRepository;
+        this.archivedBundleOfferRepository = archivedBundleOfferRepository;
+        this.modelMapper = modelMapper;
+    }
 
-    @Autowired
-    CiBundleRepository ciBundleRepository;
+    public BundleOffers getPspOffers(String idPsp, String ciTaxCode, String idBundle, Integer limit, Integer page) {
+        List<PspBundleOffer> bundleOfferList =
+                this.bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, idBundle, limit, page).stream()
+                        .map(bo -> this.modelMapper.map(bo, PspBundleOffer.class))
+                        .toList();
 
-    @Autowired
-    ArchivedBundleOfferRepository archivedBundleOfferRepository;
-
-    @Autowired
-    ModelMapper modelMapper;
-
-
-    public BundleOffers getPspOffers(String idPsp) {
-        List<PspBundleOffer> bundleOfferList = bundleOfferRepository.findByIdPsp(idPsp)
-                .stream()
-                .map(bo -> modelMapper.map(bo, PspBundleOffer.class))
-                .collect(Collectors.toList());
-
-        PageInfo pageInfo = PageInfo.builder()
-                .itemsFound(bundleOfferList.size())
-                .totalPages(1)
-                .build();
+        Integer totalItems = this.bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, idBundle);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return BundleOffers.builder()
                 .offers(bundleOfferList)
-                .pageInfo(pageInfo)
+                .pageInfo(PageInfo.builder()
+                        .page(page)
+                        .limit(limit)
+                        .totalItems(Long.valueOf(totalItems))
+                        .totalPages(totalPages)
+                        .build())
                 .build();
     }
 
@@ -137,7 +151,7 @@ public class BundleOfferService {
         List<CiBundleOffer> bundleOfferList = offerList
                 .stream()
                 .map(bo -> modelMapper.map(bo, CiBundleOffer.class))
-                .collect(Collectors.toList());
+                .toList();
 
         PageInfo pageInfo = PageInfo.builder()
                 .itemsFound(bundleOfferList.size())

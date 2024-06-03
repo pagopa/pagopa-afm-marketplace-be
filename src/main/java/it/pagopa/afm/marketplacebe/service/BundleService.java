@@ -57,6 +57,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
+import static it.pagopa.afm.marketplacebe.util.CommonUtil.calculateTotalPages;
+
 @Service
 @Slf4j
 public class BundleService {
@@ -803,9 +805,5 @@ public class BundleService {
         } else {
             return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
         }
-    }
-
-    private int calculateTotalPages(Integer limit, double totalItems) {
-        return (int) Math.ceil(totalItems / limit);
     }
 }

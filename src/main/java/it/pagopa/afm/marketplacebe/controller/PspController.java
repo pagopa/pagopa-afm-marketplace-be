@@ -303,10 +303,13 @@ public class PspController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<BundleOffers> getOffers(
-            @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
-            @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
-            @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 1") @RequestParam(required = false, defaultValue = "1") Integer page) {
-        return ResponseEntity.ok(bundleOfferService.getPspOffers(idPsp));
+            @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") @Size(max = 35) String idPsp,
+            @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciTaxCode,
+            @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(100) Integer limit,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) @Max(10000) Integer page
+    ) {
+        return ResponseEntity.ok(bundleOfferService.getPspOffers(idPsp, ciTaxCode, idBundle, limit, page));
     }
 
     /**

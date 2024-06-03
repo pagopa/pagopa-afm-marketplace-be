@@ -33,6 +33,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static it.pagopa.afm.marketplacebe.util.CommonUtil.calculateTotalPages;
+
 @Service
 @Slf4j
 public class BundleRequestService {
@@ -267,10 +269,6 @@ public class BundleRequestService {
             throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
         }
         return optBundle.get();
-    }
-
-    private int calculateTotalPages(Integer limit, double totalItems) {
-        return (int) Math.ceil(totalItems / limit);
     }
 
     private List<CiBundleAttribute> buildCiBundleAttributes(String idBundle, List<CiBundleAttributeModel> ciBundleAttributeModelList) {
