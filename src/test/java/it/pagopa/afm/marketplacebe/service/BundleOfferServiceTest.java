@@ -1,47 +1,8 @@
 package it.pagopa.afm.marketplacebe.service;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockArchivedBundleOffer;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOffer;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOfferId;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOfferList;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCode;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCodeList;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdPsp;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-
 import com.azure.cosmos.models.PartitionKey;
-
 import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.config.MappingsConfiguration;
 import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
@@ -56,34 +17,64 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 
-@SpringBootTest
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static it.pagopa.afm.marketplacebe.TestUtil.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@SpringBootTest(classes = {BundleOfferService.class, MappingsConfiguration.class})
 class BundleOfferServiceTest {
 
     @MockBean
-    BundleOfferRepository bundleOfferRepository;
+    private BundleOfferRepository bundleOfferRepository;
 
     @MockBean
-    ArchivedBundleOfferRepository archivedBundleOfferRepository;
+    private ArchivedBundleOfferRepository archivedBundleOfferRepository;
 
     @MockBean
-    BundleRepository bundleRepository;
+    private BundleRepository bundleRepository;
 
     @MockBean
-    CiBundleRepository ciBundleRepository;
+    private CiBundleRepository ciBundleRepository;
 
     @Captor
-    ArgumentCaptor<BundleOffer> bundleOfferArgument;
+    private ArgumentCaptor<BundleOffer> bundleOfferArgument;
 
     @Captor
-    ArgumentCaptor<ArchivedBundleOffer> archivedBundleOfferArgument;
+    private ArgumentCaptor<ArchivedBundleOffer> archivedBundleOfferArgument;
 
     @Captor
-    ArgumentCaptor<CiBundle> ciBundleArgument;
+    private ArgumentCaptor<CiBundle> ciBundleArgument;
 
     @Autowired
-    @InjectMocks
-    BundleOfferService bundleOfferService;
+    private BundleOfferService bundleOfferService;
 
     @Test
     void sendBundleOfferOk() {
@@ -124,10 +115,47 @@ class BundleOfferServiceTest {
 
     @Test
     void getPspOffers_ok() {
-        when(bundleOfferRepository.findByIdPsp(anyString())).thenReturn(List.of(TestUtil.getMockBundleOffer()));
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(anyString(), anyString(), anyString(), anyInt(), anyInt()))
+                .thenReturn(List.of(TestUtil.getMockBundleOffer()));
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(anyString(), anyString(), anyString()))
+                .thenReturn(1);
 
-        BundleOffers result = bundleOfferService.getPspOffers(getMockIdPsp());
+        BundleOffers result = assertDoesNotThrow(() ->
+                bundleOfferService.getPspOffers(getMockIdPsp(), "ciTaxCode", "idBundle", 10, 0));
+
         assertNotNull(result);
+
+        assertNotNull(result.getOffers());
+        assertEquals(1, result.getOffers().size());
+        assertEquals(getMockIdBundle(), result.getOffers().get(0).getIdBundle());
+
+        assertNotNull(result.getPageInfo());
+        assertEquals(10, result.getPageInfo().getLimit());
+        assertEquals(0, result.getPageInfo().getPage());
+        assertEquals(1, result.getPageInfo().getTotalPages());
+        assertEquals(1, result.getPageInfo().getTotalItems());
+    }
+
+    @Test
+    void getPspOffers_ok_empty_result() {
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(anyString(), anyString(), anyString(), anyInt(), anyInt()))
+                .thenReturn(Collections.emptyList());
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(anyString(), anyString(), anyString()))
+                .thenReturn(0);
+
+        BundleOffers result = assertDoesNotThrow(() ->
+                bundleOfferService.getPspOffers(getMockIdPsp(), "ciTaxCode", "idBundle", 10, 0));
+
+        assertNotNull(result);
+
+        assertNotNull(result.getOffers());
+        assertEquals(0, result.getOffers().size());
+
+        assertNotNull(result.getPageInfo());
+        assertEquals(10, result.getPageInfo().getLimit());
+        assertEquals(0, result.getPageInfo().getPage());
+        assertEquals(0, result.getPageInfo().getTotalPages());
+        assertEquals(0, result.getPageInfo().getTotalItems());
     }
 
     @Test
@@ -258,19 +286,6 @@ class BundleOfferServiceTest {
         } catch (Exception e) {
             fail();
         }
-    }
-
-    @Test
-    void getOffersTest() {
-
-        when(bundleOfferRepository.findByIdPsp(getMockIdPsp()))
-                .thenReturn(getMockBundleOfferList());
-
-        var result = bundleOfferService.getPspOffers(getMockIdPsp());
-
-        verify(bundleOfferRepository, times(1)).findByIdPsp(getMockIdPsp());
-        assertEquals(1, result.getOffers().size());
-        assertEquals(getMockIdBundle(), result.getOffers().get(0).getIdBundle());
     }
 
     @Test
