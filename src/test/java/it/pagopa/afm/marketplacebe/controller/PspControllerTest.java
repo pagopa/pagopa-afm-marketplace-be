@@ -1,17 +1,11 @@
 package it.pagopa.afm.marketplacebe.controller;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
-
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.exception.AppError;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.service.BundleOfferService;
+import it.pagopa.afm.marketplacebe.service.BundleRequestService;
+import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,12 +14,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.exception.AppError;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.service.BundleOfferService;
-import it.pagopa.afm.marketplacebe.service.BundleRequestService;
-import it.pagopa.afm.marketplacebe.service.BundleService;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -78,7 +81,7 @@ class PspControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
-    
+
     @Test
     void getBundleByName_200() throws Exception {
         when(bundleService.getBundleById(anyString(), anyString())).thenReturn(TestUtil.getMockPspBundleDetails());
@@ -172,12 +175,12 @@ class PspControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
-    
+
     @Test
     void createBundleByList_201() throws Exception {
         when(bundleService.createBundleByList(anyString(), any())).thenReturn(TestUtil.getMockBundleResponseList());
 
-        String url = String.format(BUNDLES+"/massive", TestUtil.getMockIdPsp());
+        String url = String.format(BUNDLES + "/massive", TestUtil.getMockIdPsp());
 
         mvc.perform(post(url)
                         .content(TestUtil.toJson(TestUtil.getMockBundleRequestList()))
@@ -190,7 +193,7 @@ class PspControllerTest {
         AppException exception = new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDate");
         doThrow(exception).when(bundleService).createBundleByList(anyString(), any());
 
-        String url = String.format(BUNDLES+"/massive", TestUtil.getMockIdPsp());
+        String url = String.format(BUNDLES + "/massive", TestUtil.getMockIdPsp());
 
         mvc.perform(post(url)
                         .content(TestUtil.toJson(TestUtil.getMockBundleRequestList()))
@@ -305,11 +308,14 @@ class PspControllerTest {
 
     @Test
     void getOffers_200() throws Exception {
-        when(bundleOfferService.getPspOffers(anyString())).thenReturn(TestUtil.getMockBundleOffers());
+        when(bundleOfferService.getPspOffers(anyString(), anyString(), anyString(), anyInt(), anyInt()))
+                .thenReturn(TestUtil.getMockBundleOffers());
 
         String url = String.format(OFFERS, TestUtil.getMockIdPsp());
 
-        mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON)
+                        .param("ciTaxCode", "ciTaxCode")
+                        .param("idBundle", "idBundle"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }

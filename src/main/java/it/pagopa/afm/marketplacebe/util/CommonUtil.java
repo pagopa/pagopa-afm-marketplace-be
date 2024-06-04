@@ -41,4 +41,15 @@ public class CommonUtil {
     public static Boolean deNull(Boolean value) {
         return Optional.ofNullable(value).orElse(false);
     }
+
+    /**
+     * Util to calculate total pages of a Cosmos paginated query
+     *
+     * @param limit page size
+     * @param totalItems total items found in Cosmos
+     * @return the total pages
+     */
+    public static int calculateTotalPages(Integer limit, double totalItems) {
+        return (int) Math.ceil(totalItems / limit);
+    }
 }

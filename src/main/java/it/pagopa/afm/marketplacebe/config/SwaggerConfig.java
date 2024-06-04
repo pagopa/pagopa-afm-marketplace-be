@@ -30,9 +30,11 @@ public class SwaggerConfig {
     @Bean
     OpenAPI customOpenAPI(@Value("${info.app.name}") String appTitle,
                           @Value("${info.app.description}") String appDescription,
-                          @Value("${info.app.version}") String appVersion) {
+                          @Value("${info.app.version}") String appVersion,
+                          @Value("${server.port}") String port
+    ) {
         return new OpenAPI()
-                .servers(List.of(new Server().url("http://localhost:8080"),
+                .servers(List.of(new Server().url(String.format("http://localhost:%s", port)),
                         new Server().url("https://{host}{basePath}")
                                 .variables(new ServerVariables()
                                         .addServerVariable("host",

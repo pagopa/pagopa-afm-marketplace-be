@@ -38,4 +38,31 @@ public interface BundleOfferRepository extends CosmosRepository<BundleOffer, Str
             ")")
     List<BundleOffer> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
 
+
+    @Query(value = "SELECT * " +
+            "FROM bundleoffers b" +
+            " WHERE " +
+            " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
+            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
+            " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)" +
+            " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
+    List<BundleOffer> findByIdPspAndFiscalCodeAndIdBundle(
+            @Param("idPsp") String idPsp,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("idBundle") String idBundle,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize
+    );
+
+    @Query(value = "SELECT VALUE COUNT(1) " +
+            "FROM bundleoffers b" +
+            " WHERE " +
+            " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
+            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
+            " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)")
+    Integer getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(
+            @Param("idPsp") String idPsp,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("idBundle") String idBundle
+    );
 }
