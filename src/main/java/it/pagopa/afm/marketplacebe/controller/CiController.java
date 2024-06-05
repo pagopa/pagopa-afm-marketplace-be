@@ -71,12 +71,9 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
-            value = "/{ci-tax-code}/bundles",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
+    @GetMapping(value = "/{ci-fiscal-code}/bundles", produces = {MediaType.APPLICATION_JSON_VALUE})
     public CiBundles getBundlesByFiscalCode(
-            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-tax-code") String taxCode,
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String taxCode,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page,
             @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) BundleType type,
@@ -297,14 +294,15 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(value = "/{ci-tax-code}/offers", produces = {MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/{ci-fiscal-code}/offers", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<BundleCiOffers> getOffersByCI(
-            @Parameter(description = "Tax code of the creditor institution to which the offers are addressed", required = true) @PathVariable("ci-tax-code") String ciTaxCode,
+            @Parameter(description = "Tax code of the creditor institution to which the offers are addressed", required = true) @PathVariable("ci-fiscal-code") String ciTaxCode,
             @Parameter(description = "Id of the payment service provider that has created the offers (used for to filter out the result)") @RequestParam(required = false) String idPsp,
+            @Parameter(description = "Filtering the offers by bundle name") @RequestParam(required = false) String bundleName,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
     ) {
-        return ResponseEntity.ok(this.bundleOfferService.getCiOffers(ciTaxCode, idPsp, limit, page));
+        return ResponseEntity.ok(this.bundleOfferService.getCiOffers(ciTaxCode, idPsp, bundleName, limit, page));
     }
 
     @Operation(summary = "The CI accepts an offer of a PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})

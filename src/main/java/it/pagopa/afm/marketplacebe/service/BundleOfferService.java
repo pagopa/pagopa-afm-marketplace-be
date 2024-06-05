@@ -20,6 +20,7 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class BundleOfferService {
 
     private final ArchivedBundleOfferRepository archivedBundleOfferRepository;
 
+    private final CosmosRepository cosmosRepository;
+
     private final ModelMapper modelMapper;
 
     @Autowired
@@ -54,12 +57,14 @@ public class BundleOfferService {
             BundleOfferRepository bundleOfferRepository,
             CiBundleRepository ciBundleRepository,
             ArchivedBundleOfferRepository archivedBundleOfferRepository,
+            CosmosRepository cosmosRepository,
             ModelMapper modelMapper
     ) {
         this.bundleRepository = bundleRepository;
         this.bundleOfferRepository = bundleOfferRepository;
         this.ciBundleRepository = ciBundleRepository;
         this.archivedBundleOfferRepository = archivedBundleOfferRepository;
+        this.cosmosRepository = cosmosRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -148,20 +153,29 @@ public class BundleOfferService {
     /**
      * Retrieve the paginated list of private bundle's offers of the specified CI
      *
-     * @param ciTaxCode tax code of the creditor institution to which the offers are addressed
-     * @param idPsp id of the payment service provider that has created the offers (used for to filter out the result)
-     * @param limit the size of the page
-     * @param page the number of the page
+     * @param ciTaxCode  tax code of the creditor institution to which the offers are addressed
+     * @param idPsp      id of the payment service provider that has created the offers (used for to filter out the result)
+     * @param bundleName the bundle name (used to filter out the result)
+     * @param limit      the size of the page
+     * @param page       the number of the page
      * @return the paginated list of offers
      */
-    public BundleCiOffers getCiOffers(String ciTaxCode, String idPsp, Integer limit, Integer page) {
+    public BundleCiOffers getCiOffers(String ciTaxCode, String idPsp, String bundleName, Integer limit, Integer page) {
+        List<String> idBundles = null;
+        if (bundleName != null) {
+            idBundles = this.cosmosRepository.getBundlesByNameAndPSPBusinessName(bundleName, null, BundleType.PRIVATE.name())
+                    .parallelStream()
+                    .map(Bundle::getId)
+                    .toList();
+        }
+
         List<CiBundleOffer> bundleOfferList =
-                this.bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, null, limit * page, limit)
+                this.bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundles(idPsp, ciTaxCode, idBundles, limit * page, limit)
                         .parallelStream()
                         .map(bo -> modelMapper.map(bo, CiBundleOffer.class))
                         .toList();
 
-        Integer totalItems = this.bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, null);
+        Integer totalItems = this.bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(idPsp, ciTaxCode, idBundles);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return BundleCiOffers.builder()

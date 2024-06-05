@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
@@ -312,7 +311,7 @@ class CiControllerTest {
 
     @Test
     void getOffersByCI_200() throws Exception {
-        when(bundleOfferService.getCiOffers(anyString(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundleCiOffers());
+        when(bundleOfferService.getCiOffers(anyString(), anyString(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundleCiOffers());
 
         String url = String.format(OFFERS, TestUtil.getMockCiFiscalCode());
 

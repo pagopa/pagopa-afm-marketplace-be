@@ -18,6 +18,7 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -36,15 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockArchivedBundleOffer;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOffer;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOfferId;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCode;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCodeList;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdBundle;
-import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdPsp;
+import static it.pagopa.afm.marketplacebe.TestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,6 +48,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,6 +67,9 @@ class BundleOfferServiceTest {
 
     @MockBean
     private CiBundleRepository ciBundleRepository;
+
+    @MockBean
+    private CosmosRepository cosmosRepository;
 
     @Captor
     private ArgumentCaptor<BundleOffer> bundleOfferArgument;
@@ -287,12 +284,33 @@ class BundleOfferServiceTest {
     void getCiOffers_ok_1(String idPsp) {
         String ciFiscalCode = TestUtil.getMockCiFiscalCode();
         BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
-        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(ciFiscalCode, idPsp, null, 10, 1))
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundles(ciFiscalCode, idPsp, null, 10, 1))
                 .thenReturn(List.of(bundleOffer));
-        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(anyString(), anyString(), eq(null)))
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(idPsp, ciFiscalCode, null))
                 .thenReturn(1);
 
-        BundleCiOffers result = assertDoesNotThrow(() -> bundleOfferService.getCiOffers(ciFiscalCode, idPsp, 10, 1));
+        BundleCiOffers result = assertDoesNotThrow(() -> bundleOfferService.getCiOffers(idPsp, ciFiscalCode, null, 10, 1));
+
+        assertNotNull(result);
+
+        verify(cosmosRepository, never()).getBundlesByNameAndPSPBusinessName(anyString(), eq(null), eq(BundleType.PRIVATE.name()));
+    }
+
+    @Test
+    void getCiOffers_ok_with_bundle_name_filter() {
+        String ciFiscalCode = TestUtil.getMockCiFiscalCode();
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        List<Bundle> mockBundleList = getMockBundleList();
+        List<String> mockIdBundleList = mockBundleList.parallelStream().map(Bundle::getId).toList();
+
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName("name", null, BundleType.PRIVATE.name()))
+                .thenReturn(mockBundleList);
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundles(null, ciFiscalCode, mockIdBundleList, 10, 1))
+                .thenReturn(List.of(bundleOffer));
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(null, ciFiscalCode, mockIdBundleList))
+                .thenReturn(1);
+
+        BundleCiOffers result = assertDoesNotThrow(() -> bundleOfferService.getCiOffers(ciFiscalCode, null, "name", 10, 1));
 
         assertNotNull(result);
     }

@@ -64,4 +64,31 @@ public interface BundleOfferRepository extends CosmosRepository<BundleOffer, Str
             @Param("ciFiscalCode") String ciFiscalCode,
             @Param("idBundle") String idBundle
     );
+
+    @Query(value = "SELECT * " +
+            "FROM bundleoffers b" +
+            " WHERE " +
+            " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
+            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
+            " AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle))" +
+            " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
+    List<BundleOffer> findByIdPspAndFiscalCodeAndIdBundles(
+            @Param("idPsp") String idPsp,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("idBundles") List<String> idBundles,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize
+    );
+
+    @Query(value = "SELECT VALUE COUNT(1) " +
+            "FROM bundleoffers b" +
+            " WHERE " +
+            " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
+            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
+            " AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle))")
+    Integer getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(
+            @Param("idPsp") String idPsp,
+            @Param("ciFiscalCode") String ciFiscalCode,
+            @Param("idBundles") List<String> idBundles
+    );
 }
