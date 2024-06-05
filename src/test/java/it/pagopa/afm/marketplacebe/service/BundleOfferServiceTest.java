@@ -10,6 +10,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -35,7 +36,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static it.pagopa.afm.marketplacebe.TestUtil.*;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockArchivedBundleOffer;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOffer;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockBundleOfferId;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCode;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockCiFiscalCodeList;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdBundle;
+import static it.pagopa.afm.marketplacebe.TestUtil.getMockIdPsp;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -275,17 +285,16 @@ class BundleOfferServiceTest {
     @NullSource    // pass a null value
     @ValueSource(strings = {"1234567901"})
     void getCiOffers_ok_1(String idPsp) {
-        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
-        when(bundleOfferRepository.findByCiFiscalCode(anyString())).thenReturn(List.of(bundleOffer));
-        when(bundleOfferRepository.findByIdPsp(anyString(), any(PartitionKey.class))).thenReturn(List.of(bundleOffer));
-
         String ciFiscalCode = TestUtil.getMockCiFiscalCode();
-        try {
-            bundleOfferService.getCiOffers(ciFiscalCode, idPsp);
-            assertTrue(true);
-        } catch (Exception e) {
-            fail();
-        }
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(ciFiscalCode, idPsp, null, 10, 1))
+                .thenReturn(List.of(bundleOffer));
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(anyString(), anyString(), eq(null)))
+                .thenReturn(1);
+
+        BundleCiOffers result = assertDoesNotThrow(() -> bundleOfferService.getCiOffers(ciFiscalCode, idPsp, 10, 1));
+
+        assertNotNull(result);
     }
 
     @Test
@@ -302,26 +311,6 @@ class BundleOfferServiceTest {
 
         assertEquals(getMockArchivedBundleOffer(offerToArchive).getId(), archivedBundleOfferArgument.getValue().getId());
         assertEquals(offerToArchive.getId(), bundleOfferArgument.getValue().getId());
-    }
-
-    @Test
-    void restGetOffersByCiFiscalCodeOk() {
-        when(bundleOfferRepository.findByCiFiscalCode(getMockCiFiscalCode()))
-                .thenReturn(getMockBundleOfferList());
-
-        var result = bundleOfferService.getCiOffers(getMockCiFiscalCode(), null);
-
-        assertEquals(1, result.getOffers().size());
-    }
-
-    @Test
-    void restGetOffersByidPspCodeOk() {
-        when(bundleOfferRepository.findByIdPsp(anyString(), any(PartitionKey.class)))
-                .thenReturn(getMockBundleOfferList());
-
-        var result = bundleOfferService.getCiOffers(null, getMockIdPsp());
-
-        assertEquals(1, result.getOffers().size());
     }
 
     @Test

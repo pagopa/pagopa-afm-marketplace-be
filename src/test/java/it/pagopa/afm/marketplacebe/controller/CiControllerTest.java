@@ -312,7 +312,7 @@ class CiControllerTest {
 
     @Test
     void getOffersByCI_200() throws Exception {
-        when(bundleOfferService.getCiOffers(anyString(), anyString())).thenReturn(TestUtil.getMockBundleCiOffers());
+        when(bundleOfferService.getCiOffers(anyString(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundleCiOffers());
 
         String url = String.format(OFFERS, TestUtil.getMockCiFiscalCode());
 
