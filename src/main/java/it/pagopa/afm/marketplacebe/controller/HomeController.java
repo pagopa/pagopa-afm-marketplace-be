@@ -12,6 +12,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.AppInfo;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
+import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
@@ -119,7 +121,28 @@ public class HomeController {
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
     ) {
-        return bundleService.getBundles(types, name, validFrom, limit, page);
+        return this.bundleService.getBundles(types, name, validFrom, limit, page);
+    }
+
+    /**
+     * Retrieve the bundle details
+     *
+     * @param idBundle Bundle identifier
+     * @return the bundle details
+     */
+    @Operation(summary = "Get the bundle details", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PspBundleDetails.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @GetMapping(value = "/bundles/{id-bundle}", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<PspBundleDetails> getBundle(
+            @Parameter(description = "Bundle identifier", required = true) @PathVariable("id-bundle") String idBundle
+    ) {
+        return ResponseEntity.ok(this.bundleService.getBundleDetailsById(idBundle));
     }
 
     @Operation(summary = "Generate the configuration", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Home",})

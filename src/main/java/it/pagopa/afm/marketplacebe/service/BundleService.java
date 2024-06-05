@@ -184,6 +184,18 @@ public class BundleService {
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
 
+    /**
+     * Retrieve the detail of the bundle with the provided id
+     *
+     * @param idBundle bundle id
+     * @return the bundle details
+     */
+    public PspBundleDetails getBundleDetailsById(String idBundle) {
+        Bundle bundle = getBundle(idBundle);
+
+        return modelMapper.map(bundle, PspBundleDetails.class);
+    }
+
     public List<BundleResponse> createBundleByList(String idPsp, List<BundleRequest> bundleRequestList) {
         List<Bundle> bundles = new ArrayList<>();
         for (BundleRequest bundleRequest : ListUtils.emptyIfNull(bundleRequestList)) {
@@ -635,12 +647,8 @@ public class BundleService {
      * @return bundle
      */
     private Bundle getBundle(String idBundle) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
-        if (bundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-
-        return bundle.get();
+        return this.bundleRepository.findById(idBundle)
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
     }
 
     /**
