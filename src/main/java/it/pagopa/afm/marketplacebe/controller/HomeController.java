@@ -139,7 +139,7 @@ public class HomeController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(value = "/bundles/{id-bundle}", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<PspBundleDetails> getBundle(
+    public ResponseEntity<PspBundleDetails> getBundleDetails(
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("id-bundle") String idBundle
     ) {
         return ResponseEntity.ok(this.bundleService.getBundleDetailsById(idBundle));

@@ -1509,6 +1509,29 @@ class BundleServiceTest {
         }
     }
 
+    @Test
+    void getBundleByIdSuccess() {
+        Bundle bundle = getMockBundle();
+        when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
+
+        PspBundleDetails result = assertDoesNotThrow(() -> bundleService.getBundleDetailsById("bundleId"));
+
+        assertNotNull(result);
+        assertEquals(bundle.getId(), result.getId());
+        assertEquals(bundle.getName(), result.getName());
+        assertEquals(bundle.getType().name(), result.getType());
+    }
+
+    @Test
+    void getBundleByIdNotFound() {
+        when(bundleRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        AppException e = assertThrows(AppException.class, () -> bundleService.getBundleDetailsById("bundleId"));
+
+        assertNotNull(e);
+        assertEquals(HttpStatus.NOT_FOUND, e.getHttpStatus());
+    }
+
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
         String idPsp = TestUtil.getMockIdPsp();
 

@@ -66,6 +66,17 @@ class HomeControllerTest {
     }
 
     @Test
+    void getBundleDetails() throws Exception {
+        when(bundleService.getBundleDetailsById(anyString())).thenReturn(TestUtil.getMockPspBundleDetails());
+
+        String url = "/bundles/{id-bundle}";
+        mvc.perform(get(url, "bundleId")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
     void getConfiguration() throws Exception {
         String url = "/configuration";
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
