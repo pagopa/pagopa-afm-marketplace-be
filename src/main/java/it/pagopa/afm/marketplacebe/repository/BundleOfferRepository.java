@@ -38,7 +38,6 @@ public interface BundleOfferRepository extends CosmosRepository<BundleOffer, Str
             ")")
     List<BundleOffer> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
 
-
     @Query(value = "SELECT * " +
             "FROM bundleoffers b" +
             " WHERE " +

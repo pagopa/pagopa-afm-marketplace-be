@@ -145,22 +145,34 @@ public class BundleOfferService {
         archiveBundleOffer(bundleOffer.get(), null);
     }
 
-    public BundleCiOffers getCiOffers(String ciFiscalCode, String idPsp) {
+    /**
+     * Retrieve the paginated list of private bundle's offers of the specified CI
+     *
+     * @param ciTaxCode tax code of the creditor institution to which the offers are addressed
+     * @param idPsp id of the payment service provider that has created the offers (used for to filter out the result)
+     * @param limit the size of the page
+     * @param page the number of the page
+     * @return the paginated list of offers
+     */
+    public BundleCiOffers getCiOffers(String ciTaxCode, String idPsp, Integer limit, Integer page) {
+        List<CiBundleOffer> bundleOfferList =
+                this.bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, null, limit * page, limit)
+                        .parallelStream()
+                        .map(bo -> modelMapper.map(bo, CiBundleOffer.class))
+                        .toList();
 
-        List<BundleOffer> offerList = idPsp == null ? bundleOfferRepository.findByCiFiscalCode(ciFiscalCode) : bundleOfferRepository.findByIdPsp(idPsp, new PartitionKey(ciFiscalCode));
-        List<CiBundleOffer> bundleOfferList = offerList
-                .stream()
-                .map(bo -> modelMapper.map(bo, CiBundleOffer.class))
-                .toList();
-
-        PageInfo pageInfo = PageInfo.builder()
-                .itemsFound(bundleOfferList.size())
-                .totalPages(1)
-                .build();
+        Integer totalItems = this.bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(idPsp, ciTaxCode, null);
+        int totalPages = calculateTotalPages(limit, totalItems);
 
         return BundleCiOffers.builder()
                 .offers(bundleOfferList)
-                .pageInfo(pageInfo)
+                .pageInfo(PageInfo.builder()
+                        .page(page)
+                        .limit(limit)
+                        .itemsFound(bundleOfferList.size())
+                        .totalItems(Long.valueOf(totalItems))
+                        .totalPages(totalPages)
+                        .build())
                 .build();
     }
 
