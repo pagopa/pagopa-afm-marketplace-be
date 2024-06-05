@@ -461,8 +461,7 @@ class BundleServiceTest {
                 .thenReturn(1);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, null, null
-        );
+                mockCIBundle.getCiFiscalCode(), null, null, null, 100, 0);
 
 
         assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
@@ -486,8 +485,7 @@ class BundleServiceTest {
                 .thenReturn(0);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, "GLOBAL", null
-        );
+                mockCIBundle.getCiFiscalCode(), "GLOBAL", null, null, 100, 0);
 
         assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
         assertEquals(0, ciBundlesResult.getPageInfo().getPage());
@@ -507,10 +505,15 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName())).thenReturn(List.of(bundle));
+        when(bundleRepository.findByLikePspBusinessNameAndLikeName(bundle.getPspBusinessName(), null)).thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, null, bundle.getPspBusinessName()
+                mockCIBundle.getCiFiscalCode(),
+                null,
+                null,
+                bundle.getPspBusinessName(),
+                100,
+                0
         );
 
 
@@ -536,10 +539,49 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName())).thenReturn(List.of(bundle));
+        when(bundleRepository.findByLikePspBusinessNameAndLikeName(bundle.getPspBusinessName(), null)).thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE", bundle.getPspBusinessName()
+                mockCIBundle.getCiFiscalCode(),
+                "PRIVATE",
+                null,
+                bundle.getPspBusinessName(),
+                100,
+                0
+        );
+
+
+        assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
+        assertEquals(mockCIBundle.getIdBundle(),
+                ciBundlesResult.getBundleDetailsList().get(0).getIdBundle());
+        assertEquals(mockCIBundle.getId(),
+                ciBundlesResult.getBundleDetailsList().get(0).getIdCIBundle());
+        assertEquals(0, ciBundlesResult.getPageInfo().getPage());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalItems());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalPages());
+    }
+
+    @Test
+    void shouldGetBundlesByFiscalCodeAndTypeAndBundleNameFilters() {
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList(), anyInt(), anyInt()))
+                .thenReturn(ciBundles);
+        when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
+                .thenReturn(1);
+        when(bundleRepository.findByLikePspBusinessNameAndLikeName(null, bundle.getName())).thenReturn(List.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(),
+                "PRIVATE",
+                bundle.getName(),
+                null,
+                100,
+                0
         );
 
 

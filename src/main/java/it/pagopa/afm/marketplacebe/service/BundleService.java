@@ -404,27 +404,36 @@ public class BundleService {
     /**
      * Retrieve the paginated list of information about the relation between a bundle and a creditor institution
      *
-     * @param fiscalCode      creditor institution's tax code
+     * @param taxCode         creditor institution's tax code
+     * @param type            the type of bundle,  used to filter out the result
+     * @param bundleName      the bundle name, used to filter out the result
+     * @param pspBusinessName payment service provider's business name, used to filter out the result
      * @param limit           the number of element in the page
      * @param pageNumber      the page number
-     * @param type            the type of bundle
-     * @param pspBusinessName payment service provider's business name
      * @return the paginated list the details about the relation between a bundle and a creditor institution
      */
-    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
-        List<String> idBundles = pspBusinessName != null
-                ? this.bundleRepository.findByPspBusinessName(pspBusinessName).stream()
-                .map(Bundle::getId)
-                .toList()
-                : null;
+    public CiBundles getBundlesByFiscalCode(
+            @NotNull String taxCode,
+            String type,
+            String bundleName,
+            String pspBusinessName,
+            Integer limit,
+            Integer pageNumber
+    ) {
+        List<String> idBundles = null;
+        if (pspBusinessName != null || bundleName != null) {
+            idBundles = this.bundleRepository.findByLikePspBusinessNameAndLikeName(pspBusinessName, bundleName).stream()
+                    .map(Bundle::getId)
+                    .toList();
+        }
 
-        var bundleList = ciBundleRepository
-                .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles, limit * pageNumber, limit)
+        var bundleList = this.ciBundleRepository
+                .findByCiFiscalCodeAndTypeAndIdBundles(taxCode, type, idBundles, limit * pageNumber, limit)
                 .parallelStream()
                 .map(ciBundle -> this.modelMapper.map(ciBundle, CiBundleDetails.class))
                 .toList();
 
-        Integer totalItems = this.ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles);
+        Integer totalItems = this.ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(taxCode, type, idBundles);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return CiBundles.builder()
@@ -432,6 +441,7 @@ public class BundleService {
                 .pageInfo(PageInfo.builder()
                         .limit(limit)
                         .page(pageNumber)
+                        .itemsFound(bundleList.size())
                         .totalItems(Long.valueOf(totalItems))
                         .totalPages(totalPages)
                         .build())
@@ -506,7 +516,7 @@ public class BundleService {
                 .insertedDate(LocalDateTime.now())
                 .build();
 
-        if(ciBundle.getAttributes() != null) {
+        if (ciBundle.getAttributes() != null) {
             ciBundle.getAttributes().add(attribute);
         } else {
             throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_INITIALIZED, ciBundle.getId());

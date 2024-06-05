@@ -71,16 +71,18 @@ public class CiController {
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(
-            value = "/{ci-fiscal-code}/bundles",
+            value = "/{ci-tax-code}/bundles",
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public CiBundles getBundlesByFiscalCode(
-            @Parameter(description = "CI identifier", required = true) @PathVariable("ci-fiscal-code") String fiscalCode,
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-tax-code") String taxCode,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page,
             @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type,
-            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName) {
-        return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page, type, pspBusinessName);
+            @Parameter(description = "Filtering the ciBundles by bundle name") @RequestParam(required = false) String bundleName,
+            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName
+    ) {
+        return bundleService.getBundlesByFiscalCode(taxCode, type, bundleName, pspBusinessName, limit, page);
     }
 
     @Operation(summary = "Get a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})

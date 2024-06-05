@@ -50,7 +50,8 @@ class CiControllerTest {
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
-        when(bundleService.getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class), nullable(String.class))).thenReturn(TestUtil.getMockCiBundles());
+        when(bundleService.getBundlesByFiscalCode(anyString(), nullable(String.class), nullable(String.class), nullable(String.class), anyInt(), anyInt()))
+                .thenReturn(TestUtil.getMockCiBundles());
 
         String url = String.format(BUNDLES, TestUtil.getMockCiFiscalCode());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -60,10 +61,8 @@ class CiControllerTest {
 
     @Test
     void getBundles_404() throws Exception {
-        AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockIdBundle());
-        doThrow(exception).when(bundleService).getBundlesByFiscalCode(anyString(), anyInt(), anyInt(), nullable(String.class), nullable(String.class));
-
-        when(bundleService.getBundlesByIdPsp(anyString(), anyList(), anyString(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        doThrow(new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockIdBundle()))
+                .when(bundleService).getBundlesByFiscalCode(anyString(), nullable(String.class), nullable(String.class), nullable(String.class), anyInt(), anyInt());
 
         String url = String.format(BUNDLES, TestUtil.getMockCiFiscalCode());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
