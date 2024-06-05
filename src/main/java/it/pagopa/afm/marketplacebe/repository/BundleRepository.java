@@ -67,11 +67,4 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
             + "    SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0, 0, 0, 0), 0, 10)"
             + " )")
     List<Bundle> findByCurrentDateBetweenValidityDateFromAndTo(@Param("currentDate") LocalDate currentDate);
-
-    @Query(value = "SELECT * " +
-            "FROM bundles b" +
-            " WHERE " +
-            " (IS_NULL(@pspBusinessName) OR b.pspBusinessName like @pspBusinessName)" +
-            " AND (IS_NULL(@name) OR b.name like @name)")
-    List<Bundle> findByLikePspBusinessNameAndLikeName(String pspBusinessName, String name);
 }

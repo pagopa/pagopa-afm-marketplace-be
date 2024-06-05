@@ -405,7 +405,7 @@ public class BundleService {
      * Retrieve the paginated list of information about the relation between a bundle and a creditor institution
      *
      * @param taxCode         creditor institution's tax code
-     * @param type            the type of bundle,  used to filter out the result
+     * @param bundleType      the type of bundle,  used to filter out the result
      * @param bundleName      the bundle name, used to filter out the result
      * @param pspBusinessName payment service provider's business name, used to filter out the result
      * @param limit           the number of element in the page
@@ -414,15 +414,17 @@ public class BundleService {
      */
     public CiBundles getBundlesByFiscalCode(
             @NotNull String taxCode,
-            String type,
+            BundleType bundleType,
             String bundleName,
             String pspBusinessName,
             Integer limit,
             Integer pageNumber
     ) {
         List<String> idBundles = null;
+        String type = bundleType != null ? bundleType.name() : null;
         if (pspBusinessName != null || bundleName != null) {
-            idBundles = this.bundleRepository.findByLikePspBusinessNameAndLikeName(pspBusinessName, bundleName).stream()
+            idBundles = this.cosmosRepository.getBundlesByNameAndPSPBusinessName(bundleName, pspBusinessName, type)
+                    .parallelStream()
                     .map(Bundle::getId)
                     .toList();
         }
@@ -433,7 +435,8 @@ public class BundleService {
                 .map(ciBundle -> this.modelMapper.map(ciBundle, CiBundleDetails.class))
                 .toList();
 
-        Integer totalItems = this.ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(taxCode, type, idBundles);
+        Integer totalItems = this.ciBundleRepository
+                .getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(taxCode, type, idBundles);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return CiBundles.builder()

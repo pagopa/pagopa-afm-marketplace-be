@@ -485,7 +485,7 @@ class BundleServiceTest {
                 .thenReturn(0);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), "GLOBAL", null, null, 100, 0);
+                mockCIBundle.getCiFiscalCode(), BundleType.GLOBAL, null, null, 100, 0);
 
         assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
         assertEquals(0, ciBundlesResult.getPageInfo().getPage());
@@ -505,7 +505,8 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByLikePspBusinessNameAndLikeName(bundle.getPspBusinessName(), null)).thenReturn(List.of(bundle));
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName(bundle.getPspBusinessName(), null, null))
+                .thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
                 mockCIBundle.getCiFiscalCode(),
@@ -539,11 +540,12 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByLikePspBusinessNameAndLikeName(bundle.getPspBusinessName(), null)).thenReturn(List.of(bundle));
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName(bundle.getPspBusinessName(), null, "PRIVATE"))
+                .thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
                 mockCIBundle.getCiFiscalCode(),
-                "PRIVATE",
+                BundleType.PRIVATE,
                 null,
                 bundle.getPspBusinessName(),
                 100,
@@ -573,11 +575,12 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByLikePspBusinessNameAndLikeName(null, bundle.getName())).thenReturn(List.of(bundle));
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName(null, bundle.getName(), "PRIVATE"))
+                .thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
                 mockCIBundle.getCiFiscalCode(),
-                "PRIVATE",
+                BundleType.PRIVATE,
                 bundle.getName(),
                 null,
                 100,

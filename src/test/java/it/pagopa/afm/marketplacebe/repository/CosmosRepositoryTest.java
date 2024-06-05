@@ -78,6 +78,42 @@ class CosmosRepositoryTest {
 	}
 
 	@Test
+	void getBundlesByNameAndPSPBusinessNameSuccess() {
+		var bundle = getMockBundle();
+        Iterable<Object> bundleList = List.of(bundle);
+
+        // Precondition
+        when(cosmosTemplate.runQuery(any(SqlQuerySpec.class), any(), any())).thenReturn(bundleList);
+
+        List<Bundle> bundles = assertDoesNotThrow(() ->
+				cosmosRepository.getBundlesByNameAndPSPBusinessName(
+						"mock name",
+						"pspBusinessName",
+						BundleType.PRIVATE.name())
+		);
+
+        assertFalse(bundles.isEmpty());
+	}
+
+	@Test
+	void getBundlesByNameAndPSPBusinessNameSuccessWithNoFilter() {
+		var bundle = getMockBundle();
+        Iterable<Object> bundleList = List.of(bundle);
+
+        // Precondition
+        when(cosmosTemplate.runQuery(any(SqlQuerySpec.class), any(), any())).thenReturn(bundleList);
+
+        List<Bundle> bundles = assertDoesNotThrow(() ->
+				cosmosRepository.getBundlesByNameAndPSPBusinessName(
+						null,
+						null,
+						null)
+		);
+
+        assertFalse(bundles.isEmpty());
+	}
+
+	@Test
 	void getTotalItemsFindByNameAndTypeAndValidityDateFrom() {
         // Precondition
         when(cosmosTemplate.count(any(SqlQuerySpec.class), anyString())).thenReturn(1L);

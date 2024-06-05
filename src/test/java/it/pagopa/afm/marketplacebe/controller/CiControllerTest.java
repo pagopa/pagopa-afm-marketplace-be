@@ -1,6 +1,7 @@
 package it.pagopa.afm.marketplacebe.controller;
 
 import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
@@ -50,7 +51,7 @@ class CiControllerTest {
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
-        when(bundleService.getBundlesByFiscalCode(anyString(), nullable(String.class), nullable(String.class), nullable(String.class), anyInt(), anyInt()))
+        when(bundleService.getBundlesByFiscalCode(anyString(), nullable(BundleType.class), nullable(String.class), nullable(String.class), anyInt(), anyInt()))
                 .thenReturn(TestUtil.getMockCiBundles());
 
         String url = String.format(BUNDLES, TestUtil.getMockCiFiscalCode());
@@ -62,7 +63,7 @@ class CiControllerTest {
     @Test
     void getBundles_404() throws Exception {
         doThrow(new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockIdBundle()))
-                .when(bundleService).getBundlesByFiscalCode(anyString(), nullable(String.class), nullable(String.class), nullable(String.class), anyInt(), anyInt());
+                .when(bundleService).getBundlesByFiscalCode(anyString(), nullable(BundleType.class), nullable(String.class), nullable(String.class), anyInt(), anyInt());
 
         String url = String.format(BUNDLES, TestUtil.getMockCiFiscalCode());
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))

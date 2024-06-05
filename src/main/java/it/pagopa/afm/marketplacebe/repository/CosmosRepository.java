@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 @Repository
 public class CosmosRepository {
 
+    private static final String BASE_BUNDLES_QUERY = "SELECT * FROM bundles b WHERE 1=1 ";
+    private static final String AND_BUNDLE_NAME_LIKE = "AND b.name like '%";
+    
     private final CosmosTemplate cosmosTemplate;
 
     @Autowired
@@ -33,7 +36,7 @@ public class CosmosRepository {
             int pageSize
     ) {
         StringBuilder builder = new StringBuilder();
-        builder.append("SELECT * FROM bundles b WHERE 1=1 ");
+        builder.append(BASE_BUNDLES_QUERY);
 
         buildWhereConditions(idPsp, name, types, builder);
 
@@ -71,7 +74,7 @@ public class CosmosRepository {
 
         // adds the name clause
         if (StringUtils.isNotEmpty(name)) {
-            builder.append("AND b.name like '%").append(name).append("%' ");
+            builder.append(AND_BUNDLE_NAME_LIKE).append(name).append("%' ");
         }
 
         // adds the bundle types clause
@@ -84,7 +87,7 @@ public class CosmosRepository {
     }
 
     /**
-     * Build and execute the query to get all bundles filtered by name, type and validity date from on bundles table.
+     * Build and execute the query to get all bundles filtered by name, type and validity date on bundles table.
      * validFrom param is used for exclude all bundle that are not active before the specified date.
      *
      * @param name bundle's name
@@ -102,7 +105,7 @@ public class CosmosRepository {
             int pageSize
     ) {
         StringBuilder builder = new StringBuilder();
-        builder.append("SELECT * FROM bundles b WHERE 1=1 ");
+        builder.append(BASE_BUNDLES_QUERY);
 
         buildWhereForGetBundlesByNameAndTypeAndValidityDateFrom(name, types, validFrom, builder);
 
@@ -113,7 +116,29 @@ public class CosmosRepository {
     }
 
     /**
-     * Build and execute the query to count all bundles filtered by name, type and validity date from on bundles table.
+     * Build and execute the query to get all bundles filtered by name, PSP business name and type on bundles table.
+     *
+     * @param name bundle's name
+     * @param bundleType bundle's type
+     * @param pspBusinessName PSP business name
+     * @return the requested list of bundles
+     */
+    public List<Bundle> getBundlesByNameAndPSPBusinessName(
+            String name,
+            String pspBusinessName,
+            String bundleType
+    ) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(BASE_BUNDLES_QUERY);
+
+        buildWhereForGetBundlesByNameAndPSPBusinessName(name, pspBusinessName, bundleType, builder);
+
+        return IterableUtils
+                .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Bundle.class));
+    }
+
+    /**
+     * Build and execute the query to count all bundles filtered by name, type and validity date on bundles table.
      * validFrom param is used for exclude all bundle that are not active before the specified date.
      *
      * @param name bundle's name
@@ -136,7 +161,7 @@ public class CosmosRepository {
 
     private void buildWhereForGetBundlesByNameAndTypeAndValidityDateFrom(String name, List<BundleType> types, LocalDate validFrom, StringBuilder builder) {
         if (StringUtils.isNotEmpty(name)) {
-            builder.append("AND b.name like '%").append(name).append("%' ");
+            builder.append(AND_BUNDLE_NAME_LIKE).append(name).append("%' ");
         }
 
         if (CollectionUtils.isNotEmpty(types)) {
@@ -158,4 +183,17 @@ public class CosmosRepository {
         }
     }
 
+
+    private void buildWhereForGetBundlesByNameAndPSPBusinessName(String name, String pspBusinessName, String bundleType, StringBuilder builder) {
+        if (StringUtils.isNotEmpty(name)) {
+            builder.append(AND_BUNDLE_NAME_LIKE).append(name).append("%' ");
+        }
+        if (StringUtils.isNotEmpty(pspBusinessName)) {
+            builder.append("AND b.pspBusinessName like '%").append(pspBusinessName).append("%' ");
+        }
+
+        if (StringUtils.isNotEmpty(bundleType)) {
+            builder.append("AND b.type = '").append(bundleType).append("' ");
+        }
+    }
 }

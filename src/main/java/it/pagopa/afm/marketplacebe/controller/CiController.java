@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
@@ -78,7 +79,7 @@ public class CiController {
             @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-tax-code") String taxCode,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page,
-            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type,
+            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) BundleType type,
             @Parameter(description = "Filtering the ciBundles by bundle name") @RequestParam(required = false) String bundleName,
             @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName
     ) {
