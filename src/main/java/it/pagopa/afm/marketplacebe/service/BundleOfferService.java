@@ -22,6 +22,7 @@ import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -162,7 +163,7 @@ public class BundleOfferService {
      */
     public BundleCiOffers getCiOffers(String ciTaxCode, String idPsp, String bundleName, Integer limit, Integer page) {
         List<String> idBundles = null;
-        if (bundleName != null) {
+        if (StringUtils.isNotEmpty(bundleName)) {
             idBundles = this.cosmosRepository.getBundlesByNameAndPSPBusinessName(bundleName, null, BundleType.PRIVATE.name())
                     .parallelStream()
                     .map(Bundle::getId)

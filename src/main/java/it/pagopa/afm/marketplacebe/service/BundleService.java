@@ -42,6 +42,7 @@ import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -422,7 +423,7 @@ public class BundleService {
     ) {
         List<String> idBundles = null;
         String type = bundleType != null ? bundleType.name() : null;
-        if (pspBusinessName != null || bundleName != null) {
+        if (StringUtils.isNotEmpty(pspBusinessName) || StringUtils.isNotEmpty(bundleName)) {
             idBundles = this.cosmosRepository.getBundlesByNameAndPSPBusinessName(bundleName, pspBusinessName, type)
                     .parallelStream()
                     .map(Bundle::getId)

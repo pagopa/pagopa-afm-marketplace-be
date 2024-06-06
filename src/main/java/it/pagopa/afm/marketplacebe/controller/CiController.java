@@ -73,14 +73,14 @@ public class CiController {
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
     @GetMapping(value = "/{ci-fiscal-code}/bundles", produces = {MediaType.APPLICATION_JSON_VALUE})
     public CiBundles getBundlesByFiscalCode(
-            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String taxCode,
-            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
-            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page,
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String ciTaxCode,
             @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) BundleType type,
             @Parameter(description = "Filtering the ciBundles by bundle name") @RequestParam(required = false) String bundleName,
-            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName
+            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
     ) {
-        return bundleService.getBundlesByFiscalCode(taxCode, type, bundleName, pspBusinessName, limit, page);
+        return bundleService.getBundlesByFiscalCode(ciTaxCode, type, bundleName, pspBusinessName, limit, page);
     }
 
     @Operation(summary = "Get a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
