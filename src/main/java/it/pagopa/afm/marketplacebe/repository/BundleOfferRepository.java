@@ -70,7 +70,7 @@ public interface BundleOfferRepository extends CosmosRepository<BundleOffer, Str
             " WHERE " +
             " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
             " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
-            " AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle))" +
+            " AND (IS_NULL(@idBundles) OR array_contains(@idBundles, b.idBundle))" +
             " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
     List<BundleOffer> findByIdPspAndFiscalCodeAndIdBundles(
             @Param("idPsp") String idPsp,
@@ -85,7 +85,7 @@ public interface BundleOfferRepository extends CosmosRepository<BundleOffer, Str
             " WHERE " +
             " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
             " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
-            " AND (IS_NULL(@idBundles) OR array_contains(@idBundles, c.idBundle))")
+            " AND (IS_NULL(@idBundles) OR array_contains(@idBundles, b.idBundle))")
     Integer getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(
             @Param("idPsp") String idPsp,
             @Param("ciFiscalCode") String ciFiscalCode,
