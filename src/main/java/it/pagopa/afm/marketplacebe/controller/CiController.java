@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
@@ -70,17 +71,16 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
-            value = "/{ci-fiscal-code}/bundles",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
+    @GetMapping(value = "/{ci-fiscal-code}/bundles", produces = {MediaType.APPLICATION_JSON_VALUE})
     public CiBundles getBundlesByFiscalCode(
-            @Parameter(description = "CI identifier", required = true) @PathVariable("ci-fiscal-code") String fiscalCode,
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String ciTaxCode,
+            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) BundleType type,
+            @Parameter(description = "Filtering the ciBundles by bundle name") @RequestParam(required = false) String bundleName,
+            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
-            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page,
-            @Parameter(description = "Filtering the ciBundles by type") @RequestParam(required = false) String type,
-            @Parameter(description = "Filtering the ciBundles by pspBusinessName of the corresponding bundle") @RequestParam(required = false) String pspBusinessName) {
-        return bundleService.getBundlesByFiscalCode(fiscalCode, limit, page, type, pspBusinessName);
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
+    ) {
+        return bundleService.getBundlesByFiscalCode(ciTaxCode, type, bundleName, pspBusinessName, limit, page);
     }
 
     @Operation(summary = "Get a bundle of a CI", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})
@@ -277,12 +277,12 @@ public class CiController {
     }
 
     /**
-     * GET /cis/:ci-fiscal-code/offers : Get paginated list of PSP offers to the CI regarding private bundles
+     * GET /cis/:ci-tax-code/offers : Get paginated list of PSP offers to the CI regarding private bundles
      *
-     * @param ciFiscalCode CI identifier.
-     * @param size         Number of elements for page. Default = 50.
-     * @param cursor       Cursor from which starts counting.
-     * @param idPsp        PSP identifier. Optional filter.
+     * @param ciTaxCode CI identifier.
+     * @param idPsp     PSP identifier. Optional filter.
+     * @param limit     Number of element in the requested page
+     * @param page      Page number
      * @return OK. (status code 200)
      * or Service unavailable (status code 500)
      */
@@ -294,16 +294,15 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @GetMapping(
-            value = "/{ci-fiscal-code}/offers",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
+    @GetMapping(value = "/{ci-fiscal-code}/offers", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<BundleCiOffers> getOffersByCI(
-            @Parameter(description = "CI identifier", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
-            @Positive @Parameter(description = "Number of elements for one page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer size,
-            @Parameter(description = "Starting cursor") @RequestParam(required = false) String cursor,
-            @Parameter(description = "Filter by psp") @RequestParam(required = false) String idPsp) {
-        return ResponseEntity.ok(bundleOfferService.getCiOffers(ciFiscalCode, idPsp));
+            @Parameter(description = "Tax code of the creditor institution to which the offers are addressed", required = true) @PathVariable("ci-fiscal-code") String ciTaxCode,
+            @Parameter(description = "Id of the payment service provider that has created the offers (used for to filter out the result)") @RequestParam(required = false) String idPsp,
+            @Parameter(description = "Filtering the offers by bundle name") @RequestParam(required = false) String bundleName,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
+            @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
+    ) {
+        return ResponseEntity.ok(this.bundleOfferService.getCiOffers(ciTaxCode, idPsp, bundleName, limit, page));
     }
 
     @Operation(summary = "The CI accepts an offer of a PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})

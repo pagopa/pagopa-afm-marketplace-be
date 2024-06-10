@@ -461,8 +461,7 @@ class BundleServiceTest {
                 .thenReturn(1);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, null, null
-        );
+                mockCIBundle.getCiFiscalCode(), null, null, null, 100, 0);
 
 
         assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
@@ -486,8 +485,7 @@ class BundleServiceTest {
                 .thenReturn(0);
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, "GLOBAL", null
-        );
+                mockCIBundle.getCiFiscalCode(), BundleType.GLOBAL, null, null, 100, 0);
 
         assertEquals(0, ciBundlesResult.getBundleDetailsList().size());
         assertEquals(0, ciBundlesResult.getPageInfo().getPage());
@@ -507,10 +505,16 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), eq(null), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName())).thenReturn(List.of(bundle));
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName(bundle.getPspBusinessName(), null, null))
+                .thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, null, bundle.getPspBusinessName()
+                mockCIBundle.getCiFiscalCode(),
+                null,
+                null,
+                bundle.getPspBusinessName(),
+                100,
+                0
         );
 
 
@@ -536,10 +540,51 @@ class BundleServiceTest {
                 .thenReturn(ciBundles);
         when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
                 .thenReturn(1);
-        when(bundleRepository.findByPspBusinessName(bundle.getPspBusinessName())).thenReturn(List.of(bundle));
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName(bundle.getPspBusinessName(), null, "PRIVATE"))
+                .thenReturn(List.of(bundle));
 
         CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
-                mockCIBundle.getCiFiscalCode(), 100, 0, "PRIVATE", bundle.getPspBusinessName()
+                mockCIBundle.getCiFiscalCode(),
+                BundleType.PRIVATE,
+                null,
+                bundle.getPspBusinessName(),
+                100,
+                0
+        );
+
+
+        assertEquals(ciBundles.size(), ciBundlesResult.getBundleDetailsList().size());
+        assertEquals(mockCIBundle.getIdBundle(),
+                ciBundlesResult.getBundleDetailsList().get(0).getIdBundle());
+        assertEquals(mockCIBundle.getId(),
+                ciBundlesResult.getBundleDetailsList().get(0).getIdCIBundle());
+        assertEquals(0, ciBundlesResult.getPageInfo().getPage());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalItems());
+        assertEquals(1, ciBundlesResult.getPageInfo().getTotalPages());
+    }
+
+    @Test
+    void shouldGetBundlesByFiscalCodeAndTypeAndBundleNameFilters() {
+        CiBundle mockCIBundle = getMockCiBundle();
+        List<CiBundle> ciBundles = List.of(mockCIBundle);
+        Bundle bundle = getMockBundle();
+        mockCIBundle.setIdBundle(bundle.getId());
+
+        // Preconditions
+        when(ciBundleRepository.findByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList(), anyInt(), anyInt()))
+                .thenReturn(ciBundles);
+        when(ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(anyString(), anyString(), anyList()))
+                .thenReturn(1);
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName(null, bundle.getName(), "PRIVATE"))
+                .thenReturn(List.of(bundle));
+
+        CiBundles ciBundlesResult = bundleService.getBundlesByFiscalCode(
+                mockCIBundle.getCiFiscalCode(),
+                BundleType.PRIVATE,
+                bundle.getName(),
+                null,
+                100,
+                0
         );
 
 
@@ -1507,6 +1552,29 @@ class BundleServiceTest {
         } catch (Exception e) {
             fail();
         }
+    }
+
+    @Test
+    void getBundleByIdSuccess() {
+        Bundle bundle = getMockBundle();
+        when(bundleRepository.findById(anyString())).thenReturn(Optional.of(bundle));
+
+        PspBundleDetails result = assertDoesNotThrow(() -> bundleService.getBundleDetailsById("bundleId"));
+
+        assertNotNull(result);
+        assertEquals(bundle.getId(), result.getId());
+        assertEquals(bundle.getName(), result.getName());
+        assertEquals(bundle.getType().name(), result.getType());
+    }
+
+    @Test
+    void getBundleByIdNotFound() {
+        when(bundleRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        AppException e = assertThrows(AppException.class, () -> bundleService.getBundleDetailsById("bundleId"));
+
+        assertNotNull(e);
+        assertEquals(HttpStatus.NOT_FOUND, e.getHttpStatus());
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {

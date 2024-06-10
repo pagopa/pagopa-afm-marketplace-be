@@ -10,6 +10,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
@@ -17,6 +18,7 @@ import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
+import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -45,6 +47,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,6 +67,9 @@ class BundleOfferServiceTest {
 
     @MockBean
     private CiBundleRepository ciBundleRepository;
+
+    @MockBean
+    private CosmosRepository cosmosRepository;
 
     @Captor
     private ArgumentCaptor<BundleOffer> bundleOfferArgument;
@@ -275,17 +282,37 @@ class BundleOfferServiceTest {
     @NullSource    // pass a null value
     @ValueSource(strings = {"1234567901"})
     void getCiOffers_ok_1(String idPsp) {
-        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
-        when(bundleOfferRepository.findByCiFiscalCode(anyString())).thenReturn(List.of(bundleOffer));
-        when(bundleOfferRepository.findByIdPsp(anyString(), any(PartitionKey.class))).thenReturn(List.of(bundleOffer));
-
         String ciFiscalCode = TestUtil.getMockCiFiscalCode();
-        try {
-            bundleOfferService.getCiOffers(ciFiscalCode, idPsp);
-            assertTrue(true);
-        } catch (Exception e) {
-            fail();
-        }
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundles(ciFiscalCode, idPsp, null, 10, 1))
+                .thenReturn(List.of(bundleOffer));
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(idPsp, ciFiscalCode, null))
+                .thenReturn(1);
+
+        BundleCiOffers result = assertDoesNotThrow(() -> bundleOfferService.getCiOffers(idPsp, ciFiscalCode, null, 10, 1));
+
+        assertNotNull(result);
+
+        verify(cosmosRepository, never()).getBundlesByNameAndPSPBusinessName(anyString(), eq(null), eq(BundleType.PRIVATE.name()));
+    }
+
+    @Test
+    void getCiOffers_ok_with_bundle_name_filter() {
+        String ciFiscalCode = TestUtil.getMockCiFiscalCode();
+        BundleOffer bundleOffer = TestUtil.getMockBundleOffer();
+        List<Bundle> mockBundleList = getMockBundleList();
+        List<String> mockIdBundleList = mockBundleList.parallelStream().map(Bundle::getId).toList();
+
+        when(cosmosRepository.getBundlesByNameAndPSPBusinessName("name", null, BundleType.PRIVATE.name()))
+                .thenReturn(mockBundleList);
+        when(bundleOfferRepository.findByIdPspAndFiscalCodeAndIdBundles(null, ciFiscalCode, mockIdBundleList, 10, 1))
+                .thenReturn(List.of(bundleOffer));
+        when(bundleOfferRepository.getTotalItemsFindByIdPspAndFiscalCodeAndIdBundles(null, ciFiscalCode, mockIdBundleList))
+                .thenReturn(1);
+
+        BundleCiOffers result = assertDoesNotThrow(() -> bundleOfferService.getCiOffers(ciFiscalCode, null, "name", 10, 1));
+
+        assertNotNull(result);
     }
 
     @Test
@@ -302,26 +329,6 @@ class BundleOfferServiceTest {
 
         assertEquals(getMockArchivedBundleOffer(offerToArchive).getId(), archivedBundleOfferArgument.getValue().getId());
         assertEquals(offerToArchive.getId(), bundleOfferArgument.getValue().getId());
-    }
-
-    @Test
-    void restGetOffersByCiFiscalCodeOk() {
-        when(bundleOfferRepository.findByCiFiscalCode(getMockCiFiscalCode()))
-                .thenReturn(getMockBundleOfferList());
-
-        var result = bundleOfferService.getCiOffers(getMockCiFiscalCode(), null);
-
-        assertEquals(1, result.getOffers().size());
-    }
-
-    @Test
-    void restGetOffersByidPspCodeOk() {
-        when(bundleOfferRepository.findByIdPsp(anyString(), any(PartitionKey.class)))
-                .thenReturn(getMockBundleOfferList());
-
-        var result = bundleOfferService.getCiOffers(null, getMockIdPsp());
-
-        assertEquals(1, result.getOffers().size());
     }
 
     @Test

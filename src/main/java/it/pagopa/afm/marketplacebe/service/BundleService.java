@@ -42,6 +42,7 @@ import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -180,6 +181,18 @@ public class BundleService {
 
     public PspBundleDetails getBundleById(String idBundle, String idPsp) {
         Bundle bundle = getBundle(idBundle, idPsp);
+
+        return modelMapper.map(bundle, PspBundleDetails.class);
+    }
+
+    /**
+     * Retrieve the detail of the bundle with the provided id
+     *
+     * @param idBundle bundle id
+     * @return the bundle details
+     */
+    public PspBundleDetails getBundleDetailsById(String idBundle) {
+        Bundle bundle = getBundle(idBundle);
 
         return modelMapper.map(bundle, PspBundleDetails.class);
     }
@@ -392,27 +405,39 @@ public class BundleService {
     /**
      * Retrieve the paginated list of information about the relation between a bundle and a creditor institution
      *
-     * @param fiscalCode      creditor institution's tax code
+     * @param taxCode         creditor institution's tax code
+     * @param bundleType      the type of bundle,  used to filter out the result
+     * @param bundleName      the bundle name, used to filter out the result
+     * @param pspBusinessName payment service provider's business name, used to filter out the result
      * @param limit           the number of element in the page
      * @param pageNumber      the page number
-     * @param type            the type of bundle
-     * @param pspBusinessName payment service provider's business name
      * @return the paginated list the details about the relation between a bundle and a creditor institution
      */
-    public CiBundles getBundlesByFiscalCode(@NotNull String fiscalCode, Integer limit, Integer pageNumber, String type, String pspBusinessName) {
-        List<String> idBundles = pspBusinessName != null
-                ? this.bundleRepository.findByPspBusinessName(pspBusinessName).stream()
-                .map(Bundle::getId)
-                .toList()
-                : null;
+    public CiBundles getBundlesByFiscalCode(
+            @NotNull String taxCode,
+            BundleType bundleType,
+            String bundleName,
+            String pspBusinessName,
+            Integer limit,
+            Integer pageNumber
+    ) {
+        List<String> idBundles = null;
+        String type = bundleType != null ? bundleType.name() : null;
+        if (StringUtils.isNotEmpty(pspBusinessName) || StringUtils.isNotEmpty(bundleName)) {
+            idBundles = this.cosmosRepository.getBundlesByNameAndPSPBusinessName(bundleName, pspBusinessName, type)
+                    .parallelStream()
+                    .map(Bundle::getId)
+                    .toList();
+        }
 
-        var bundleList = ciBundleRepository
-                .findByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles, limit * pageNumber, limit)
+        var bundleList = this.ciBundleRepository
+                .findByCiFiscalCodeAndTypeAndIdBundles(taxCode, type, idBundles, limit * pageNumber, limit)
                 .parallelStream()
                 .map(ciBundle -> this.modelMapper.map(ciBundle, CiBundleDetails.class))
                 .toList();
 
-        Integer totalItems = this.ciBundleRepository.getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(fiscalCode, type, idBundles);
+        Integer totalItems = this.ciBundleRepository
+                .getTotalItemsFindByCiFiscalCodeAndTypeAndIdBundles(taxCode, type, idBundles);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return CiBundles.builder()
@@ -420,6 +445,7 @@ public class BundleService {
                 .pageInfo(PageInfo.builder()
                         .limit(limit)
                         .page(pageNumber)
+                        .itemsFound(bundleList.size())
                         .totalItems(Long.valueOf(totalItems))
                         .totalPages(totalPages)
                         .build())
@@ -494,7 +520,7 @@ public class BundleService {
                 .insertedDate(LocalDateTime.now())
                 .build();
 
-        if(ciBundle.getAttributes() != null) {
+        if (ciBundle.getAttributes() != null) {
             ciBundle.getAttributes().add(attribute);
         } else {
             throw new AppException(AppError.BUNDLE_ATTRIBUTE_NOT_INITIALIZED, ciBundle.getId());
@@ -635,12 +661,8 @@ public class BundleService {
      * @return bundle
      */
     private Bundle getBundle(String idBundle) {
-        Optional<Bundle> bundle = bundleRepository.findById(idBundle);
-        if (bundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-
-        return bundle.get();
+        return this.bundleRepository.findById(idBundle)
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
     }
 
     /**
