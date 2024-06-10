@@ -198,12 +198,16 @@ public class BundleOfferService {
      * Accept the provided private bundle offer.
      * Verify if the offer and the provided attributes are valid and if so it creates the corresponding CIBundle
      *
-     * @param ciFiscalCode creditor institution's tax code
-     * @param idBundleOffer bundle offer's id
+     * @param ciFiscalCode     creditor institution's tax code
+     * @param idBundleOffer    bundle offer's id
      * @param bundleAttributes bundle attributes specified by the creditor institution
      * @return the id of the created CIBundle
      */
-    public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer, List<CiBundleAttributeModel> bundleAttributes) {
+    public CiBundleId acceptOffer(
+            String ciFiscalCode,
+            String idBundleOffer,
+            List<CiBundleAttributeModel> bundleAttributes
+    ) {
         BundleOffer offer = getBundleOffer(idBundleOffer, ciFiscalCode);
         Bundle bundle = getBundle(offer.getIdBundle(), offer.getIdPsp());
 
@@ -326,7 +330,10 @@ public class BundleOfferService {
         this.bundleOfferRepository.delete(bundleOffer);
     }
 
-    private List<CiBundleAttribute> buildCiBundleAttributes(String idBundle, List<CiBundleAttributeModel> ciBundleAttributeModelList) {
+    private List<CiBundleAttribute> buildCiBundleAttributes(
+            String idBundle,
+            List<CiBundleAttributeModel> ciBundleAttributeModelList
+    ) {
         return ciBundleAttributeModelList.parallelStream()
                 .map(attribute -> CiBundleAttribute.builder()
                         .id(String.format("%s-%s", idBundle, UUID.randomUUID()))

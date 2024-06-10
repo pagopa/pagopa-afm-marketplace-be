@@ -1,9 +1,11 @@
 package it.pagopa.afm.marketplacebe.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
@@ -15,8 +17,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
@@ -39,6 +44,7 @@ class CiControllerTest {
     private final String OFFERS = "/cis/%s/offers";
     private final String ACCEPT_OFFER = OFFERS + "/%s/accept";
     private final String REJECT_OFFER = OFFERS + "/%s/reject";
+
     @Autowired
     private MockMvc mvc;
     @MockBean
@@ -47,6 +53,8 @@ class CiControllerTest {
     private BundleOfferService bundleOfferService;
     @MockBean
     private BundleRequestService bundleRequestService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void getBundlesByFiscalCode_200() throws Exception {
@@ -322,11 +330,12 @@ class CiControllerTest {
 
     @Test
     void acceptOffer_201() throws Exception {
-        when(bundleOfferService.acceptOffer(anyString(), anyString())).thenReturn(TestUtil.getMockCiBundleId());
+        when(bundleOfferService.acceptOffer(anyString(), anyString(), anyList())).thenReturn(TestUtil.getMockCiBundleId());
 
         String url = String.format(ACCEPT_OFFER, TestUtil.getMockCiFiscalCode(), "idBundleOffer");
 
         mvc.perform(post(url)
+                        .content(objectMapper.writeValueAsString(Collections.singletonList(new CiBundleAttributeModel())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
     }
@@ -334,11 +343,12 @@ class CiControllerTest {
     @Test
     void acceptOffer_404() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, TestUtil.getMockIdBundle());
-        doThrow(exception).when(bundleOfferService).acceptOffer(anyString(), anyString());
+        doThrow(exception).when(bundleOfferService).acceptOffer(anyString(), anyString(), anyList());
 
         String url = String.format(ACCEPT_OFFER, TestUtil.getMockCiFiscalCode(), "idBundleOffer");
 
         mvc.perform(post(url)
+                        .content(objectMapper.writeValueAsString(Collections.singletonList(new CiBundleAttributeModel())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -346,11 +356,12 @@ class CiControllerTest {
     @Test
     void acceptOffer_409() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, TestUtil.getMockIdBundle(), "");
-        doThrow(exception).when(bundleOfferService).acceptOffer(anyString(), anyString());
+        doThrow(exception).when(bundleOfferService).acceptOffer(anyString(), anyString(), anyList());
 
         String url = String.format(ACCEPT_OFFER, TestUtil.getMockCiFiscalCode(), "idBundleOffer");
 
         mvc.perform(post(url)
+                        .content(objectMapper.writeValueAsString(Collections.singletonList(new CiBundleAttributeModel())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
     }
