@@ -44,6 +44,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @RestController()
 @RequestMapping(path = "/cis")
@@ -317,9 +318,11 @@ public class CiController {
             value = "/{ci-fiscal-code}/offers/{id-bundle-offer}/accept"
     )
     public ResponseEntity<CiBundleId> acceptOffer(
-            @Parameter(description = "PSP identifier", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
-            @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("id-bundle-offer") String idBundleOffer) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(bundleOfferService.acceptOffer(ciFiscalCode, idBundleOffer));
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
+            @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("id-bundle-offer") String idBundleOffer,
+            @RequestBody @Valid @NotNull List<CiBundleAttributeModel> bundleAttributes
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.bundleOfferService.acceptOffer(ciFiscalCode, idBundleOffer, bundleAttributes));
     }
 
     @Operation(summary = "The CI rejects the offer of the PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"CI",})

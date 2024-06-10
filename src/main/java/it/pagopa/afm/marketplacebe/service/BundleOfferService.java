@@ -6,6 +6,7 @@ import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
@@ -16,6 +17,7 @@ import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.offer.CiBundleOffer;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
 import it.pagopa.afm.marketplacebe.model.offer.PspBundleOffer;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
@@ -32,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static it.pagopa.afm.marketplacebe.util.CommonUtil.calculateTotalPages;
 
@@ -191,42 +194,51 @@ public class BundleOfferService {
                 .build();
     }
 
-    public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer) {
+    /**
+     * Accept the provided private bundle offer.
+     * Verify if the offer and the provided attributes are valid and if so it creates the corresponding CIBundle
+     *
+     * @param ciFiscalCode creditor institution's tax code
+     * @param idBundleOffer bundle offer's id
+     * @param bundleAttributes bundle attributes specified by the creditor institution
+     * @return the id of the created CIBundle
+     */
+    public CiBundleId acceptOffer(String ciFiscalCode, String idBundleOffer, List<CiBundleAttributeModel> bundleAttributes) {
         BundleOffer offer = getBundleOffer(idBundleOffer, ciFiscalCode);
-
         Bundle bundle = getBundle(offer.getIdBundle(), offer.getIdPsp());
 
-        // verify if validityDateTo is after now
+        // verify if bundle is already deleted (validityDateTo is after now)
         if (!CommonUtil.isValidityDateToAcceptable(bundle.getValidityDateTo())) {
             throw new AppException(AppError.BUNDLE_BAD_REQUEST, ALREADY_DELETED);
         }
 
-        // check if the bundle has already been offered
-        var offerBundle = bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(bundle.getId(), ciFiscalCode);
-        if (offerBundle.isPresent() && !offerBundle.get().getId().equals(idBundleOffer)) {
+        // check if the bundle has already been offered to the same CI
+        if (isBundleOfferDuplicated(ciFiscalCode, idBundleOffer, bundle)) {
             throw new AppException(AppError.BUNDLE_OFFER_CONFLICT, bundle.getId(), "Bundle already offered to CI " + ciFiscalCode);
         }
 
-        Optional<CiBundle> ciBundle = ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(
-                offer.getIdBundle(),
-                ciFiscalCode
-        );
-
-        if (ciBundle.isPresent()) {
+        // verify if the offer is already been accepted
+        if (isOfferAlreadyAccepted(ciFiscalCode, offer)) {
             throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
-        } else {
-            if (offer.getAcceptedDate() == null && offer.getRejectionDate() == null) {
-                archiveBundleOffer(offer, true);
+        }
 
-                // create CI-Bundle relation
-                return CiBundleId.builder()
-                        .id(ciBundleRepository.save(buildCiBundle(offer, bundle)).getId())
-                        .build();
-            } else if (offer.getAcceptedDate() == null && offer.getRejectionDate() != null) {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, offer.getRejectionDate());
-            } else {
-                throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
+        if (offer.getAcceptedDate() == null && offer.getRejectionDate() == null) {
+            archiveBundleOffer(offer, true);
+
+            List<CiBundleAttribute> attributes = new ArrayList<>();
+            if (bundleAttributes != null && !bundleAttributes.isEmpty()) {
+                validateCIBundleAttributes(bundleAttributes, bundle);
+                attributes = buildCiBundleAttributes(bundle.getId(), bundleAttributes);
             }
+
+            // create CI-Bundle relation
+            return CiBundleId.builder()
+                    .id(this.ciBundleRepository.save(buildCiBundle(offer, bundle, attributes)).getId())
+                    .build();
+        } else if (offer.getAcceptedDate() == null) {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_REJECTED, idBundleOffer, offer.getRejectionDate());
+        } else {
+            throw new AppException(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED, idBundleOffer, offer.getAcceptedDate());
         }
     }
 
@@ -260,29 +272,21 @@ public class BundleOfferService {
                 .orElseThrow(() -> new AppException(AppError.BUNDLE_OFFER_NOT_FOUND, idBundleOffer));
     }
 
-    private CiBundle buildCiBundle(BundleOffer entity, Bundle bundle) {
+    private CiBundle buildCiBundle(BundleOffer bundleOffer, Bundle bundle, List<CiBundleAttribute> attributes) {
+        LocalDate validityDateFrom = bundle.getValidityDateFrom();
         LocalDate buildTime = LocalDate.now();
-
-        if (bundle.getValidityDateFrom() == null) {
-            return CiBundle.builder()
-                    .ciFiscalCode(entity.getCiFiscalCode())
-                    .idBundle(entity.getIdBundle())
-                    .type(bundle.getType())
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(buildTime)
-                    .attributes(new ArrayList<>())
-                    .build();
-        } else {
-            return CiBundle.builder()
-                    .ciFiscalCode(entity.getCiFiscalCode())
-                    .idBundle(entity.getIdBundle())
-                    .type(bundle.getType())
-                    .validityDateTo(bundle.getValidityDateTo())
-                    .validityDateFrom(bundle.getValidityDateFrom().isBefore(buildTime) ?
-                            buildTime : bundle.getValidityDateFrom())
-                    .attributes(new ArrayList<>())
-                    .build();
+        if (validityDateFrom == null || validityDateFrom.isBefore(buildTime)) {
+            validityDateFrom = buildTime;
         }
+
+        return CiBundle.builder()
+                .ciFiscalCode(bundleOffer.getCiFiscalCode())
+                .idBundle(bundleOffer.getIdBundle())
+                .type(bundle.getType())
+                .validityDateTo(bundle.getValidityDateTo())
+                .validityDateFrom(validityDateFrom)
+                .attributes(attributes)
+                .build();
     }
 
     /**
@@ -293,11 +297,8 @@ public class BundleOfferService {
      * @return the bundle if present
      */
     private Bundle getBundle(String idBundle, String idPsp) {
-        Optional<Bundle> optBundle = bundleRepository.findById(idBundle, new PartitionKey(idPsp));
-        if (optBundle.isEmpty()) {
-            throw new AppException(AppError.BUNDLE_NOT_FOUND, idBundle);
-        }
-        return optBundle.get();
+        return this.bundleRepository.findById(idBundle, new PartitionKey(idPsp))
+                .orElseThrow(() -> new AppException(AppError.BUNDLE_NOT_FOUND, idBundle));
     }
 
     /**
@@ -321,8 +322,53 @@ public class BundleOfferService {
                     .build();
         }
 
-        archivedBundleOfferRepository.save(modelMapper.map(offerToArchive, ArchivedBundleOffer.class));
-        bundleOfferRepository.delete(bundleOffer);
+        this.archivedBundleOfferRepository.save(modelMapper.map(offerToArchive, ArchivedBundleOffer.class));
+        this.bundleOfferRepository.delete(bundleOffer);
     }
 
+    private List<CiBundleAttribute> buildCiBundleAttributes(String idBundle, List<CiBundleAttributeModel> ciBundleAttributeModelList) {
+        return ciBundleAttributeModelList.parallelStream()
+                .map(attribute -> CiBundleAttribute.builder()
+                        .id(String.format("%s-%s", idBundle, UUID.randomUUID()))
+                        .insertedDate(LocalDateTime.now())
+                        .maxPaymentAmount(attribute.getMaxPaymentAmount())
+                        .transferCategory(attribute.getTransferCategory())
+                        .transferCategoryRelation(attribute.getTransferCategoryRelation())
+                        .build())
+                .toList();
+    }
+
+    private void validateCIBundleAttributes(List<CiBundleAttributeModel> attributeModelList, Bundle bundle) {
+        attributeModelList.parallelStream().forEach(
+                attribute -> {
+                    // rule R15: attribute payment amount should be lower than bundle one
+                    if (attribute.getMaxPaymentAmount().compareTo(bundle.getPaymentAmount()) > 0) {
+                        throw new AppException(
+                                AppError.BUNDLE_OFFER_BAD_REQUEST,
+                                bundle.getId(),
+                                "Payment amount should be lower than or equal to bundle payment amount."
+                        );
+                    }
+                    if (attribute.getTransferCategory() == null && attributeModelList.size() > 1) {
+                        throw new AppException(
+                                AppError.BUNDLE_OFFER_BAD_ATTRIBUTE,
+                                bundle.getId(),
+                                "Only one attribute can be specified if the attribute has transfer category null"
+                        );
+                    }
+
+                });
+    }
+
+    private boolean isOfferAlreadyAccepted(String ciFiscalCode, BundleOffer offer) {
+        return this.ciBundleRepository
+                .findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(offer.getIdBundle(), ciFiscalCode)
+                .isPresent();
+    }
+
+    private boolean isBundleOfferDuplicated(String ciFiscalCode, String idBundleOffer, Bundle bundle) {
+        var offerBundle = this.bundleOfferRepository
+                .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(bundle.getId(), ciFiscalCode);
+        return offerBundle.isPresent() && !offerBundle.get().getId().equals(idBundleOffer);
+    }
 }
