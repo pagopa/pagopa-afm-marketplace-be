@@ -1495,7 +1495,7 @@
           {
             "name": "ci-fiscal-code",
             "in": "path",
-            "description": "PSP identifier",
+            "description": "Creditor institution's tax code",
             "required": true,
             "schema": {
               "type": "string"
@@ -1511,6 +1511,19 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CiBundleAttributeModel"
+                }
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "201": {
             "description": "OK",
