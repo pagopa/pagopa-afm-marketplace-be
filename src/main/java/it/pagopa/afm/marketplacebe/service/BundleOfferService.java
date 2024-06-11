@@ -227,13 +227,12 @@ public class BundleOfferService {
         }
 
         if (offer.getAcceptedDate() == null && offer.getRejectionDate() == null) {
-            archiveBundleOffer(offer, true);
-
             List<CiBundleAttribute> attributes = new ArrayList<>();
             if (bundleAttributes != null && !bundleAttributes.isEmpty()) {
                 validateCIBundleAttributes(bundleAttributes, bundle);
                 attributes = buildCiBundleAttributes(bundle.getId(), bundleAttributes);
             }
+            archiveBundleOffer(offer, true);
 
             // create CI-Bundle relation
             return CiBundleId.builder()

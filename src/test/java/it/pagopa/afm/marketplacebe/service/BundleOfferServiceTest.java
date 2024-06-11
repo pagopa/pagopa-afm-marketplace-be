@@ -352,7 +352,9 @@ class BundleOfferServiceTest {
         assertNotNull(result);
         assertEquals(ciBundle.getId(), result.getId());
 
-        verify(ciBundleRepository, times(1)).save(ciBundleArgument.capture());
+        verify(archivedBundleOfferRepository).save(any());
+        verify(bundleOfferRepository).delete(any());
+        verify(ciBundleRepository).save(ciBundleArgument.capture());
         assertEquals(getMockBundleOffer().getIdBundle(), ciBundleArgument.getValue().getIdBundle());
     }
 
@@ -375,6 +377,8 @@ class BundleOfferServiceTest {
         assertNotNull(result);
         assertEquals(ciBundle.getId(), result.getId());
 
+        verify(archivedBundleOfferRepository).save(any());
+        verify(bundleOfferRepository).delete(any());
         verify(ciBundleRepository, times(1)).save(ciBundleArgument.capture());
         assertEquals(getMockBundleOffer().getIdBundle(), ciBundleArgument.getValue().getIdBundle());
     }
@@ -400,6 +404,8 @@ class BundleOfferServiceTest {
         verify(bundleOfferRepository, never())
                 .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString());
         verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode);
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -424,6 +430,8 @@ class BundleOfferServiceTest {
         verify(bundleOfferRepository, never())
                 .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString());
         verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode);
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -448,6 +456,8 @@ class BundleOfferServiceTest {
         verify(bundleOfferRepository, never())
                 .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString());
         verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode);
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -473,6 +483,8 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getTitle(), e.getTitle());
 
         verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(any(), anyString());
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -497,6 +509,8 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), e.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), e.getTitle());
 
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -519,6 +533,8 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), e.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), e.getTitle());
 
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -542,6 +558,8 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getHttpStatus(), e.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getTitle(), e.getTitle());
 
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -566,6 +584,8 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_BAD_REQUEST.getHttpStatus(), e.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_BAD_REQUEST.getTitle(), e.getTitle());
 
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
@@ -590,6 +610,8 @@ class BundleOfferServiceTest {
         assertEquals(AppError.BUNDLE_OFFER_BAD_ATTRIBUTE.getHttpStatus(), e.getHttpStatus());
         assertEquals(AppError.BUNDLE_OFFER_BAD_ATTRIBUTE.getTitle(), e.getTitle());
 
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
         verify(ciBundleRepository, never()).save(any());
     }
 
