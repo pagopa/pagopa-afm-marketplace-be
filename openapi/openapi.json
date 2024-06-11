@@ -1641,7 +1641,7 @@
           {
             "name": "ci-fiscal-code",
             "in": "path",
-            "description": "CI identifier",
+            "description": "Creditor institution's tax code",
             "required": true,
             "schema": {
               "type": "string"

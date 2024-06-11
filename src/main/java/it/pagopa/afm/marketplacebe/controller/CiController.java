@@ -333,13 +333,11 @@ public class CiController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @PostMapping(
-            value = "/{ci-fiscal-code}/offers/{id-bundle-offer}/reject"
-    )
+    @PostMapping(value = "/{ci-fiscal-code}/offers/{id-bundle-offer}/reject")
     public ResponseEntity<Void> rejectOffer(
-            @Parameter(description = "CI identifier", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
+            @Parameter(description = "Creditor institution's tax code", required = true) @PathVariable("ci-fiscal-code") String ciFiscalCode,
             @Parameter(description = "Bundle offer identifier", required = true) @PathVariable("id-bundle-offer") String idBundleOffer) {
-        bundleOfferService.rejectOffer(ciFiscalCode, idBundleOffer);
+        this.bundleOfferService.rejectOffer(ciFiscalCode, idBundleOffer);
         return ResponseEntity.ok().build();
     }
 }

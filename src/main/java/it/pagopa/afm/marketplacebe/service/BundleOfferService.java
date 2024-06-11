@@ -246,9 +246,14 @@ public class BundleOfferService {
         }
     }
 
+    /**
+     * Reject the private bundle offer with the provided id
+     *
+     * @param ciFiscalCode creditor institution's tax code
+     * @param idBundleOffer private bundle offer id
+     */
     public void rejectOffer(String ciFiscalCode, String idBundleOffer) {
         BundleOffer entity = getBundleOffer(idBundleOffer, ciFiscalCode);
-
         Bundle bundle = getBundle(entity.getIdBundle(), entity.getIdPsp());
 
         // verify if validityDateTo is after now
