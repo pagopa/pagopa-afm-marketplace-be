@@ -13,7 +13,9 @@ import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCiOffers;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffered;
 import it.pagopa.afm.marketplacebe.model.offer.BundleOffers;
+import it.pagopa.afm.marketplacebe.model.offer.CiBundleId;
 import it.pagopa.afm.marketplacebe.model.offer.CiFiscalCodeList;
+import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
 import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
@@ -332,165 +334,285 @@ class BundleOfferServiceTest {
     }
 
     @Test
-    void acceptOfferNoUpdateOk() {
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundleOffer()));
+    void acceptOfferSuccessNoUpdate() {
+        CiBundle ciBundle = getMockCiBundle();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
         when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
                 .thenReturn(Optional.empty());
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundle()));
+        when(ciBundleRepository.save(any())).thenReturn(ciBundle);
 
-        when(ciBundleRepository.save(any())).thenReturn(
-                getMockCiBundle()
+        CiBundleId result = assertDoesNotThrow(() -> bundleOfferService.acceptOffer(
+                        getMockCiFiscalCode(),
+                        getMockBundleOfferId(),
+                        Collections.singletonList(getMockCiBundleAttributeModel()))
         );
 
-        bundleOfferService.acceptOffer(getMockCiFiscalCode(), getMockBundleOfferId());
+        assertNotNull(result);
+        assertEquals(ciBundle.getId(), result.getId());
 
+        verify(archivedBundleOfferRepository).save(any());
+        verify(bundleOfferRepository).delete(any());
+        verify(ciBundleRepository).save(ciBundleArgument.capture());
+        assertEquals(getMockBundleOffer().getIdBundle(), ciBundleArgument.getValue().getIdBundle());
+    }
+
+    @Test
+    void acceptOfferSuccessValidityWithoutAttributes() {
+        CiBundle ciBundle = getMockCiBundle();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
+        when(ciBundleRepository.save(any())).thenReturn(ciBundle);
+
+        CiBundleId result = assertDoesNotThrow(() -> bundleOfferService.acceptOffer(
+                        getMockCiFiscalCode(),
+                        getMockBundleOfferId(),
+                        Collections.emptyList())
+        );
+
+        assertNotNull(result);
+        assertEquals(ciBundle.getId(), result.getId());
+
+        verify(archivedBundleOfferRepository).save(any());
+        verify(bundleOfferRepository).delete(any());
         verify(ciBundleRepository, times(1)).save(ciBundleArgument.capture());
         assertEquals(getMockBundleOffer().getIdBundle(), ciBundleArgument.getValue().getIdBundle());
     }
 
     @Test
-    void acceptOfferValidityDateFromNullOk() {
+    void acceptOfferFailBundleOfferNotFound() {
         Bundle bundle = getMockBundle();
-        bundle.setValidityDateFrom(null);
-
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundleOffer()));
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
-                .thenReturn(Optional.empty());
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(bundle));
-
-        when(ciBundleRepository.save(any())).thenReturn(
-                getMockCiBundle()
-        );
-
-        bundleOfferService.acceptOffer(getMockCiFiscalCode(), getMockBundleOfferId());
-
-        verify(ciBundleRepository, times(1)).save(ciBundleArgument.capture());
-        assertEquals(getMockBundleOffer().getIdBundle(), ciBundleArgument.getValue().getIdBundle());
-    }
-
-    @Test
-    void acceptOfferRejected() {
-        BundleOffer mockBundleOffer = getMockBundleOffer();
-        mockBundleOffer.setRejectionDate(LocalDateTime.now());
+        bundle.setValidityDateTo(LocalDate.now());
         String mockCiFiscalCode = getMockCiFiscalCode();
 
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(mockBundleOffer));
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
-                .thenReturn(Optional.empty());
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundle()));
-
-        when(ciBundleRepository.save(any())).thenReturn(getMockCiBundle());
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
 
         String mockBundleOfferId = getMockBundleOfferId();
-        var exception = assertThrows(AppException.class,
-                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
 
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getHttpStatus(), exception.getHttpStatus());
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getTitle(), exception.getTitle());
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_NOT_FOUND.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_NOT_FOUND.getTitle(), e.getTitle());
+
+        verify(bundleRepository, never()).findById(anyString(), any(PartitionKey.class));
+        verify(bundleOfferRepository, never())
+                .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString());
+        verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode);
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
     }
 
     @Test
-    void acceptOfferAccepted() {
+    void acceptOfferFailBundleNotFound() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(LocalDate.now());
+        String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.empty());
+
+        String mockBundleOfferId = getMockBundleOfferId();
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
+
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_NOT_FOUND.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_NOT_FOUND.getTitle(), e.getTitle());
+
+        verify(bundleOfferRepository, never())
+                .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString());
+        verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode);
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptOfferFailBundleAlreadyDeleted() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(LocalDate.now());
+        String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        String mockBundleOfferId = getMockBundleOfferId();
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
+
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_BAD_REQUEST.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_BAD_REQUEST.getTitle(), e.getTitle());
+
+        verify(bundleOfferRepository, never())
+                .findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString());
+        verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode);
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptOfferFailConflictDuplicatedOffer() {
+        Bundle bundle = getMockBundle();
+        bundle.setValidityDateTo(null);
+        bundle.setValidityDateFrom(null);
+        String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+        when(bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString()))
+                .thenReturn(Optional.of(getMockBundleOffer()));
+
+        String mockBundleOfferId = UUID.randomUUID().toString();
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
+
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getTitle(), e.getTitle());
+
+        verify(ciBundleRepository, never()).findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(any(), anyString());
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptOfferFailAlreadyAccepted() {
         BundleOffer mockBundleOffer = getMockBundleOffer();
         mockBundleOffer.setAcceptedDate(LocalDateTime.now());
         String mockCiFiscalCode = getMockCiFiscalCode();
 
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(mockBundleOffer));
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(mockBundleOffer));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
         when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
                 .thenReturn(Optional.empty());
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundle()));
-
         when(ciBundleRepository.save(any())).thenReturn(getMockCiBundle());
 
         String mockBundleOfferId = getMockBundleOfferId();
-        var exception = assertThrows(AppException.class,
-                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
 
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), e.getTitle());
+
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
     }
 
     @Test
-    void acceptOfferConflict() {
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundleOffer()));
+    void acceptOfferFailAlreadyAcceptedAndCIBundleIsPresent() {
         String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundleOffer()));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
         when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode))
                 .thenReturn(Optional.of(getMockCiBundle()));
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundle()));
-
-        when(ciBundleRepository.save(any())).thenReturn(
-                getMockCiBundle()
-        );
+        when(ciBundleRepository.save(any())).thenReturn(getMockCiBundle());
 
         String mockBundleOfferId = getMockBundleOfferId();
-        var exception = assertThrows(AppException.class,
-                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
 
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), e.getTitle());
+
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
     }
 
     @Test
-    void acceptOfferConflict2() {
-        Bundle bundle = getMockBundle();
-        bundle.setValidityDateTo(null);
-        bundle.setValidityDateFrom(null);
-
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundleOffer()));
+    void acceptOfferFailAlreadyRejected() {
+        BundleOffer mockBundleOffer = getMockBundleOffer();
+        mockBundleOffer.setRejectionDate(LocalDateTime.now());
         String mockCiFiscalCode = getMockCiFiscalCode();
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode))
-                .thenReturn(Optional.of(getMockCiBundle()));
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(bundle));
 
-        when(ciBundleRepository.save(any())).thenReturn(
-                getMockCiBundle()
-        );
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(mockBundleOffer));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
 
         String mockBundleOfferId = getMockBundleOfferId();
-        var exception = assertThrows(AppException.class,
-                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
 
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getHttpStatus(), exception.getHttpStatus());
-        assertEquals(AppError.BUNDLE_OFFER_ALREADY_ACCEPTED.getTitle(), exception.getTitle());
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_ALREADY_REJECTED.getTitle(), e.getTitle());
+
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
     }
 
     @Test
-    void acceptOfferConflict3() {
-        Bundle bundle = getMockBundle();
-        bundle.setValidityDateTo(null);
-        bundle.setValidityDateFrom(null);
-
-        when(bundleOfferRepository.findByIdBundleAndCiFiscalCodeAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString()))
-                .thenReturn(Optional.of(getMockBundleOffer()));
-        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(getMockBundleOffer()));
+    void acceptOfferFailAttributeWithInvalidPaymentAmount() {
+        BundleOffer mockBundleOffer = getMockBundleOffer();
         String mockCiFiscalCode = getMockCiFiscalCode();
-        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), mockCiFiscalCode))
-                .thenReturn(Optional.of(getMockCiBundle()));
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(bundle));
 
-        when(ciBundleRepository.save(any())).thenReturn(
-                getMockCiBundle()
-        );
-        String mockBundleOfferId = UUID.randomUUID().toString();
-        var exception = assertThrows(AppException.class,
-                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId));
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(mockBundleOffer));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
 
-        assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getHttpStatus(), exception.getHttpStatus());
-        assertEquals(AppError.BUNDLE_OFFER_CONFLICT.getTitle(), exception.getTitle());
+        String mockBundleOfferId = getMockBundleOfferId();
+        CiBundleAttributeModel attributeModel = getMockCiBundleAttributeModel();
+        attributeModel.setMaxPaymentAmount(10000000000000000L);
+        List<CiBundleAttributeModel> attributes = Collections.singletonList(attributeModel);
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
+
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_BAD_REQUEST.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_BAD_REQUEST.getTitle(), e.getTitle());
+
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptOfferFailAttributeWithMultipleAttributeAndTransferCategoryNull() {
+        BundleOffer mockBundleOffer = getMockBundleOffer();
+        String mockCiFiscalCode = getMockCiFiscalCode();
+
+        when(bundleOfferRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(mockBundleOffer));
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(getMockBundle()));
+        when(ciBundleRepository.findByIdBundleAndCiFiscalCodeAndValidityDateToIsNull(getMockIdBundle(), getMockCiFiscalCode()))
+                .thenReturn(Optional.empty());
+
+        String mockBundleOfferId = getMockBundleOfferId();
+        CiBundleAttributeModel attributeModel = getMockCiBundleAttributeModel();
+        attributeModel.setTransferCategory(null);
+        List<CiBundleAttributeModel> attributes = List.of(attributeModel, getMockCiBundleAttributeModel());
+        var e = assertThrows(AppException.class,
+                () -> bundleOfferService.acceptOffer(mockCiFiscalCode, mockBundleOfferId, attributes));
+
+        assertNotNull(e);
+        assertEquals(AppError.BUNDLE_OFFER_BAD_ATTRIBUTE.getHttpStatus(), e.getHttpStatus());
+        assertEquals(AppError.BUNDLE_OFFER_BAD_ATTRIBUTE.getTitle(), e.getTitle());
+
+        verify(archivedBundleOfferRepository, never()).save(any());
+        verify(bundleOfferRepository, never()).delete(any());
+        verify(ciBundleRepository, never()).save(any());
     }
 
     @Test

@@ -16,6 +16,7 @@ public enum AppError {
     BUNDLE_NAME_CONFLICT(HttpStatus.CONFLICT, "Bundle conflict", "Bundle with name %s"),
 
     BUNDLE_OFFER_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Bundle offer bad request", "Bundle offer with id %s not configured with %s."),
+    BUNDLE_OFFER_BAD_ATTRIBUTE(HttpStatus.BAD_REQUEST, "Bundle offer bad attribute", "Bundle offer with id %s has invalid attributes: %s."),
     BUNDLE_OFFER_NOT_FOUND(HttpStatus.NOT_FOUND, "Bundle offer not found", "Bundle offer with id %s not found."),
     BUNDLE_OFFER_CONFLICT(HttpStatus.CONFLICT, "Bundle offer conflict", "Bundle offer with id %s. %s"),
     BUNDLE_OFFER_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "Bundle Offer already accepted", "The offer %s was accepted on %s"),

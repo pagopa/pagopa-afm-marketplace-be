@@ -180,7 +180,7 @@ public class BundleRequestService {
         } else if (bundleRequest.getAcceptedDate() != null && bundleRequest.getRejectionDate() == null) {
             throw new AppException(AppError.REQUEST_ALREADY_ACCEPTED, idBundleRequest, bundleRequest.getAcceptedDate());
         } else {
-            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, bundleRequest.getAcceptedDate());
+            throw new AppException(AppError.REQUEST_ALREADY_REJECTED, idBundleRequest, bundleRequest.getRejectionDate());
         }
     }
 
