@@ -129,19 +129,20 @@ public class BundleService {
      * @param bundleTypes list of bundle's type
      * @param name        bundle's name
      * @param validFrom   validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param expireAt     validity date of bundles, used to retrieve all bundles that expire at the specified date
      * @param limit       page size
      * @param pageNumber  page number
      * @return a paginated list of bundles
      */
-    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, Integer limit, Integer pageNumber) {
+    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, LocalDate expireAt, Integer limit, Integer pageNumber) {
         // NOT a search by idPsp --> return only valid bundles
         List<PspBundleDetails> bundleList = this.cosmosRepository
-                .getBundlesByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom, limit * pageNumber, limit)
+                .getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(name, bundleTypes, validFrom, expireAt, limit * pageNumber, limit)
                 .stream()
                 .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFrom(name, bundleTypes, validFrom);
+        Long totalItems = this.cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(name, bundleTypes, validFrom, expireAt);
         int totalPages = calculateTotalPages(limit, totalItems);
 
         return Bundles.builder()
