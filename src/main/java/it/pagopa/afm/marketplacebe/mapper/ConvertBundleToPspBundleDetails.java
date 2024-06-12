@@ -34,6 +34,7 @@ public class ConvertBundleToPspBundleDetails implements Converter<Bundle, PspBun
                 .idChannel(source.getIdChannel())
                 .pspBusinessName(source.getPspBusinessName())
                 .urlPolicyPsp(source.getUrlPolicyPsp())
+                .idPsp(source.getIdPsp())
                 .build();
     }
 }
