@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -218,7 +219,7 @@ class PspControllerTest {
 
     @Test
     void updateBundle_200() throws Exception {
-        when(bundleService.updateBundle(anyString(), anyString(), any())).thenReturn(TestUtil.getMockBundle());
+        when(bundleService.updateBundle(anyString(), anyString(), any(), anyBoolean())).thenReturn(TestUtil.getMockBundle());
 
         String url = String.format(BUNDLE, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
 
@@ -231,7 +232,7 @@ class PspControllerTest {
     @Test
     void updateBundle_400() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_BAD_REQUEST, "ValidityDate");
-        doThrow(exception).when(bundleService).updateBundle(anyString(), anyString(), any());
+        doThrow(exception).when(bundleService).updateBundle(anyString(), anyString(), any(), anyBoolean());
 
         String url = String.format(BUNDLE, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
 
@@ -245,7 +246,7 @@ class PspControllerTest {
     @Test
     void updateBundle_404() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_NOT_FOUND, "idbundle");
-        doThrow(exception).when(bundleService).updateBundle(anyString(), anyString(), any());
+        doThrow(exception).when(bundleService).updateBundle(anyString(), anyString(), any(), anyBoolean());
 
         String url = String.format(BUNDLE, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
 
@@ -259,7 +260,7 @@ class PspControllerTest {
     @Test
     void updateBundle_409() throws Exception {
         AppException exception = new AppException(AppError.BUNDLE_NAME_CONFLICT, "name");
-        doThrow(exception).when(bundleService).updateBundle(anyString(), anyString(), any());
+        doThrow(exception).when(bundleService).updateBundle(anyString(), anyString(), any(), anyBoolean());
 
         String url = String.format(BUNDLE, TestUtil.getMockIdPsp(), TestUtil.getMockIdBundle());
 

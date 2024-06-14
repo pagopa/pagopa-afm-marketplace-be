@@ -261,7 +261,7 @@ public class BundleService {
                 .build();
     }
 
-    public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest) {
+    public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest, boolean forceUpdate) {
         setVerifyTouchpointAnyIfNull(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
@@ -269,8 +269,10 @@ public class BundleService {
         // verify validityDateFrom, if it is null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
-        // verify validityDateFrom and validityDateTo
-        analyzeValidityDate(bundleRequest, bundle);
+        if (!forceUpdate) {
+            // verify validityDateFrom and validityDateTo
+            analyzeValidityDate(bundleRequest, bundle);
+        }
 
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one

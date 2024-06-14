@@ -3346,6 +3346,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "forceUpdate",
+            "in": "query",
+            "description": "Force update",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {

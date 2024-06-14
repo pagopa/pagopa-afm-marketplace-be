@@ -244,15 +244,14 @@ public class PspController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
-    @PutMapping(
-            value = "/{idpsp}/bundles/{idbundle}",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
+    @PutMapping(value = "/{idpsp}/bundles/{idbundle}", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> updateBundle(
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
-            @RequestBody @Valid @NotNull BundleRequest bundleRequest) {
-        bundleService.updateBundle(idPsp, idBundle, bundleRequest);
+            @Parameter(description = "Force update") @RequestParam(required = false, defaultValue = "false") boolean forceUpdate,
+            @RequestBody @Valid @NotNull BundleRequest bundleRequest
+    ) {
+        this.bundleService.updateBundle(idPsp, idBundle, bundleRequest, forceUpdate);
         return ResponseEntity.ok().build();
     }
 

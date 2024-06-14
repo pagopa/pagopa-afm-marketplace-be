@@ -316,7 +316,7 @@ class BundleServiceTest {
                 .thenReturn(bundle);
 
 
-        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest);
+        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, false);
 
         assertEquals(bundleRequest.getName(), updatedBundle.getName());
     }
@@ -336,7 +336,7 @@ class BundleServiceTest {
         when(bundleRepository.save(Mockito.any()))
                 .thenReturn(bundle);
 
-        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest);
+        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, false);
 
         assertEquals(bundleRequest.getName(), updatedBundle.getName());
     }
@@ -1376,7 +1376,7 @@ class BundleServiceTest {
         when(paymentTypeRepository.findByName(bundle.getPaymentType())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
 
-        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest(), false);
         assertNotNull(result);
         assertEquals(result.getPspBusinessName(), TestUtil.getMockBundleRequest().getPspBusinessName());
     }
@@ -1402,7 +1402,7 @@ class BundleServiceTest {
 
         when(paymentTypeRepository.findByName(bundle.getPaymentType())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
-        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest());
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), TestUtil.getMockBundleRequest(), false);
         assertNotNull(result);
     }
 
@@ -1426,7 +1426,7 @@ class BundleServiceTest {
 
         when(paymentTypeRepository.findByName(bundle.getPaymentType())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
-        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), bundleRequest);
+        Bundle result = bundleService.updateBundle(TestUtil.getMockIdPsp(), bundle.getId(), bundleRequest, false);
         assertNotNull(result);
     }
 
@@ -1596,7 +1596,7 @@ class BundleServiceTest {
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
 
         try {
-            bundleService.updateBundle(idPsp, idBundle, bundleRequest);
+            bundleService.updateBundle(idPsp, idBundle, bundleRequest, false);
         } catch (AppException e) {
             assertEquals(status, e.getHttpStatus());
         } catch (Exception e) {
