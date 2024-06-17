@@ -34,6 +34,7 @@ public class PspBundleDetails {
     private LocalDateTime insertedDate;
     private LocalDateTime lastUpdatedDate;
     private String idChannel;
+    private String idPsp;
 
     private String idBrokerPsp;
     private Boolean digitalStamp;

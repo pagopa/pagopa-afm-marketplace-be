@@ -20,7 +20,7 @@ public class CosmosRepository {
 
     private static final String BASE_BUNDLES_QUERY = "SELECT * FROM bundles b WHERE 1=1 ";
     private static final String AND_BUNDLE_NAME_LIKE = "AND b.name like '%";
-    
+
     private final CosmosTemplate cosmosTemplate;
 
     @Autowired
@@ -90,24 +90,26 @@ public class CosmosRepository {
      * Build and execute the query to get all bundles filtered by name, type and validity date on bundles table.
      * validFrom param is used for exclude all bundle that are not active before the specified date.
      *
-     * @param name bundle's name
-     * @param types list of bundle's types
-     * @param validFrom validity date
-     * @param offset number of elements to be skipped
-     * @param pageSize page size
+     * @param name      bundle's name
+     * @param types     list of bundle's types
+     * @param validFrom validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param expireAt   validity date of bundles, used to retrieve all bundles that expire at the specified date
+     * @param offset    number of elements to be skipped
+     * @param pageSize  page size
      * @return the requested page of bundles
      */
-    public List<Bundle> getBundlesByNameAndTypeAndValidityDateFrom(
+    public List<Bundle> getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(
             String name,
             List<BundleType> types,
             LocalDate validFrom,
+            LocalDate expireAt,
             int offset,
             int pageSize
     ) {
         StringBuilder builder = new StringBuilder();
         builder.append(BASE_BUNDLES_QUERY);
 
-        buildWhereForGetBundlesByNameAndTypeAndValidityDateFrom(name, types, validFrom, builder);
+        buildWhereForGetBundlesByNameAndTypeAndValidityDateFromAndExpireAt(name, types, validFrom, expireAt, builder);
 
         builder.append("ORDER BY b.id OFFSET ").append(offset).append(" LIMIT ").append(pageSize);
 
@@ -118,8 +120,8 @@ public class CosmosRepository {
     /**
      * Build and execute the query to get all bundles filtered by name, PSP business name and type on bundles table.
      *
-     * @param name bundle's name
-     * @param bundleType bundle's type
+     * @param name            bundle's name
+     * @param bundleType      bundle's type
      * @param pspBusinessName PSP business name
      * @return the requested list of bundles
      */
@@ -141,25 +143,33 @@ public class CosmosRepository {
      * Build and execute the query to count all bundles filtered by name, type and validity date on bundles table.
      * validFrom param is used for exclude all bundle that are not active before the specified date.
      *
-     * @param name bundle's name
-     * @param types list of bundle's types
-     * @param validFrom validity date
+     * @param name      bundle's name
+     * @param types     list of bundle's types
+     * @param validFrom validity date of bundles, used to retrieve all bundles valid from the specified date
+     * @param expireAt   validity date of bundles, used to retrieve all bundles that expire at the specified date
      * @return the number of element founds with the query
      */
-    public Long getTotalItemsFindByNameAndTypeAndValidityDateFrom(
+    public Long getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(
             String name,
             List<BundleType> types,
-            LocalDate validFrom
+            LocalDate validFrom,
+            LocalDate expireAt
     ) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT VALUE COUNT(1) FROM bundles b WHERE 1=1 ");
 
-        buildWhereForGetBundlesByNameAndTypeAndValidityDateFrom(name, types, validFrom, builder);
+        buildWhereForGetBundlesByNameAndTypeAndValidityDateFromAndExpireAt(name, types, validFrom, expireAt, builder);
 
         return cosmosTemplate.count(new SqlQuerySpec(builder.toString()), "bundles");
     }
 
-    private void buildWhereForGetBundlesByNameAndTypeAndValidityDateFrom(String name, List<BundleType> types, LocalDate validFrom, StringBuilder builder) {
+    private void buildWhereForGetBundlesByNameAndTypeAndValidityDateFromAndExpireAt(
+            String name,
+            List<BundleType> types,
+            LocalDate validFrom,
+            LocalDate expireAt,
+            StringBuilder builder
+    ) {
         if (StringUtils.isNotEmpty(name)) {
             builder.append(AND_BUNDLE_NAME_LIKE).append(name).append("%' ");
         }
@@ -181,10 +191,26 @@ public class CosmosRepository {
                     .append(validFrom.getDayOfMonth())
                     .append(", 0, 0, 0, 0), 0, 10) ");
         }
+
+        if (expireAt != null) {
+            builder.append("AND SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10) ")
+                    .append("= SUBSTRING(DateTimeFromParts(")
+                    .append(expireAt.getYear())
+                    .append(",")
+                    .append(expireAt.getMonthValue())
+                    .append(",")
+                    .append(expireAt.getDayOfMonth())
+                    .append(", 0, 0, 0, 0), 0, 10) ");
+        }
     }
 
 
-    private void buildWhereForGetBundlesByNameAndPSPBusinessName(String name, String pspBusinessName, String bundleType, StringBuilder builder) {
+    private void buildWhereForGetBundlesByNameAndPSPBusinessName(
+            String name,
+            String pspBusinessName,
+            String bundleType,
+            StringBuilder builder
+    ) {
         if (StringUtils.isNotEmpty(name)) {
             builder.append(AND_BUNDLE_NAME_LIKE).append(name).append("%' ");
         }
