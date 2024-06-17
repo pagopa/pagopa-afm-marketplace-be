@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -147,7 +148,7 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle identifier", required = true) @PathVariable("idbundle") String idBundle,
             @Parameter(description = "CI fiscal code") @RequestParam(required = false) @Valid String ciFiscalCode,
-            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(200) Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) Integer page) {
         return ResponseEntity.ok(bundleService.getCIs(idBundle, idPsp, ciFiscalCode, limit, page));
     }
@@ -305,7 +306,7 @@ public class PspController {
             @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") @Size(max = 35) String idPsp,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciTaxCode,
             @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
-            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(200) Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) Integer page
     ) {
         return ResponseEntity.ok(bundleOfferService.getPspOffers(idPsp, ciTaxCode, idBundle, limit, page));
@@ -392,7 +393,7 @@ public class PspController {
             @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") @Size(max = 35) String idPsp,
             @Parameter(description = "Filter by creditor institution") @RequestParam(required = false) String ciFiscalCode,
             @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
-            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
+            @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(200) Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) Integer page
             ) {
         return bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle);
