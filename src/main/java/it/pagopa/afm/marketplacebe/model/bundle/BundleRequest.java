@@ -1,5 +1,8 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+import io.swagger.v3.oas.annotations.media.Schema;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +24,12 @@ public class BundleRequest {
     private String idChannel;
     @NotNull
     private String idBrokerPsp;
+
+    @Schema(description = "is the bundle valid for cart payments?",
+            defaultValue = "true",
+            required = false)
+    @JsonSetter(nulls = Nulls.SKIP)
+    private Boolean cart = true;
 
     private String idCdi;
     @NotNull

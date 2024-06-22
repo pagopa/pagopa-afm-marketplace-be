@@ -40,6 +40,8 @@ public class Bundle {
 
     @NotNull
     private String idBrokerPsp;
+
+    private Boolean cart;
     
     private String idCdi;
 

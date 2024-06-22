@@ -42,4 +42,7 @@ public class PspBundleDetails {
 
     private String pspBusinessName;
     private String urlPolicyPsp;
+
+    private Boolean cart;
+    private String abi;
 }
