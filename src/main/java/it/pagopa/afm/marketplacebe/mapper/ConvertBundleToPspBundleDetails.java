@@ -15,12 +15,10 @@ public class ConvertBundleToPspBundleDetails implements Converter<Bundle, PspBun
         @Valid Bundle source = context.getSource();
         return PspBundleDetails.builder()
                 .id(source.getId())
-
                 .name(source.getName())
                 .description(source.getDescription())
                 .paymentAmount(source.getPaymentAmount())
                 .minPaymentAmount(source.getMinPaymentAmount())
-                .maxPaymentAmount(source.getMaxPaymentAmount())
                 .maxPaymentAmount(source.getMaxPaymentAmount())
                 .paymentType(source.getPaymentType())
                 .touchpoint(source.getTouchpoint())
