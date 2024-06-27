@@ -1,10 +1,10 @@
 {
-  "openapi" : "3.0.1",
-  "info" : {
-    "title" : "Marketplace API for PagoPA AFM",
-    "description" : "marketplace-be",
-    "termsOfService" : "https://www.pagopa.gov.it/",
-    "version" : "0.17.6"
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Marketplace API for PagoPA AFM",
+    "description": "marketplace-be",
+    "termsOfService": "https://www.pagopa.gov.it/",
+    "version": "0.18.0"
   },
   "servers" : [ {
     "url" : "http://localhost:8080"
