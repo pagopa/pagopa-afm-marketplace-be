@@ -35,6 +35,8 @@ public class ConvertBundleToPspBundleDetails implements Converter<Bundle, PspBun
                 .pspBusinessName(source.getPspBusinessName())
                 .urlPolicyPsp(source.getUrlPolicyPsp())
                 .idPsp(source.getIdPsp())
+                .cart(source.getCart())
+                .abi(source.getAbi())
                 .build();
     }
 }

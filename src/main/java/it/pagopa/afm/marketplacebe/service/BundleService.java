@@ -240,6 +240,7 @@ public class BundleService {
                 .idPsp(idPsp)
                 .idChannel(bundleRequest.getIdChannel())
                 .idBrokerPsp(bundleRequest.getIdBrokerPsp())
+                .cart(bundleRequest.getCart())
                 .idCdi(bundleRequest.getIdCdi())
                 .abi(bundleRequest.getAbi())
                 .name(bundleRequest.getName())
@@ -283,6 +284,7 @@ public class BundleService {
 
         bundle.setIdChannel(bundleRequest.getIdChannel());
         bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
+        bundle.setCart(bundleRequest.getCart());
         bundle.setIdCdi(bundleRequest.getIdCdi());
         bundle.setAbi(bundleRequest.getAbi());
         bundle.setName(bundleRequest.getName());

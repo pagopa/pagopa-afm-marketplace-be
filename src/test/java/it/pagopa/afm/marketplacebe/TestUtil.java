@@ -53,13 +53,13 @@ import java.util.UUID;
 @UtilityClass
 public class TestUtil {
 
-    private final static String MOCK_ID_PSP = "1234567890";
-    private final static String MOCK_CI_FISCAL_CODE = "fiscalCode";
-    private final static String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8";
+    private static final String MOCK_ID_PSP = "1234567890";
+    private static final String MOCK_CI_FISCAL_CODE = "fiscalCode";
+    private static final String MOCK_ID_BUNDLE = "cbfbc9c6-6c0b-429e-83ca-30ef453504f8";
 
-    private final static String MOCK_ID_OFFER = "acfbc9c6-6c0b-429e-83ca-30ef453504f8";
+    private static final String MOCK_ID_OFFER = "acfbc9c6-6c0b-429e-83ca-30ef453504f8";
 
-    private final static String MOCK_ID_PAYMENT_TYPE = "76c16af5-241b-4b9d-bda2-0b5f6b427a4c";
+    private static final String MOCK_ID_PAYMENT_TYPE = "76c16af5-241b-4b9d-bda2-0b5f6b427a4c";
 
     public static String getMockIdPsp() {
         return MOCK_ID_PSP;
@@ -113,6 +113,7 @@ public class TestUtil {
                 .validityDateTo(LocalDate.now().plusDays(8))
                 .digitalStamp(Boolean.TRUE)
                 .digitalStampRestriction(Boolean.FALSE)
+                .cart(Boolean.TRUE)
                 .build();
     }
 
@@ -137,6 +138,7 @@ public class TestUtil {
                 .transferCategoryList(transferCategoryList)
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(LocalDate.now().plusDays(8))
+                .cart(Boolean.TRUE)
                 .build();
     }
 
@@ -166,6 +168,7 @@ public class TestUtil {
                 .transferCategoryList(transferCategoryList)
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(LocalDate.now().plusDays(8))
+                .cart(Boolean.TRUE)
                 .build());
         bundleRequestList.add(BundleRequest.builder()
                 .idChannel("idChannel2")
@@ -187,6 +190,7 @@ public class TestUtil {
                 .transferCategoryList(transferCategoryList)
                 .validityDateFrom(null)
                 .validityDateTo(null)
+                .cart(Boolean.TRUE)
                 .build());
         bundleRequestList.add(BundleRequest.builder()
                 .idChannel("idChannel3")
@@ -208,6 +212,7 @@ public class TestUtil {
                 .transferCategoryList(transferCategoryList)
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(null)
+                .cart(Boolean.FALSE)
                 .build());
 
         return bundleRequestList;
@@ -239,7 +244,7 @@ public class TestUtil {
     }
 
     public static List<Bundle> getMockBundleList() {
-        List<Bundle> bundleList = Arrays.asList(
+        return Arrays.asList(
                 Bundle.builder()
                         .id(getMockIdBundle())
                         .idPsp(getMockIdPsp())
@@ -261,7 +266,6 @@ public class TestUtil {
                         .lastUpdatedDate(LocalDateTime.now())
                         .paymentType("CP")
                         .build());
-        return bundleList;
     }
 
     public static List<Bundle> getMockBundleSameConfiguration() {
