@@ -378,7 +378,9 @@ class BundleServiceTest {
 
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
-        AppException e = assertThrows(AppException.class, () -> bundleService.removeBundle(bundle.getId(), bundle.getIdPsp()));
+        String bundleId = bundle.getId();
+        String idPsp = bundle.getIdPsp();
+        AppException e = assertThrows(AppException.class, () -> bundleService.removeBundle(bundleId, idPsp));
 
         assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());
     }
