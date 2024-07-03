@@ -4,6 +4,8 @@ import com.azure.cosmos.models.PartitionKey;
 import it.pagopa.afm.marketplacebe.TestUtil;
 import it.pagopa.afm.marketplacebe.config.MappingsConfiguration;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
+import it.pagopa.afm.marketplacebe.entity.BundleOffer;
+import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.exception.AppException;
@@ -348,20 +350,39 @@ class BundleServiceTest {
         // Valid bundle
         bundle.setValidityDateTo(null);
 
-        // Precondition
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class)))
-                .thenReturn(Optional.of(bundle));
-        when(ciBundleRepository.findByIdBundle(anyString()))
-                .thenReturn(Lists.newArrayList(getMockCiBundle()));
-        when(bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString()))
-                .thenReturn(Lists.newArrayList(getMockBundleRequestE()));
+        ArrayList<BundleRequestEntity> requests = Lists.newArrayList(getMockBundleRequestE());
+        ArrayList<BundleOffer> offers = Lists.newArrayList(getMockBundleOffer());
 
-        bundleService.removeBundle(bundle.getId(), bundle.getIdPsp());
+        // Precondition
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+        when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(Lists.newArrayList(getMockCiBundle()));
+        when(bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString()))
+                .thenReturn(requests);
+        when(bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(anyString(), anyString()))
+                .thenReturn(offers);
+
+        assertDoesNotThrow(() -> bundleService.removeBundle(bundle.getId(), bundle.getIdPsp()));
 
         verify(bundleRepository).save(bundleArgumentCaptor.capture());
+        verify(bundleRequestRepository).deleteAll(requests);
+        verify(bundleOfferRepository).deleteAll(offers);
 
         assertEquals(LocalDate.now(), bundleArgumentCaptor.getValue().getValidityDateTo());
         assertEquals(bundle.getId(), bundleArgumentCaptor.getValue().getId());
+    }
+
+    @Test
+    void removeBundle_ko_1() {
+        Bundle bundle = TestUtil.getMockBundle();
+        bundle.setValidityDateTo(LocalDate.now());
+
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
+
+        String bundleId = bundle.getId();
+        String idPsp = bundle.getIdPsp();
+        AppException e = assertThrows(AppException.class, () -> bundleService.removeBundle(bundleId, idPsp));
+
+        assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());
     }
 
     @Test
@@ -1478,23 +1499,6 @@ class BundleServiceTest {
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(), any(BundleType.class), anyString(), anyString())).thenReturn(List.of(bundle));
 
         updateBundle_ko(TestUtil.getMockBundle(), HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void removeBundle_ko_1() {
-        Bundle bundle = TestUtil.getMockBundle();
-        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
-
-        String idPsp = TestUtil.getMockIdPsp();
-        String idBundle = bundle.getId();
-
-        try {
-            bundleService.removeBundle(idPsp, idBundle);
-        } catch (AppException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());
-        } catch (Exception e) {
-            fail();
-        }
     }
 
     @Test

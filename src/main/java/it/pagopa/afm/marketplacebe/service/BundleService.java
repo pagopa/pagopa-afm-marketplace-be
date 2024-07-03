@@ -319,6 +319,13 @@ public class BundleService {
         return bundleRepository.save(bundle);
     }
 
+    /**
+     * Mark the specified bundle as expired by setting its validityDateTo field to today. Then updates all linked ciBundles
+     * as expired and deletes all bundle request/offer that have not been already accepted or rejected.
+     *
+     * @param idPsp payment service provider's id
+     * @param idBundle bundle's id
+     */
     public void removeBundle(String idPsp, String idBundle) {
         Bundle bundle = getBundle(idBundle, idPsp);
 
@@ -328,26 +335,21 @@ public class BundleService {
 
         // set validityDateTo=now in order to invalidate the bundle (logical delete)
         bundle.setValidityDateTo(LocalDate.now());
-
-        bundleRepository.save(bundle);
+        this.bundleRepository.save(bundle);
 
         // invalidate all references
         // ci-bundles
-        List<CiBundle> ciBundleList = ciBundleRepository.findByIdBundle(idBundle);
+        List<CiBundle> ciBundleList = this.ciBundleRepository.findByIdBundle(idBundle);
         ciBundleList.forEach(ciBundle -> ciBundle.setValidityDateTo(LocalDate.now()));
-        ciBundleRepository.saveAll(ciBundleList);
+        this.ciBundleRepository.saveAll(ciBundleList);
 
-        // bundle requests
-        List<BundleRequestEntity> requests = bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
-
-        requests.forEach(request -> request.setRejectionDate(LocalDateTime.now()));
-        bundleRequestRepository.saveAll(requests);
+        // bundle requests (if not accepted/rejected can be deleted physically)
+        List<BundleRequestEntity> requests = this.bundleRequestRepository.findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(idBundle, idPsp);
+        this.bundleRequestRepository.deleteAll(requests);
 
         // bundle offers (if not accepted/rejected can be deleted physically)
-        BundleOffer offer = bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
-        if (offer != null) {
-            bundleOfferRepository.delete(offer);
-        }
+        List<BundleOffer> offers = this.bundleOfferRepository.findByIdPspAndIdBundleAndAcceptedDateIsNullAndRejectionDateIsNull(idPsp, idBundle);
+        this.bundleOfferRepository.deleteAll(offers);
     }
 
     /**
