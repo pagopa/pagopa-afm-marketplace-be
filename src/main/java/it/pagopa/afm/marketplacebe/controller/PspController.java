@@ -25,6 +25,7 @@ import it.pagopa.afm.marketplacebe.service.BundleOfferService;
 import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +75,14 @@ public class PspController {
     /**
      * GET /psps/:idpsp/bundles : Get bundle list of the given PSP
      *
-     * @param idPsp : PSP identifier
+     * @param idPsp                 : PSP identifier
+     * @param types                 list of bundle's type
+     * @param name                  bundle's name
+     * @param maxPaymentAmountOrder type of order to apply to the paymentAmount
+     * @param paymentAmountMinRange minimum paymentAmount to filter by
+     * @param paymentAmountMaxRange maximum paymentAmount to filter by
+     * @param limit                 page size
+     * @param page                  page number
      * @return ResponseEntity with status 200 (OK) and with body the bundle list
      */
     @Operation(summary = "Get paginated list of bundles of a PSP", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
@@ -93,9 +101,12 @@ public class PspController {
             @Size(max = 35) @Parameter(description = "PSP identifier", required = true) @PathVariable("idpsp") String idPsp,
             @Parameter(description = "Bundle type. Default = GLOBAL") @RequestParam(required = false, defaultValue = "GLOBAL") @Valid List<BundleType> types,
             @Parameter(description = "Bundle name.") @RequestParam(required = false) @Valid String name,
+            @Parameter(description = "Order bundles by maxPaymentAmount", example = "ASC") @RequestParam(required = false) Sort.Direction maxPaymentAmountOrder,
+            @Parameter(description = "Filter bundles with paymentAmount less than") @RequestParam(required = false) Long paymentAmountMinRange,
+            @Parameter(description = "Filter bundles with paymentAmount more than") @RequestParam(required = false) Long paymentAmountMaxRange,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page) {
-        return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, types, name, page, limit));
+        return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, types, name, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, page, limit));
     }
 
     /**
@@ -369,11 +380,11 @@ public class PspController {
     /**
      * GET /psps/:idpsp/requests : Get paginated list of CI requests to the PSP regarding public bundles
      *
-     * @param idPsp Payment service provider identifier
+     * @param idPsp        Payment service provider identifier
      * @param ciFiscalCode Creditor institution's tax code
-     * @param idBundle bundle's identifier
-     * @param limit Number of element in the requested page
-     * @param page Page number
+     * @param idBundle     bundle's identifier
+     * @param limit        Number of element in the requested page
+     * @param page         Page number
      * @return the paginated list of CI request to the PSP regarding public bundles
      */
     @Operation(summary = "Get paginated list of CI request to the PSP regarding public bundles", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"PSP",})
@@ -394,7 +405,7 @@ public class PspController {
             @Parameter(description = "Filter by bundle id") @RequestParam(required = false) String idBundle,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive @Max(200) Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @PositiveOrZero @Min(0) Integer page
-            ) {
+    ) {
         return bundleRequestService.getPublicBundleRequests(idPsp, limit, page, ciFiscalCode, idBundle);
     }
 

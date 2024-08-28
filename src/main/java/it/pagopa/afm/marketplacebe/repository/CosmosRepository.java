@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -32,13 +33,14 @@ public class CosmosRepository {
             String idPsp,
             String name,
             List<BundleType> types,
+            Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange,
             int pageNumber,
             int pageSize
     ) {
         StringBuilder builder = new StringBuilder();
         builder.append(BASE_BUNDLES_QUERY);
 
-        buildWhereConditions(idPsp, name, types, builder);
+        buildWhereConditions(idPsp, name, types, maxPaymentAmountOrder,  paymentAmountMinRange,  paymentAmountMaxRange, builder);
 
         builder.append("ORDER BY b.id OFFSET " + pageNumber * pageSize + " LIMIT " + pageSize);
 
@@ -46,11 +48,11 @@ public class CosmosRepository {
                 .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Bundle.class));
     }
 
-    public Integer getTotalPages(String idPsp, String name, List<BundleType> types, int pageSize) {
+    public Integer getTotalPages(String idPsp, String name, List<BundleType> types,Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, int pageSize) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT VALUE COUNT(b.id) FROM bundles b WHERE 1=1 ");
 
-        buildWhereConditions(idPsp, name, types, builder);
+        buildWhereConditions(idPsp, name, types, maxPaymentAmountOrder,  paymentAmountMinRange,  paymentAmountMaxRange, builder);
 
         List<Integer> result = IterableUtils
                 .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Integer.class));
@@ -62,7 +64,7 @@ public class CosmosRepository {
         }
     }
 
-    private static void buildWhereConditions(String idPsp, String name, List<BundleType> types, StringBuilder builder) {
+    private static void buildWhereConditions(String idPsp, String name, List<BundleType> types,Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, StringBuilder builder) {
         // adds the idPsp clause if present
         if (StringUtils.isNotEmpty(idPsp)) {
             builder.append("AND b.idPsp = '").append(idPsp).append("' ");
@@ -83,6 +85,18 @@ public class CosmosRepository {
             StringJoiner joiner = new StringJoiner(",");
             types.forEach(item -> joiner.add("'" + item.toString() + "'"));
             builder.append(joiner).append(" ) ");
+        }
+
+        if (paymentAmountMinRange != null) {
+            builder.append("AND b.paymentAmount > ").append(paymentAmountMinRange).append(" ");
+        }
+
+        if (paymentAmountMaxRange != null) {
+            builder.append("AND b.paymentAmount < ").append(paymentAmountMaxRange).append(" ");
+        }
+
+        if (maxPaymentAmountOrder != null) {
+            builder.append("AND ORDER BY b.maxPaymentAmount ").append(maxPaymentAmountOrder).append(" ");
         }
     }
 

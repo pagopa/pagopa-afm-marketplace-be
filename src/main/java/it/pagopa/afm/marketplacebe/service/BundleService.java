@@ -45,6 +45,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -129,7 +130,7 @@ public class BundleService {
      * @param bundleTypes list of bundle's type
      * @param name        bundle's name
      * @param validFrom   validity date of bundles, used to retrieve all bundles valid from the specified date
-     * @param expireAt     validity date of bundles, used to retrieve all bundles that expire at the specified date
+     * @param expireAt    validity date of bundles, used to retrieve all bundles that expire at the specified date
      * @param limit       page size
      * @param pageNumber  page number
      * @return a paginated list of bundles
@@ -157,14 +158,14 @@ public class BundleService {
                 .build();
     }
 
-    public Bundles getBundlesByIdPsp(String idPsp, List<BundleType> bundleTypes, String name, Integer pageNumber, Integer pageSize) {
+    public Bundles getBundlesByIdPsp(String idPsp, List<BundleType> bundleTypes, String name, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, Integer pageNumber, Integer pageSize) {
         // Search by idPsp --> return all bundles
-        List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, pageSize, pageNumber)
+        List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, pageSize, pageNumber)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        var totalPages = cosmosRepository.getTotalPages(idPsp, name, bundleTypes, pageSize);
+        var totalPages = cosmosRepository.getTotalPages(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, pageSize);
 
 
         PageInfo pageInfo = PageInfo.builder()
@@ -323,7 +324,7 @@ public class BundleService {
      * Mark the specified bundle as expired by setting its validityDateTo field to today. Then updates all linked ciBundles
      * as expired and deletes all bundle request/offer that have not been already accepted or rejected.
      *
-     * @param idPsp payment service provider's id
+     * @param idPsp    payment service provider's id
      * @param idBundle bundle's id
      */
     public void removeBundle(String idPsp, String idBundle) {
@@ -824,8 +825,8 @@ public class BundleService {
         });
     }
 
-    private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types, Integer pageSize, Integer pageNumber) {
-        return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, pageNumber, pageSize);
+    private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, Integer pageSize, Integer pageNumber) {
+        return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, pageNumber, pageSize);
     }
 
     private List<Bundle> getBundlesIdPspTypePaymentTypeTouchPoint(String idPsp, BundleRequest bundleRequest) {

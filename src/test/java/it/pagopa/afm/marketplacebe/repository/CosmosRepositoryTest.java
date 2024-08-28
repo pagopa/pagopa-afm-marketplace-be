@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,7 +38,7 @@ class CosmosRepositoryTest {
         // Precondition
         when(cosmosTemplate.runQuery(any(SqlQuerySpec.class), any(), any())).thenReturn(bundleList);
 
-        List<Bundle> bundles = cosmosRepository.getBundlesByNameAndType(null, "mock name", List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL), 0, 50);
+        List<Bundle> bundles = cosmosRepository.getBundlesByNameAndType(null, "mock name", List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL), Sort.Direction.ASC, null,null, 0, 50);
 
         assertFalse(bundles.isEmpty());
     }
@@ -50,7 +51,7 @@ class CosmosRepositoryTest {
         // Precondition
         when(cosmosTemplate.runQuery(any(SqlQuerySpec.class), any(), any())).thenReturn(bundleList);
 
-        List<Bundle> bundles = cosmosRepository.getBundlesByNameAndType("idPsp", "mock name", List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL), 0, 50);
+        List<Bundle> bundles = cosmosRepository.getBundlesByNameAndType("idPsp", "mock name", List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL),  Sort.Direction.ASC, null, null, 0, 50);
 
         assertFalse(bundles.isEmpty());
     }

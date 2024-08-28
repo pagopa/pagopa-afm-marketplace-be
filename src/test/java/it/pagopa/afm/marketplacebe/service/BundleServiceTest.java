@@ -42,6 +42,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
@@ -181,11 +182,11 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndType(anyString(), any(), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+        when(cosmosRepository.getBundlesByNameAndType(anyString(), any(), anyList(), any(), any(), any(), anyInt(), anyInt())).thenReturn(bundleList);
 
         List<BundleType> bundleParams = new ArrayList<>();
         bundleParams.add(BundleType.GLOBAL);
-        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), bundleParams, null, 0, 50);
+        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), bundleParams, null, Sort.Direction.ASC, null, null, 0, 50);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -197,11 +198,11 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndType(anyString(), anyString(), anyList(), anyInt(), anyInt())).thenReturn(bundleList);
+        when(cosmosRepository.getBundlesByNameAndType(anyString(), anyString(), anyList(), any(), any(), any(), anyInt(), anyInt())).thenReturn(bundleList);
 
         List<BundleType> bundleParams = new ArrayList<>();
         bundleParams.add(BundleType.GLOBAL);
-        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), bundleParams, "mockName", 0, 50);
+        Bundles bundles = bundleService.getBundlesByIdPsp(bundle.getIdPsp(), bundleParams, "mockName", Sort.Direction.ASC, null, null, 0, 50);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
