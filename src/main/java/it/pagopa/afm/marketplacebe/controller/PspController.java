@@ -26,6 +26,7 @@ import it.pagopa.afm.marketplacebe.service.BundleRequestService;
 import it.pagopa.afm.marketplacebe.service.BundleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController()
@@ -81,6 +83,10 @@ public class PspController {
      * @param maxPaymentAmountOrder type of order to apply to the paymentAmount
      * @param paymentAmountMinRange minimum paymentAmount to filter by
      * @param paymentAmountMaxRange maximum paymentAmount to filter by
+     * @param validBefore           filter bundles by validityDateFrom
+     * @param validAfter            filter bundles by validityDateFrom
+     * @param expireBefore          filter bundles by validityDateTo
+     * @param expireAfter           filter bundles by validityDateTo
      * @param limit                 page size
      * @param page                  page number
      * @return ResponseEntity with status 200 (OK) and with body the bundle list
@@ -104,9 +110,13 @@ public class PspController {
             @Parameter(description = "Order bundles by maxPaymentAmount", example = "ASC") @RequestParam(required = false) Sort.Direction maxPaymentAmountOrder,
             @Parameter(description = "Filter bundles with paymentAmount less than") @RequestParam(required = false) Long paymentAmountMinRange,
             @Parameter(description = "Filter bundles with paymentAmount more than") @RequestParam(required = false) Long paymentAmountMaxRange,
+            @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid before the specified date (yyyy-MM-dd)", example = "2024-05-10") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate validBefore,
+            @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid after the specified date (yyyy-MM-dd)", example = "2024-05-10") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate validAfter,
+            @Parameter(description = "Validity date of bundles, used to retrieve all bundles that expire before the specified date (yyyy-MM-dd)", example = "2024-05-10") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expireBefore,
+            @Parameter(description = "Validity date of bundles, used to retrieve all bundles that expire after the specified date (yyyy-MM-dd)", example = "2024-05-10") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expireAfter,
             @Positive @Parameter(description = "Number of items for page. Default = 50") @RequestParam(required = false, defaultValue = "50") Integer limit,
             @PositiveOrZero @Parameter(description = "Page number. Page number value starts from 0. Default = 0") @RequestParam(required = false, defaultValue = "0") Integer page) {
-        return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, types, name, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, page, limit));
+        return ResponseEntity.ok(bundleService.getBundlesByIdPsp(idPsp, types, name, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, page, limit));
     }
 
     /**

@@ -158,14 +158,23 @@ public class BundleService {
                 .build();
     }
 
-    public Bundles getBundlesByIdPsp(String idPsp, List<BundleType> bundleTypes, String name, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, Integer pageNumber, Integer pageSize) {
+    public Bundles getBundlesByIdPsp(
+            String idPsp,
+            List<BundleType> bundleTypes,
+            String name,
+            Sort.Direction maxPaymentAmountOrder,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter,
+            Integer pageNumber,
+            Integer pageSize) {
         // Search by idPsp --> return all bundles
-        List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, pageSize, pageNumber)
+        List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, pageSize, pageNumber)
                 .stream()
                 .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        var totalPages = cosmosRepository.getTotalPages(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, pageSize);
+        var totalPages = cosmosRepository.getTotalPages(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, pageSize);
 
 
         PageInfo pageInfo = PageInfo.builder()
@@ -825,8 +834,8 @@ public class BundleService {
         });
     }
 
-    private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, Integer pageSize, Integer pageNumber) {
-        return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, pageNumber, pageSize);
+    private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter, Integer pageSize, Integer pageNumber) {
+        return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, pageNumber, pageSize);
     }
 
     private List<Bundle> getBundlesIdPspTypePaymentTypeTouchPoint(String idPsp, BundleRequest bundleRequest) {
