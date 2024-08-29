@@ -135,7 +135,14 @@ public class BundleService {
      * @param pageNumber  page number
      * @return a paginated list of bundles
      */
-    public Bundles getBundles(List<BundleType> bundleTypes, String name, LocalDate validFrom, LocalDate expireAt, Integer limit, Integer pageNumber) {
+    public Bundles getBundles(
+            List<BundleType> bundleTypes,
+            String name,
+            LocalDate validFrom,
+            LocalDate expireAt,
+            Integer limit,
+            Integer pageNumber
+    ) {
         // NOT a search by idPsp --> return only valid bundles
         List<PspBundleDetails> bundleList = this.cosmosRepository
                 .getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(name, bundleTypes, validFrom, expireAt, limit * pageNumber, limit)
@@ -167,26 +174,26 @@ public class BundleService {
             Long paymentAmountMaxRange,
             LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter,
             Integer pageNumber,
-            Integer pageSize) {
+            Integer pageSize
+    ) {
         // Search by idPsp --> return all bundles
         List<PspBundleDetails> bundleList = getBundlesByNameAndType(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, pageSize, pageNumber)
                 .stream()
-                .map(bundle -> modelMapper.map(bundle, PspBundleDetails.class))
+                .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        var totalPages = cosmosRepository.getTotalPages(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, pageSize);
-
-
-        PageInfo pageInfo = PageInfo.builder()
-                .itemsFound(bundleList.size())
-                .limit(pageSize)
-                .page(pageNumber)
-                .totalPages(totalPages)
-                .build();
+        Long totalItems = this.cosmosRepository.getTotalItems(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter);
+        int totalPages = calculateTotalPages(pageSize, totalItems);
 
         return Bundles.builder()
                 .bundleDetailsList(bundleList)
-                .pageInfo(pageInfo)
+                .pageInfo(PageInfo.builder()
+                        .itemsFound(bundleList.size())
+                        .limit(pageSize)
+                        .page(pageNumber)
+                        .totalPages(totalPages)
+                        .totalItems(totalItems)
+                        .build())
                 .build();
     }
 
@@ -372,7 +379,13 @@ public class BundleService {
      * @param pageNumber   page number
      * @return the paginated list of Creditor Institution's tax codes
      */
-    public BundleCreditorInstitutionResource getCIs(String idBundle, String idPSP, @Nullable String ciFiscalCode, Integer limit, Integer pageNumber) {
+    public BundleCreditorInstitutionResource getCIs(
+            String idBundle,
+            String idPSP,
+            @Nullable String ciFiscalCode,
+            Integer limit,
+            Integer pageNumber
+    ) {
         List<CiBundle> subscriptions = ciBundleRepository.findByIdBundleAndCiFiscalCode(idBundle, ciFiscalCode, limit * pageNumber, limit);
 
         List<CiBundleDetails> ciBundleDetails = subscriptions.parallelStream()
@@ -491,13 +504,20 @@ public class BundleService {
         ciBundleRepository.save(ciBundle);
     }
 
-    public BundleDetailsAttributes getBundleAttributesByFiscalCode(@NotNull String fiscalCode, @NotNull String idBundle) {
+    public BundleDetailsAttributes getBundleAttributesByFiscalCode(
+            @NotNull String fiscalCode,
+            @NotNull String idBundle
+    ) {
         var ciBundle = findCiBundle(fiscalCode, idBundle);
 
         return modelMapper.map(ciBundle, BundleDetailsAttributes.class);
     }
 
-    public BundleAttributeResponse createBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull CiBundleAttributeModel bundleAttribute) {
+    public BundleAttributeResponse createBundleAttributesByCi(
+            @NotNull String fiscalCode,
+            @NotNull String idBundle,
+            @NotNull CiBundleAttributeModel bundleAttribute
+    ) {
         // bundle attribute should be created only for global bundle
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
@@ -551,7 +571,12 @@ public class BundleService {
                 .build();
     }
 
-    public void updateBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute, @NotNull CiBundleAttributeModel bundleAttribute) {
+    public void updateBundleAttributesByCi(
+            @NotNull String fiscalCode,
+            @NotNull String idBundle,
+            @NotNull String idAttribute,
+            @NotNull CiBundleAttributeModel bundleAttribute
+    ) {
         // bundle attribute should be updated only for global bundle
         // for public bundle CI should send a new request to PSP
         Bundle bundle = getBundle(idBundle);
@@ -585,7 +610,11 @@ public class BundleService {
         }
     }
 
-    public void removeBundleAttributesByCi(@NotNull String fiscalCode, @NotNull String idBundle, @NotNull String idAttribute) {
+    public void removeBundleAttributesByCi(
+            @NotNull String fiscalCode,
+            @NotNull String idBundle,
+            @NotNull String idAttribute
+    ) {
         // bundle attribute should be removed only for global and public bundles
         Bundle bundle = getBundle(idBundle);
 
@@ -706,7 +735,12 @@ public class BundleService {
      * @param minPaymentAmountTarget min amount of existent bundle
      * @param maxPaymentAmountTarget max amount of existent bundle
      */
-    private boolean isPaymentAmountRangeValid(Long minPaymentAmount, Long maxPaymentAmount, Long minPaymentAmountTarget, Long maxPaymentAmountTarget) {
+    private boolean isPaymentAmountRangeValid(
+            Long minPaymentAmount,
+            Long maxPaymentAmount,
+            Long minPaymentAmountTarget,
+            Long maxPaymentAmountTarget
+    ) {
         return minPaymentAmount < maxPaymentAmount && (
                 minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget || minPaymentAmount > maxPaymentAmountTarget
         );
@@ -715,7 +749,10 @@ public class BundleService {
     /**
      * Verify if transferCategoryList overlaps the target one
      */
-    private boolean isTransferCategoryListValid(List<String> transferCategoryList, List<String> transferCategoryListTarget) {
+    private boolean isTransferCategoryListValid(
+            List<String> transferCategoryList,
+            List<String> transferCategoryListTarget
+    ) {
         return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
     }
 
@@ -834,7 +871,20 @@ public class BundleService {
         });
     }
 
-    private List<Bundle> getBundlesByNameAndType(String idPsp, String name, List<BundleType> types, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter, Integer pageSize, Integer pageNumber) {
+    private List<Bundle> getBundlesByNameAndType(
+            String idPsp,
+            String name,
+            List<BundleType> types,
+            Sort.Direction maxPaymentAmountOrder,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter,
+            Integer pageSize,
+            Integer pageNumber
+    ) {
         return cosmosRepository.getBundlesByNameAndType(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, pageNumber, pageSize);
     }
 

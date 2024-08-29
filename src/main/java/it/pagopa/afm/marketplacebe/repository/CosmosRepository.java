@@ -49,23 +49,39 @@ public class CosmosRepository {
                 .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Bundle.class));
     }
 
-    public Integer getTotalPages(String idPsp, String name, List<BundleType> types, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter, int pageSize) {
+    public Long getTotalItems(
+            String idPsp,
+            String name,
+            List<BundleType> types,
+            Sort.Direction maxPaymentAmountOrder,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter
+    ) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT VALUE COUNT(b.id) FROM bundles b WHERE 1=1 ");
 
         buildWhereConditions(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
 
-        List<Integer> result = IterableUtils
-                .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Integer.class));
-
-        if (!result.isEmpty()) {
-            return (int) Math.ceil((double) result.get(0) / pageSize);
-        } else {
-            return 0;
-        }
+        return cosmosTemplate.count(new SqlQuerySpec(builder.toString()), "bundles");
     }
 
-    private static void buildWhereConditions(String idPsp, String name, List<BundleType> types, Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange, LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter, StringBuilder builder) {
+    private static void buildWhereConditions(
+            String idPsp,
+            String name,
+            List<BundleType> types,
+            Sort.Direction maxPaymentAmountOrder,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter,
+            StringBuilder builder
+    ) {
         // adds the idPsp clause if present
         if (StringUtils.isNotEmpty(idPsp)) {
             builder.append("AND b.idPsp = '").append(idPsp).append("' ");
