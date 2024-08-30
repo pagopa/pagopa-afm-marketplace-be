@@ -45,7 +45,7 @@ public class CosmosRepository {
 
         builder.append("ORDER BY ");
         if(maxPaymentAmountOrder != null){
-            builder.append("b.maxPaymentAmount ").append(maxPaymentAmountOrder);
+            builder.append("b.maxPaymentAmount ").append(maxPaymentAmountOrder.name());
         } else {
             builder.append("b.id");
         }
