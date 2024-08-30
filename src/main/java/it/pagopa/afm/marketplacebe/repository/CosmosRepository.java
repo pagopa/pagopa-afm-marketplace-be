@@ -49,8 +49,13 @@ public class CosmosRepository {
             String idPsp,
             String name,
             List<BundleType> types,
-            Sort.Direction maxPaymentAmountOrder, Long paymentAmountMinRange, Long paymentAmountMaxRange,
-            LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter,
+            Sort.Direction maxPaymentAmountOrder,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter,
             int pageNumber,
             int pageSize
     ) {

@@ -172,7 +172,10 @@ public class BundleService {
             Sort.Direction maxPaymentAmountOrder,
             Long paymentAmountMinRange,
             Long paymentAmountMaxRange,
-            LocalDate validBefore, LocalDate validAfter, LocalDate expireBefore, LocalDate expireAfter,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter,
             Integer pageNumber,
             Integer pageSize
     ) {
