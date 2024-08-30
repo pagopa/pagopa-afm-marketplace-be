@@ -4,7 +4,7 @@
     "title": "Marketplace API for Technical Support",
     "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.19.0-2-PPANTT-99-new-filters-psp-bundle-list"
+    "version": "0.19.0-3-PPANTT-99-new-filters-psp-bundle-list"
   },
   "servers": [
     {
