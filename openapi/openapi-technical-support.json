@@ -4,12 +4,27 @@
     "title": "Marketplace API for Technical Support",
     "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.19.0"
+    "version": "0.19.0-4-PPANTT-99-new-filters-psp-bundle-list"
   },
   "servers": [
     {
-      "url": "http://localhost/",
-      "description": "Generated server url"
+      "url": "http://localhost:8080"
+    },
+    {
+      "url": "https://{host}{basePath}",
+      "variables": {
+        "host": {
+          "default": "api.dev.platform.pagopa.it",
+          "enum": [
+            "api.dev.platform.pagopa.it",
+            "api.uat.platform.pagopa.it",
+            "api.platform.pagopa.it"
+          ]
+        },
+        "basePath": {
+          "default": "/afm/marketplace-service/v1/"
+        }
+      }
     }
   ],
   "tags": [
@@ -26,7 +41,7 @@
     "/bundles": {
       "get": {
         "tags": [
-          "CI"
+          "Bundle"
         ],
         "summary": "Get paginated list of bundles",
         "operationId": "getGlobalBundles",
@@ -63,12 +78,24 @@
           {
             "name": "validFrom",
             "in": "query",
-            "description": "Validity date of bundles, used to retrieve all bundles valid from the specified date",
+            "description": "Validity date of bundles, used to retrieve all bundles valid from the specified date (yyyy-MM-dd)",
             "required": false,
             "schema": {
               "type": "string",
               "format": "date"
-            }
+            },
+            "example": "2024-05-10"
+          },
+          {
+            "name": "expireAt",
+            "in": "query",
+            "description": "Validity date of bundles, used to retrieve all bundles that expire at the specified date (yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-05-10"
           },
           {
             "name": "limit",
@@ -200,6 +227,130 @@
         }
       ]
     },
+    "/bundles/{id-bundle}": {
+      "get": {
+        "tags": [
+          "Bundle"
+        ],
+        "summary": "Get the bundle details",
+        "operationId": "getBundleDetails",
+        "parameters": [
+          {
+            "name": "id-bundle",
+            "in": "path",
+            "description": "Bundle identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PspBundleDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Service unavailable",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemJson"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "X-Request-Id",
+          "in": "header",
+          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
     "/cis/{ci-fiscal-code}/bundles": {
       "get": {
         "tags": [
@@ -211,8 +362,40 @@
           {
             "name": "ci-fiscal-code",
             "in": "path",
-            "description": "CI identifier",
+            "description": "Creditor institution's tax code",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filtering the ciBundles by type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GLOBAL",
+                "PUBLIC",
+                "PRIVATE"
+              ]
+            }
+          },
+          {
+            "name": "bundleName",
+            "in": "query",
+            "description": "Filtering the ciBundles by bundle name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pspBusinessName",
+            "in": "query",
+            "description": "Filtering the ciBundles by pspBusinessName of the corresponding bundle",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -238,24 +421,6 @@
               "type": "integer",
               "format": "int32",
               "default": 0
-            }
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "description": "Filtering the ciBundles by type",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "pspBusinessName",
-            "in": "query",
-            "description": "Filtering the ciBundles by pspBusinessName of the corresponding bundle",
-            "required": false,
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -642,16 +807,34 @@
           {
             "name": "ci-fiscal-code",
             "in": "path",
-            "description": "CI identifier",
+            "description": "Tax code of the creditor institution to which the offers are addressed",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "size",
+            "name": "idPsp",
             "in": "query",
-            "description": "Number of elements for one page. Default = 50",
+            "description": "Id of the payment service provider that has created the offers (used for to filter out the result)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bundleName",
+            "in": "query",
+            "description": "Filtering the offers by bundle name",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items for page",
             "required": false,
             "schema": {
               "type": "integer",
@@ -660,21 +843,15 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "page",
             "in": "query",
-            "description": "Starting cursor",
+            "description": "Page number",
             "required": false,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "idPsp",
-            "in": "query",
-            "description": "Filter by psp",
-            "required": false,
-            "schema": {
-              "type": "string"
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
             }
           }
         ],
@@ -1457,6 +1634,84 @@
             }
           },
           {
+            "name": "maxPaymentAmountOrder",
+            "in": "query",
+            "description": "Order bundles by maxPaymentAmount",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            },
+            "example": "ASC"
+          },
+          {
+            "name": "paymentAmountMinRange",
+            "in": "query",
+            "description": "Filter bundles with paymentAmount less than",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "paymentAmountMaxRange",
+            "in": "query",
+            "description": "Filter bundles with paymentAmount more than",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "validBefore",
+            "in": "query",
+            "description": "Validity date of bundles, used to retrieve all bundles valid before the specified date (yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-05-10"
+          },
+          {
+            "name": "validAfter",
+            "in": "query",
+            "description": "Validity date of bundles, used to retrieve all bundles valid after the specified date (yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-05-10"
+          },
+          {
+            "name": "expireBefore",
+            "in": "query",
+            "description": "Validity date of bundles, used to retrieve all bundles that expire before the specified date (yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-05-10"
+          },
+          {
+            "name": "expireAfter",
+            "in": "query",
+            "description": "Validity date of bundles, used to retrieve all bundles that expire after the specified date (yyyy-MM-dd)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-05-10"
+          },
+          {
             "name": "limit",
             "in": "query",
             "description": "Number of items for page. Default = 50",
@@ -1764,7 +2019,7 @@
             "description": "Number of items for page",
             "required": false,
             "schema": {
-              "maximum": 100,
+              "maximum": 200,
               "type": "integer",
               "format": "int32",
               "default": 50
@@ -1773,10 +2028,9 @@
           {
             "name": "page",
             "in": "query",
-            "description": "Page number. Page number value starts from 0",
+            "description": "Page number",
             "required": false,
             "schema": {
-              "maximum": 10000,
               "minimum": 0,
               "type": "integer",
               "format": "int32",
@@ -2054,11 +2308,30 @@
             }
           },
           {
-            "name": "limit",
+            "name": "ciTaxCode",
             "in": "query",
-            "description": "Number of items for page. Default = 50",
+            "description": "Filter by creditor institution",
             "required": false,
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "idBundle",
+            "in": "query",
+            "description": "Filter by bundle id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items for page",
+            "required": false,
+            "schema": {
+              "maximum": 200,
               "type": "integer",
               "format": "int32",
               "default": 50
@@ -2067,13 +2340,13 @@
           {
             "name": "page",
             "in": "query",
-            "description": "Page number. Page number value starts from 0. Default = 1",
+            "description": "Page number",
             "required": false,
             "schema": {
               "minimum": 0,
               "type": "integer",
               "format": "int32",
-              "default": 1
+              "default": 0
             }
           }
         ],
@@ -2226,7 +2499,7 @@
             "description": "Number of items for page",
             "required": false,
             "schema": {
-              "maximum": 100,
+              "maximum": 200,
               "type": "integer",
               "format": "int32",
               "default": 50
@@ -2238,7 +2511,6 @@
             "description": "Page number",
             "required": false,
             "schema": {
-              "maximum": 10000,
               "minimum": 0,
               "type": "integer",
               "format": "int32",
@@ -2631,6 +2903,11 @@
           },
           "idBrokerPsp": {
             "type": "string"
+          },
+          "cart": {
+            "type": "boolean",
+            "description": "is the bundle valid for cart payments?",
+            "default": true
           },
           "idCdi": {
             "type": "string"
@@ -3086,6 +3363,9 @@
           "idChannel": {
             "type": "string"
           },
+          "idPsp": {
+            "type": "string"
+          },
           "idBrokerPsp": {
             "type": "string"
           },
@@ -3099,6 +3379,12 @@
             "type": "string"
           },
           "urlPolicyPsp": {
+            "type": "string"
+          },
+          "cart": {
+            "type": "boolean"
+          },
+          "abi": {
             "type": "string"
           },
           "idBundle": {

@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -28,41 +29,84 @@ public class CosmosRepository {
         this.cosmosTemplate = cosmosTemplate;
     }
 
+    /**
+     * Retrieve the bundles' list from CosmosDB with custom query
+     * @param idPsp id of the payment service provider
+     * @param name bundle name
+     * @param types list of bundle types
+     * @param maxPaymentAmountOrder direction to order the list based on the bundle's maxPaymentAmount
+     * @param paymentAmountMinRange filters bundles with paymentAmount more than paymentAmountMinRange
+     * @param paymentAmountMaxRange filters bundles with paymentAmount less than paymentAmountMaxRange
+     * @param validBefore filters bundles with validityDateFrom before the value of validBefore
+     * @param validAfter filters bundles with validityDateFrom after the value of validAfter
+     * @param expireBefore filters bundles with validityDateTo before the value of expireBefore
+     * @param expireAfter filters bundles with validityDateTo after the value of expireAfter
+     * @param pageNumber page's number for pagination
+     * @param pageSize maximum number of elements for page
+     * @return list of bundles ordered and filtered
+     */
     public List<Bundle> getBundlesByNameAndType(
             String idPsp,
             String name,
             List<BundleType> types,
+            Sort.Direction maxPaymentAmountOrder,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter,
             int pageNumber,
             int pageSize
     ) {
         StringBuilder builder = new StringBuilder();
         builder.append(BASE_BUNDLES_QUERY);
 
-        buildWhereConditions(idPsp, name, types, builder);
+        buildWhereConditions(idPsp, name, types, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
 
-        builder.append("ORDER BY b.id OFFSET " + pageNumber * pageSize + " LIMIT " + pageSize);
+        builder.append("ORDER BY ");
+        if(maxPaymentAmountOrder != null){
+            builder.append("b.maxPaymentAmount ").append(maxPaymentAmountOrder.name());
+        } else {
+            builder.append("b.id");
+        }
+        builder.append(" OFFSET ").append(pageNumber * pageSize).append(" LIMIT ").append(pageSize);
 
         return IterableUtils
                 .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Bundle.class));
     }
 
-    public Integer getTotalPages(String idPsp, String name, List<BundleType> types, int pageSize) {
+    public Long getTotalItems(
+            String idPsp,
+            String name,
+            List<BundleType> types,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter
+    ) {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT VALUE COUNT(b.id) FROM bundles b WHERE 1=1 ");
 
-        buildWhereConditions(idPsp, name, types, builder);
+        buildWhereConditions(idPsp, name, types, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
 
-        List<Integer> result = IterableUtils
-                .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Integer.class));
-
-        if (!result.isEmpty()) {
-            return (int) Math.ceil((double) result.get(0) / pageSize);
-        } else {
-            return 0;
-        }
+        return cosmosTemplate.count(new SqlQuerySpec(builder.toString()), "bundles");
     }
 
-    private static void buildWhereConditions(String idPsp, String name, List<BundleType> types, StringBuilder builder) {
+    private static void buildWhereConditions(
+            String idPsp,
+            String name,
+            List<BundleType> types,
+            Long paymentAmountMinRange,
+            Long paymentAmountMaxRange,
+            LocalDate validBefore,
+            LocalDate validAfter,
+            LocalDate expireBefore,
+            LocalDate expireAfter,
+            StringBuilder builder
+    ) {
         // adds the idPsp clause if present
         if (StringUtils.isNotEmpty(idPsp)) {
             builder.append("AND b.idPsp = '").append(idPsp).append("' ");
@@ -84,6 +128,28 @@ public class CosmosRepository {
             types.forEach(item -> joiner.add("'" + item.toString() + "'"));
             builder.append(joiner).append(" ) ");
         }
+
+        if (paymentAmountMinRange != null) {
+            builder.append("AND b.paymentAmount >= ").append(paymentAmountMinRange).append(" ");
+        }
+
+        if (paymentAmountMaxRange != null) {
+            builder.append("AND b.paymentAmount < ").append(paymentAmountMaxRange).append(" ");
+        }
+
+        if (validBefore != null) {
+            buildDateQuery(validBefore, false, false, builder);
+        }
+        if (validAfter != null) {
+            buildDateQuery(validAfter, false, true, builder);
+        }
+
+        if (expireBefore != null) {
+            buildDateQuery(expireBefore, true, false, builder);
+        }
+        if (expireAfter != null) {
+            buildDateQuery(expireAfter, true, true, builder);
+        }
     }
 
     /**
@@ -93,7 +159,7 @@ public class CosmosRepository {
      * @param name      bundle's name
      * @param types     list of bundle's types
      * @param validFrom validity date of bundles, used to retrieve all bundles valid from the specified date
-     * @param expireAt   validity date of bundles, used to retrieve all bundles that expire at the specified date
+     * @param expireAt  validity date of bundles, used to retrieve all bundles that expire at the specified date
      * @param offset    number of elements to be skipped
      * @param pageSize  page size
      * @return the requested page of bundles
@@ -146,7 +212,7 @@ public class CosmosRepository {
      * @param name      bundle's name
      * @param types     list of bundle's types
      * @param validFrom validity date of bundles, used to retrieve all bundles valid from the specified date
-     * @param expireAt   validity date of bundles, used to retrieve all bundles that expire at the specified date
+     * @param expireAt  validity date of bundles, used to retrieve all bundles that expire at the specified date
      * @return the number of element founds with the query
      */
     public Long getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(
@@ -182,25 +248,11 @@ public class CosmosRepository {
         }
 
         if (validFrom != null) {
-            builder.append("AND SUBSTRING(DateTimeFromParts(b.validityDateFrom[0], b.validityDateFrom[1], b.validityDateFrom[2], 0, 0, 0, 0), 0, 10) ")
-                    .append("<= SUBSTRING(DateTimeFromParts(")
-                    .append(validFrom.getYear())
-                    .append(",")
-                    .append(validFrom.getMonthValue())
-                    .append(",")
-                    .append(validFrom.getDayOfMonth())
-                    .append(", 0, 0, 0, 0), 0, 10) ");
+            buildDateQuery(validFrom, false, false, builder);
         }
 
         if (expireAt != null) {
-            builder.append("AND SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10) ")
-                    .append("= SUBSTRING(DateTimeFromParts(")
-                    .append(expireAt.getYear())
-                    .append(",")
-                    .append(expireAt.getMonthValue())
-                    .append(",")
-                    .append(expireAt.getDayOfMonth())
-                    .append(", 0, 0, 0, 0), 0, 10) ");
+            buildDateQuery(expireAt, true, false, builder);
         }
     }
 
@@ -221,5 +273,23 @@ public class CosmosRepository {
         if (StringUtils.isNotEmpty(bundleType)) {
             builder.append("AND b.type = '").append(bundleType).append("' ");
         }
+    }
+
+    private static void buildDateQuery(LocalDate date, boolean isExpireDate, boolean isDateAfter, StringBuilder builder) {
+        String baseString;
+        if (isExpireDate) {
+            baseString = "AND SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10) ";
+        } else {
+            baseString = "AND SUBSTRING(DateTimeFromParts(b.validityDateFrom[0], b.validityDateFrom[1], b.validityDateFrom[2], 0, 0, 0, 0), 0, 10) ";
+        }
+        builder.append(baseString)
+                .append(isDateAfter ? ">=" : "<=")
+                .append(" SUBSTRING(DateTimeFromParts(")
+                .append(date.getYear())
+                .append(",")
+                .append(date.getMonthValue())
+                .append(",")
+                .append(date.getDayOfMonth())
+                .append(", 0, 0, 0, 0), 0, 10) ");
     }
 }
