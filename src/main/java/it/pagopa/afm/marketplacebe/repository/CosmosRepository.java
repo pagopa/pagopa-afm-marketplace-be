@@ -227,11 +227,11 @@ public class CosmosRepository {
         }
 
         if (validFrom != null) {
-            buildDateQuery(validFrom, false, true, builder);
+            buildDateQuery(validFrom, false, false, builder);
         }
 
         if (expireAt != null) {
-            buildDateQuery(expireAt, true, true, builder);
+            buildDateQuery(expireAt, true, false, builder);
         }
     }
 
@@ -262,7 +262,7 @@ public class CosmosRepository {
             baseString = "AND SUBSTRING(DateTimeFromParts(b.validityDateFrom[0], b.validityDateFrom[1], b.validityDateFrom[2], 0, 0, 0, 0), 0, 10) ";
         }
         builder.append(baseString)
-                .append(isDateAfter ? "<=" : ">=")
+                .append(isDateAfter ? ">=" : "<=")
                 .append(" SUBSTRING(DateTimeFromParts(")
                 .append(date.getYear())
                 .append(",")
