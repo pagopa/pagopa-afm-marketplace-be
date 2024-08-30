@@ -29,6 +29,22 @@ public class CosmosRepository {
         this.cosmosTemplate = cosmosTemplate;
     }
 
+    /**
+     * Retrieve the bundles' list from CosmosDB with custom query
+     * @param idPsp id of the payment service provider
+     * @param name bundle name
+     * @param types list of bundle types
+     * @param maxPaymentAmountOrder direction to order the list based on the bundle's maxPaymentAmount
+     * @param paymentAmountMinRange filters bundles with paymentAmount more than paymentAmountMinRange
+     * @param paymentAmountMaxRange filters bundles with paymentAmount less than paymentAmountMaxRange
+     * @param validBefore filters bundles with validityDateFrom before the value of validBefore
+     * @param validAfter filters bundles with validityDateFrom after the value of validAfter
+     * @param expireBefore filters bundles with validityDateTo before the value of expireBefore
+     * @param expireAfter filters bundles with validityDateTo after the value of expireAfter
+     * @param pageNumber page's number for pagination
+     * @param pageSize maximum number of elements for page
+     * @return list of bundles ordered and filtered
+     */
     public List<Bundle> getBundlesByNameAndType(
             String idPsp,
             String name,
