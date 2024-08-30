@@ -118,13 +118,15 @@ public class CosmosRepository {
 
         if (validBefore != null) {
             buildDateQuery(validBefore, false, builder);
-        } else if (validAfter != null) {
+        }
+        if (validAfter != null) {
             buildDateQuery(validAfter, false, builder);
         }
 
         if (expireBefore != null) {
             buildDateQuery(expireBefore, true, builder);
-        } else if (expireAfter != null) {
+        }
+        if (expireAfter != null) {
             buildDateQuery(expireAfter, true, builder);
         }
     }
