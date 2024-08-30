@@ -117,17 +117,17 @@ public class CosmosRepository {
         }
 
         if (validBefore != null) {
-            buildDateQuery(validBefore, false, builder);
+            buildDateQuery(validBefore, false, false, builder);
         }
         if (validAfter != null) {
-            buildDateQuery(validAfter, false, builder);
+            buildDateQuery(validAfter, false, true, builder);
         }
 
         if (expireBefore != null) {
-            buildDateQuery(expireBefore, true, builder);
+            buildDateQuery(expireBefore, true, false, builder);
         }
         if (expireAfter != null) {
-            buildDateQuery(expireAfter, true, builder);
+            buildDateQuery(expireAfter, true, true, builder);
         }
     }
 
@@ -227,11 +227,11 @@ public class CosmosRepository {
         }
 
         if (validFrom != null) {
-            buildDateQuery(validFrom, false, builder);
+            buildDateQuery(validFrom, false, true, builder);
         }
 
         if (expireAt != null) {
-            buildDateQuery(expireAt, true, builder);
+            buildDateQuery(expireAt, true, true, builder);
         }
     }
 
@@ -254,7 +254,7 @@ public class CosmosRepository {
         }
     }
 
-    private static void buildDateQuery(LocalDate date, boolean isExpireDate, StringBuilder builder) {
+    private static void buildDateQuery(LocalDate date, boolean isExpireDate, boolean isDateAfter, StringBuilder builder) {
         String baseString;
         if (isExpireDate) {
             baseString = "AND SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10) ";
@@ -262,7 +262,8 @@ public class CosmosRepository {
             baseString = "AND SUBSTRING(DateTimeFromParts(b.validityDateFrom[0], b.validityDateFrom[1], b.validityDateFrom[2], 0, 0, 0, 0), 0, 10) ";
         }
         builder.append(baseString)
-                .append("<= SUBSTRING(DateTimeFromParts(")
+                .append(isDateAfter ? "<=" : ">=")
+                .append(" SUBSTRING(DateTimeFromParts(")
                 .append(date.getYear())
                 .append(",")
                 .append(date.getMonthValue())
