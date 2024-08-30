@@ -13,7 +13,7 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.19.0-3-PPANTT-99-new-filters-psp-bundle-list</version>
+	<version>0.19.0-4-PPANTT-99-new-filters-psp-bundle-list</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
