@@ -4,6 +4,7 @@ import com.azure.cosmos.models.SqlQuerySpec;
 import com.azure.spring.data.cosmos.core.CosmosTemplate;
 import it.pagopa.afm.marketplacebe.entity.Bundle;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
+import org.apache.tomcat.jni.Time;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +39,7 @@ class CosmosRepositoryTest {
         // Precondition
         when(cosmosTemplate.runQuery(any(SqlQuerySpec.class), any(), any())).thenReturn(bundleList);
 
-        List<Bundle> bundles = cosmosRepository.getBundlesByNameAndType(null, "mock name", List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL), Sort.Direction.ASC, null,null, null,null,null,null,0, 50);
+        List<Bundle> bundles = cosmosRepository.getBundlesByNameAndType(null, "mock name", List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL), Sort.Direction.ASC, 0L,0L, LocalDate.now(),LocalDate.now(),LocalDate.now(),LocalDate.now(),0, 50);
 
         assertFalse(bundles.isEmpty());
     }
