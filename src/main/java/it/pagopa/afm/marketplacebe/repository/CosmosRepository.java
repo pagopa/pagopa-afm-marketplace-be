@@ -41,9 +41,15 @@ public class CosmosRepository {
         StringBuilder builder = new StringBuilder();
         builder.append(BASE_BUNDLES_QUERY);
 
-        buildWhereConditions(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
+        buildWhereConditions(idPsp, name, types, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
 
-        builder.append("ORDER BY b.id OFFSET ").append(pageNumber * pageSize).append(" LIMIT ").append(pageSize);
+        builder.append("ORDER BY ");
+        if(maxPaymentAmountOrder != null){
+            builder.append("b.maxPaymentAmount ").append(maxPaymentAmountOrder);
+        } else {
+            builder.append("b.id");
+        }
+        builder.append(" OFFSET ").append(pageNumber * pageSize).append(" LIMIT ").append(pageSize);
 
         return IterableUtils
                 .toList(cosmosTemplate.runQuery(new SqlQuerySpec(builder.toString()), Bundle.class, Bundle.class));
@@ -53,7 +59,6 @@ public class CosmosRepository {
             String idPsp,
             String name,
             List<BundleType> types,
-            Sort.Direction maxPaymentAmountOrder,
             Long paymentAmountMinRange,
             Long paymentAmountMaxRange,
             LocalDate validBefore,
@@ -64,7 +69,7 @@ public class CosmosRepository {
         StringBuilder builder = new StringBuilder();
         builder.append("SELECT VALUE COUNT(b.id) FROM bundles b WHERE 1=1 ");
 
-        buildWhereConditions(idPsp, name, types, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
+        buildWhereConditions(idPsp, name, types, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter, builder);
 
         return cosmosTemplate.count(new SqlQuerySpec(builder.toString()), "bundles");
     }
@@ -73,7 +78,6 @@ public class CosmosRepository {
             String idPsp,
             String name,
             List<BundleType> types,
-            Sort.Direction maxPaymentAmountOrder,
             Long paymentAmountMinRange,
             Long paymentAmountMaxRange,
             LocalDate validBefore,
@@ -110,10 +114,6 @@ public class CosmosRepository {
 
         if (paymentAmountMaxRange != null) {
             builder.append("AND b.paymentAmount < ").append(paymentAmountMaxRange).append(" ");
-        }
-
-        if (maxPaymentAmountOrder != null) {
-            builder.append("AND ORDER BY b.maxPaymentAmount ").append(maxPaymentAmountOrder).append(" ");
         }
 
         if (validBefore != null) {

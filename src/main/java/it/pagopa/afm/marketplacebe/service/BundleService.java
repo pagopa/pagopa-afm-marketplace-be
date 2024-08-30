@@ -182,7 +182,7 @@ public class BundleService {
                 .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();
 
-        Long totalItems = this.cosmosRepository.getTotalItems(idPsp, name, bundleTypes, maxPaymentAmountOrder, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter);
+        Long totalItems = this.cosmosRepository.getTotalItems(idPsp, name, bundleTypes, paymentAmountMinRange, paymentAmountMaxRange, validBefore, validAfter, expireBefore, expireAfter);
         int totalPages = calculateTotalPages(pageSize, totalItems);
 
         return Bundles.builder()
