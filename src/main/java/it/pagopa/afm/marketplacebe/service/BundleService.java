@@ -93,6 +93,8 @@ public class BundleService {
 
     private final ModelMapper modelMapper;
 
+    private static final String ONUS_BUNDLE_SUFFIX = "_ONUS";
+
     @Autowired
     public BundleService(
             BundleRepository bundleRepository,
@@ -754,9 +756,16 @@ public class BundleService {
      */
     private boolean isTransferCategoryListValid(
             List<String> transferCategoryList,
-            List<String> transferCategoryListTarget
+            List<String> transferCategoryListTarget,
+            String idChannel,
+            String idChannelTarget
     ) {
-        return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
+        if(transferCategoryListTarget == null || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains))) {
+            return true;
+        }
+        else {
+            return (isOnusBundle(idChannel) || isOnusBundle(idChannelTarget)) && !idChannel.equals(idChannelTarget) && idChannel.replace("_ONUS", "").equals(idChannelTarget.replace("_ONUS", ""));
+        }
     }
 
     /**
@@ -843,7 +852,7 @@ public class BundleService {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
             if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList(), bundleRequest.getIdChannel(), bundle.getIdChannel()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
@@ -867,7 +876,7 @@ public class BundleService {
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
             if (!bundle.getId().equals(idBundle) &&
                     !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList(), bundleRequest.getIdChannel(), bundle.getIdChannel()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
@@ -897,5 +906,9 @@ public class BundleService {
         } else {
             return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
         }
+    }
+
+    private boolean isOnusBundle(String idChannel) {
+        return StringUtils.endsWithIgnoreCase(idChannel, ONUS_BUNDLE_SUFFIX);
     }
 }
