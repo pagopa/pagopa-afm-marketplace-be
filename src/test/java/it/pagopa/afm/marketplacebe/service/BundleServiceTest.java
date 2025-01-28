@@ -1260,9 +1260,67 @@ class BundleServiceTest {
 
     @Test
     void createBundle_ok_9() {
-        // same (payment method, touchpoint, transferCategoryList, payment amount range), different idChannel
+        // same (payment method, touchpoint, payment amount range), different transferCategoryList
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setTransferCategoryList(Arrays.asList("taxonomy3", "taxonomy4"));
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_10() {
+        // same (payment method, touchpoint, payment amount range), transferCategoryList target null
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+        bundles.get(0).setTransferCategoryList(null);
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_11() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range), idChannel ONUS case
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         bundleRequest.setIdChannel("idChannel_ONUS");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_12() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range), idChannel ONUS case and transferCategoryList null
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setIdChannel("idChannel_ONUS");
+        bundleRequest.setTransferCategoryList(null);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
@@ -1398,7 +1456,7 @@ class BundleServiceTest {
     }
 
     @Test
-    void createBundle_ko_11() {
+    void createBundle_ko_10() {
         // Same bundle configuration with a different idChannel, but it does not end with _ONUS.
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         bundleRequest.setIdChannel("idChannel_NOT-ONUS");
@@ -1416,11 +1474,29 @@ class BundleServiceTest {
     }
 
     @Test
-    void createBundle_ko_12() {
-        // Same bundle configuration for two bundle (1 ONUS, 1 NOT ONUS) with different idChannel.
+    void createBundle_ko_11() {
+        // Same bundle configuration for two bundle (1 ONUS, 1 NOT ONUS) with different normalized idChannel.
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
         bundles.get(0).setIdChannel("idChannel1_ONUS");
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_12() {
+        // Same bundle configuration for two bundle with same idChannel ONUS.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setIdChannel("idChannel_ONUS");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+        bundles.get(0).setIdChannel("idChannel_ONUS");
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
                 any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
 
