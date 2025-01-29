@@ -93,6 +93,8 @@ public class BundleService {
 
     private final ModelMapper modelMapper;
 
+    private static final String ONUS_BUNDLE_SUFFIX = "_ONUS";
+
     @Autowired
     public BundleService(
             BundleRepository bundleRepository,
@@ -750,13 +752,21 @@ public class BundleService {
     }
 
     /**
-     * Verify if transferCategoryList overlaps the target one
+     * Verify if transferCategoryList overlaps the target one,
+     * if either idChannel or idChannelTarget is of type ONUS relative to the other, the transferCategoryList check is bypassed.
      */
     private boolean isTransferCategoryListValid(
             List<String> transferCategoryList,
-            List<String> transferCategoryListTarget
+            List<String> transferCategoryListTarget,
+            String idChannel,
+            String idChannelTarget
     ) {
-        return (transferCategoryListTarget == null) || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
+        if(transferCategoryListTarget == null || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains))) {
+            return true;
+        }
+        else {
+            return isOnusBundleMatch(idChannel, idChannelTarget);
+        }
     }
 
     /**
@@ -843,7 +853,7 @@ public class BundleService {
             // verify payment amount range validity and
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
             if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList(), bundleRequest.getIdChannel(), bundle.getIdChannel()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
@@ -867,7 +877,7 @@ public class BundleService {
             // verify transfer category list overlapping and verify if validityDateFrom is acceptable
             if (!bundle.getId().equals(idBundle) &&
                     !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList(), bundleRequest.getIdChannel(), bundle.getIdChannel()) &&
                     !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
@@ -897,5 +907,39 @@ public class BundleService {
         } else {
             return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
         }
+    }
+
+    /**
+     * Checks if the given idChannel represents an ONUS bundle.
+     * This is determined by checking if the idChannel ends with the ONUS_BUNDLE_SUFFIX, ignoring case sensitivity.
+     *
+     * @param idChannel The channel ID to check.
+     * @return true if the idChannel ends with ONUS_BUNDLE_SUFFIX, false otherwise.
+     */
+    private boolean isOnusBundle(String idChannel) {
+        return StringUtils.endsWithIgnoreCase(idChannel, ONUS_BUNDLE_SUFFIX);
+    }
+
+    /**
+     * Determines if there is a match between two channels based on their ONUS bundle status.
+     * A match occurs when one channel is of type ONUS and the other is not,
+     * and both have the same normalized ID after removing the ONUS_BUNDLE_SUFFIX.
+     *
+     * @param idChannel The channel ID to compare.
+     * @param idChannelTarget The target channel ID to compare.
+     * @return true if there is an ONUS bundle match, false otherwise.
+     */
+    private boolean isOnusBundleMatch(String idChannel, String idChannelTarget) {
+        boolean isSourceOnus = isOnusBundle(idChannel);
+        boolean isTargetOnus = isOnusBundle(idChannelTarget);
+
+        boolean hasMatchedOnusStatus = isSourceOnus != isTargetOnus;
+
+        String normalizedIdChannel = idChannel.replace(ONUS_BUNDLE_SUFFIX, "");
+        String normalizedIdChannelTarget = idChannelTarget.replace(ONUS_BUNDLE_SUFFIX, "");
+
+        boolean haveMatchingNormalizedIds = normalizedIdChannel.equals(normalizedIdChannelTarget);
+
+        return hasMatchedOnusStatus && haveMatchingNormalizedIds;
     }
 }
