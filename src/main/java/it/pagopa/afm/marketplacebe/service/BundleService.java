@@ -933,7 +933,7 @@ public class BundleService {
         boolean isSourceOnus = isOnusBundle(idChannel);
         boolean isTargetOnus = isOnusBundle(idChannelTarget);
 
-        boolean hasMatchedOnusStatus = (isSourceOnus && !isTargetOnus) || (!isSourceOnus && isTargetOnus);
+        boolean hasMatchedOnusStatus = isSourceOnus != isTargetOnus;
 
         String normalizedIdChannel = idChannel.replace(ONUS_BUNDLE_SUFFIX, "");
         String normalizedIdChannelTarget = idChannelTarget.replace(ONUS_BUNDLE_SUFFIX, "");
