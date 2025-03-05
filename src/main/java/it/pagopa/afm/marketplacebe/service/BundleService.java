@@ -926,7 +926,7 @@ public class BundleService {
      * A match occurs when one channel is of type ONUS and the other is not,
      * and both have the same normalized ID after removing the ONUS_BUNDLE_SUFFIX.
      *
-     * @param idChannel       The channel ID to compare.
+     * @param idChannel The channel ID to compare.
      * @param idChannelTarget The target channel ID to compare.
      * @return true if there is an ONUS bundle match, false otherwise.
      */
