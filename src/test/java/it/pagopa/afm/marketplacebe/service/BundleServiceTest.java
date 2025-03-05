@@ -1336,6 +1336,25 @@ class BundleServiceTest {
     }
 
     @Test
+    void createBundle_ok_13() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range, idChannel), and bundle type is PRIVATE.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PRIVATE);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
     void createBundle_ko_1() {
         // validityDateFrom > validityDateTo
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
