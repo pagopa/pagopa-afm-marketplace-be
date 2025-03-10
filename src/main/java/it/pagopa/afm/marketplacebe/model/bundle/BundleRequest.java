@@ -50,4 +50,5 @@ public class BundleRequest {
     private List<String> transferCategoryList;
     private LocalDate validityDateFrom;
     private LocalDate validityDateTo;
+    private Boolean onus;
 }
