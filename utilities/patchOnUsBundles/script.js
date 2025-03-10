@@ -11,13 +11,18 @@ const CONTAINER_ID_BUNDLES = "bundles";
 const CONTAINER_ID_VALID_BUNDLES = "validbundles";
 const CONTAINER_ID_ARCHIVED_BUNDLES = "archivedbundles";
 
-async function patchObject(container, bundleId, partitionKey, onUsValue) {
-    const operations =
-        [
-            { op: 'add', path: '/onus', value: onUsValue },
-        ];
+const ONUS_SUFFIX = "_ONUS";
 
-    await container.item(bundleId, partitionKey).patch(operations);
+async function patchObjects(container, bundles) {
+    const operations = bundles.map(bundle => ({
+        "operationType": "Patch",
+        "id": bundle.id,
+        "partitionKey": bundle.idPsp,
+        "resourceBody": { operations: [{ op: 'add', path: '/onus', value: bundle.name.includes(ONUS_SUFFIX)}] }
+    }));
+    const response = await container.items.bulk(operations);
+
+    return response.filter(el => el.statusCode === 200).length;
 }
 
 async function run(containerId) {
@@ -29,9 +34,9 @@ async function run(containerId) {
 
     console.log(`Number of ${containerId}: `, resources.length);
 
-    for (const bundle of resources) {
-        await patchObject(container, bundle.id, bundle.idPsp, bundle.name.includes("_ONUS"));
-        numberOfPatch += 1;
+    for (let i = 0; i <= resources.length; i += 100) {
+        const patched = await patchObjects(container, resources.slice(i, i+100));
+        numberOfPatch += patched;
     }
 
     console.log(`Number of patches for ${containerId}: `, numberOfPatch);
