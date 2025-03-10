@@ -18,7 +18,7 @@ async function patchObjects(container, bundles) {
         "operationType": "Patch",
         "id": bundle.id,
         "partitionKey": bundle.idPsp,
-        "resourceBody": { operations: [{ op: 'add', path: '/onus', value: bundle.name.includes(ONUS_SUFFIX) || bundle.idChannel.includes(ONUS_SUFFIX)}] }
+        "resourceBody": { operations: [{ op: 'add', path: '/onUs', value: bundle.name.includes(ONUS_SUFFIX) || bundle.idChannel.includes(ONUS_SUFFIX)}] }
     }));
     const response = await container.items.bulk(operations);
 
