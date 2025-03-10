@@ -2972,6 +2972,9 @@
           "validityDateTo": {
             "type": "string",
             "format": "date"
+          },
+          "onUs": {
+            "type": "boolean"
           }
         }
       },
@@ -3386,6 +3389,9 @@
           },
           "abi": {
             "type": "string"
+          },
+          "onUs": {
+            "type": "boolean"
           },
           "idBundle": {
             "type": "string"

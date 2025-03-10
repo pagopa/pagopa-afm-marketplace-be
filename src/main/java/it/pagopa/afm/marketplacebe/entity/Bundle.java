@@ -83,4 +83,6 @@ public class Bundle {
     @LastModifiedDate
     private LocalDateTime lastUpdatedDate;
 
+    private Boolean onUs;
+
 }

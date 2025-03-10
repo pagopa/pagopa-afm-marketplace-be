@@ -45,4 +45,6 @@ public class PspBundleDetails {
 
     private Boolean cart;
     private String abi;
+
+    private Boolean onUs;
 }
