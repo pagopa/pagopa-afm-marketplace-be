@@ -5444,7 +5444,7 @@
             "type": "string",
             "format": "date"
           },
-          "onus": {
+          "onUs": {
             "type": "boolean"
           }
         }
@@ -5861,7 +5861,7 @@
           "abi": {
             "type": "string"
           },
-          "onus": {
+          "onUs": {
             "type": "boolean"
           },
           "idBundle": {

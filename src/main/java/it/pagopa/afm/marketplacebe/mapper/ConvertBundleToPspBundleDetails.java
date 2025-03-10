@@ -37,7 +37,7 @@ public class ConvertBundleToPspBundleDetails implements Converter<Bundle, PspBun
                 .idPsp(source.getIdPsp())
                 .cart(source.getCart())
                 .abi(source.getAbi())
-                .onus(source.getOnus())
+                .onUs(source.getOnUs())
                 .build();
     }
 }
