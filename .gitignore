@@ -36,3 +36,5 @@ build/
 .env
 /utilities/emulatorcert.crt
 **/.terraform/
+
+**/node_modules/**
