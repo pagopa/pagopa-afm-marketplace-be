@@ -1,7 +1,8 @@
 import { CosmosClient } from "@azure/cosmos";
+import 'dotenv/config'
 
-const key = "<cosmos-key>";
-const endpoint = "<cosmos-endpoint>";
+const key = process.env.COSMOS_KEY;
+const endpoint = process.env.COSMOS_ENDPOINT;
 const databaseId = "db";
 
 const client = new CosmosClient({ endpoint, key });
@@ -18,7 +19,7 @@ async function patchObjects(container, bundles) {
         "operationType": "Patch",
         "id": bundle.id,
         "partitionKey": bundle.idPsp,
-        "resourceBody": { operations: [{ op: 'add', path: '/onUs', value: bundle.idChannel.endsWith(ONUS_SUFFIX)}] }
+        "resourceBody": { operations: [{ op: 'add', path: '/onUs', value: bundle.idChannel?.endsWith(ONUS_SUFFIX) ?? false}] }
     }));
     const response = await container.items.bulk(operations);
 
