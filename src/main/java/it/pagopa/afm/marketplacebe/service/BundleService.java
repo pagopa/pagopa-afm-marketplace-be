@@ -282,6 +282,7 @@ public class BundleService {
                 .validityDateTo(bundleRequest.getValidityDateTo())
                 .insertedDate(now)
                 .lastUpdatedDate(now)
+                .onUs(bundleRequest.getOnUs())
                 .build();
     }
 
@@ -326,6 +327,7 @@ public class BundleService {
         bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
         bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
         bundle.setType(bundleRequest.getType());
+        bundle.setOnUs(bundleRequest.getOnUs());
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
