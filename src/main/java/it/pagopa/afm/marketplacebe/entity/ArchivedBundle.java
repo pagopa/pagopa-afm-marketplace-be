@@ -55,4 +55,6 @@ public class ArchivedBundle {
     @LastModifiedDate
     private LocalDateTime lastUpdatedDate;
 
+    private Boolean onUs;
+
 }

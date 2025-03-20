@@ -1300,7 +1300,7 @@ class BundleServiceTest {
     void createBundle_ok_11() {
         // same (payment method, touchpoint, transferCategoryList, payment amount range), idChannel ONUS case
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
-        bundleRequest.setIdChannel("idChannel_ONUS");
+        bundleRequest.setOnUs(true);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
@@ -1319,7 +1319,7 @@ class BundleServiceTest {
     void createBundle_ok_12() {
         // same (payment method, touchpoint, transferCategoryList, payment amount range), idChannel ONUS case and transferCategoryList null
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
-        bundleRequest.setIdChannel("idChannel_ONUS");
+        bundleRequest.setOnUs(true);
         bundleRequest.setTransferCategoryList(null);
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
@@ -1340,6 +1340,7 @@ class BundleServiceTest {
         // same (payment method, touchpoint, transferCategoryList, payment amount range, idChannel), and bundle type is PRIVATE.
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
         bundleRequest.setType(BundleType.PRIVATE);
+        bundleRequest.setIdChannel("different");
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
 
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
@@ -1516,6 +1517,24 @@ class BundleServiceTest {
         bundleRequest.setIdChannel("idChannel_ONUS");
         List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
         bundles.get(0).setIdChannel("idChannel_ONUS");
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_sameBundlePrivateWithSameChannel() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range, idChannel), and bundle type is PRIVATE.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PRIVATE);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
                 any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
 

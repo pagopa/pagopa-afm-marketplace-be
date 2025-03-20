@@ -64,6 +64,7 @@ public class ValidBundlesTaskExecutor extends TaskExecutor {
             validBundle.setDigitalStamp(bundle.getDigitalStamp());
             validBundle.setDigitalStampRestriction(bundle.getDigitalStampRestriction());
             validBundle.setCart(bundle.getCart());
+            validBundle.setOnUs(bundle.getOnUs());
             return validBundle;
         }).collect(Collectors.toList());
 

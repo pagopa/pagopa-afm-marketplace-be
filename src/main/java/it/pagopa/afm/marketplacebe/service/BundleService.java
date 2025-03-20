@@ -1,44 +1,16 @@
 package it.pagopa.afm.marketplacebe.service;
 
 import com.azure.cosmos.models.PartitionKey;
-import it.pagopa.afm.marketplacebe.entity.Bundle;
-import it.pagopa.afm.marketplacebe.entity.BundleOffer;
-import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
-import it.pagopa.afm.marketplacebe.entity.BundleType;
-import it.pagopa.afm.marketplacebe.entity.CiBundle;
 import it.pagopa.afm.marketplacebe.entity.CiBundleAttribute;
-import it.pagopa.afm.marketplacebe.entity.PaymentType;
+import it.pagopa.afm.marketplacebe.entity.*;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleAttributeResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
-import it.pagopa.afm.marketplacebe.model.bundle.BundleResponse;
-import it.pagopa.afm.marketplacebe.model.bundle.Bundles;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundleDetails;
-import it.pagopa.afm.marketplacebe.model.bundle.CiBundles;
-import it.pagopa.afm.marketplacebe.model.bundle.PspBundleDetails;
+import it.pagopa.afm.marketplacebe.model.bundle.*;
 import it.pagopa.afm.marketplacebe.model.offer.BundleCreditorInstitutionResource;
 import it.pagopa.afm.marketplacebe.model.request.CiBundleAttributeModel;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.CosmosRepository;
-import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
-import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
-import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
-import it.pagopa.afm.marketplacebe.task.BundleOfferTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.BundleRequestTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.BundleTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.CiBundleTaskExecutor;
-import it.pagopa.afm.marketplacebe.task.TaskManager;
-import it.pagopa.afm.marketplacebe.task.ValidBundlesTaskExecutor;
+import it.pagopa.afm.marketplacebe.repository.*;
+import it.pagopa.afm.marketplacebe.task.*;
 import it.pagopa.afm.marketplacebe.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
@@ -92,8 +64,6 @@ public class BundleService {
     private final CosmosRepository cosmosRepository;
 
     private final ModelMapper modelMapper;
-
-    private static final String ONUS_BUNDLE_SUFFIX = "_ONUS";
 
     @Autowired
     public BundleService(
@@ -252,7 +222,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlappingCreation(idPsp, bundleRequest);
+        analyzeBundlesOverlapping(null, idPsp, bundleRequest);
 
         // verify if paymentType exists with the requested name
         Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));
@@ -282,6 +252,7 @@ public class BundleService {
                 .validityDateTo(bundleRequest.getValidityDateTo())
                 .insertedDate(now)
                 .lastUpdatedDate(now)
+                .onUs(bundleRequest.getOnUs())
                 .build();
     }
 
@@ -302,7 +273,7 @@ public class BundleService {
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
         // check if there is overlapping transferCategoryList
-        analyzeBundlesOverlappingUpdate(idBundle, idPsp, bundleRequest);
+        analyzeBundlesOverlapping(idBundle, idPsp, bundleRequest);
 
         bundle.setIdChannel(bundleRequest.getIdChannel());
         bundle.setIdBrokerPsp(bundleRequest.getIdBrokerPsp());
@@ -326,6 +297,7 @@ public class BundleService {
         bundle.setDigitalStamp(CommonUtil.deNull(bundleRequest.getDigitalStamp()));
         bundle.setDigitalStampRestriction(CommonUtil.deNull(bundleRequest.getDigitalStamp()) && CommonUtil.deNull(bundleRequest.getDigitalStampRestriction()));
         bundle.setType(bundleRequest.getType());
+        bundle.setOnUs(bundleRequest.getOnUs());
 
         // rule R15: adapt paymentAmount of the related ciBundle
         List<CiBundle> ciBundles = ciBundleRepository.findByIdBundle(bundle.getId());
@@ -752,25 +724,6 @@ public class BundleService {
     }
 
     /**
-     * Verify if transferCategoryList overlaps the target one,
-     * if either idChannel or idChannelTarget is of type ONUS relative to the other,
-     * or if the bundle type is PRIVATE, the transferCategoryList check is skipped.
-     */
-    private boolean isTransferCategoryListValid(
-            List<String> transferCategoryList,
-            List<String> transferCategoryListTarget,
-            String idChannel,
-            String idChannelTarget,
-            BundleType bundleType
-    ) {
-        if (transferCategoryListTarget == null || bundleType == BundleType.PRIVATE || (transferCategoryList != null && transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains))) {
-            return true;
-        } else {
-            return isOnusBundleMatch(idChannel, idChannelTarget);
-        }
-    }
-
-    /**
      * Verify if date is equal or after now
      *
      * @param date  date to check
@@ -842,7 +795,7 @@ public class BundleService {
     /**
      * Verify if the request could be accepted according to the existent bundles
      */
-    private void analyzeBundlesOverlappingCreation(String idPsp, BundleRequest bundleRequest) {
+    private void analyzeBundlesOverlapping(String idBundle, String idPsp, BundleRequest bundleRequest) {
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
@@ -851,38 +804,44 @@ public class BundleService {
         List<Bundle> bundles = getBundlesIdPspTypePaymentTypeTouchPoint(idPsp, bundleRequest);
 
         bundles.forEach(bundle -> {
-            // verify payment amount range validity and
-            // verify transfer category list overlapping and verify if validityDateFrom is acceptable
-            if (!isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList(), bundleRequest.getIdChannel(), bundle.getIdChannel(), bundleRequest.getType()) &&
-                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
+            // If bundles have same id SKIP configuration check (UPDATE operation)
+            // If bundles have different onUs flag SKIP configuration check
+            // If bundles are private AND have different channels SKIP configuration check
+            // ELSE CHECK if they have the same configuration
+            if (bundle.getId().equals(idBundle)) {
+                return;
+            }
+            if (bundle.getOnUs() != null && !bundle.getOnUs().equals(bundleRequest.getOnUs())) {
+                return;
+            }
+            if (bundleRequest.getType().equals(BundleType.PRIVATE) && (!bundleRequest.getIdChannel().equals(bundle.getIdChannel()))) {
+                return;
+            }
+            if (
+                // verify payment amount range validity
+                    !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
+                            // verify transfer category list overlapping and verify
+                            !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
+                            // verify if validityDateFrom is acceptable
+                            !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())
+            ) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }
         });
     }
 
     /**
-     * Verify if the request could be accepted according to the existent bundles
+     * Verify if transferCategoryList overlaps the target one.
      */
-    private void analyzeBundlesOverlappingUpdate(String idBundle, String idPsp, BundleRequest bundleRequest) {
-        // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
-        // in a bundle that is not the one being updated
-        // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
-        // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
-        // check if there is overlapping transferCategoryList
-
-        List<Bundle> bundles = getBundlesIdPspTypePaymentTypeTouchPoint(idPsp, bundleRequest);
-
-        bundles.forEach(bundle -> {
-            // verify payment amount range validity and
-            // verify transfer category list overlapping and verify if validityDateFrom is acceptable
-            if (!bundle.getId().equals(idBundle) &&
-                    !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
-                    !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList(), bundleRequest.getIdChannel(), bundle.getIdChannel(), bundleRequest.getType()) &&
-                    !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())) {
-                throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
-            }
-        });
+    private boolean isTransferCategoryListValid(
+            List<String> transferCategoryList,
+            List<String> transferCategoryListTarget
+    ) {
+        // If transfer & transferTarget are NOT both null
+        return transferCategoryList != transferCategoryListTarget &&
+                // If the transfer list does not match
+                ((transferCategoryList == null || transferCategoryListTarget == null) ||
+                transferCategoryList.stream().noneMatch(transferCategoryListTarget::contains));
     }
 
     private List<Bundle> getBundlesByNameAndType(
@@ -908,39 +867,5 @@ public class BundleService {
         } else {
             return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
         }
-    }
-
-    /**
-     * Checks if the given idChannel represents an ONUS bundle.
-     * This is determined by checking if the idChannel ends with the ONUS_BUNDLE_SUFFIX, ignoring case sensitivity.
-     *
-     * @param idChannel The channel ID to check.
-     * @return true if the idChannel ends with ONUS_BUNDLE_SUFFIX, false otherwise.
-     */
-    private boolean isOnusBundle(String idChannel) {
-        return StringUtils.endsWithIgnoreCase(idChannel, ONUS_BUNDLE_SUFFIX);
-    }
-
-    /**
-     * Determines if there is a match between two channels based on their ONUS bundle status.
-     * A match occurs when one channel is of type ONUS and the other is not,
-     * and both have the same normalized ID after removing the ONUS_BUNDLE_SUFFIX.
-     *
-     * @param idChannel The channel ID to compare.
-     * @param idChannelTarget The target channel ID to compare.
-     * @return true if there is an ONUS bundle match, false otherwise.
-     */
-    private boolean isOnusBundleMatch(String idChannel, String idChannelTarget) {
-        boolean isSourceOnus = isOnusBundle(idChannel);
-        boolean isTargetOnus = isOnusBundle(idChannelTarget);
-
-        boolean hasMatchedOnusStatus = isSourceOnus != isTargetOnus;
-
-        String normalizedIdChannel = idChannel.replace(ONUS_BUNDLE_SUFFIX, "");
-        String normalizedIdChannelTarget = idChannelTarget.replace(ONUS_BUNDLE_SUFFIX, "");
-
-        boolean haveMatchingNormalizedIds = normalizedIdChannel.equals(normalizedIdChannelTarget);
-
-        return hasMatchedOnusStatus && haveMatchingNormalizedIds;
     }
 }
