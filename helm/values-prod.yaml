@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.21.5"
+    tag: "0.21.5-1-fix-pat-token"
     pullPolicy: Always
   livenessProbe:
     httpGet:
