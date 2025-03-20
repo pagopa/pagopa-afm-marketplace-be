@@ -35,8 +35,8 @@ async function run(containerId) {
 
     console.log(`Number of ${containerId}: `, resources.length);
 
-    for (let i = 0; i <= resources.length; i += 100) {
-        const patched = await patchObjects(container, resources.slice(i, i+100));
+    for (let i = 0; i <= resources.length; i += 10) {
+        const patched = await patchObjects(container, resources.slice(i, i+10));
         numberOfPatch += patched;
     }
 
