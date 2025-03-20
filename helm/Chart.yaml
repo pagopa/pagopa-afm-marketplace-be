@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopa-afm-marketplace
 description: Microservice that handles marketplace for pagoPA Advanced Fees Management
 type: application
-version: 0.87.0
-appVersion: 0.21.5-1-fix-pat-token
+version: 0.88.0
+appVersion: 0.21.6
 dependencies:
   - name: microservice-chart
     version: 2.4.0
