@@ -13,7 +13,7 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.21.6</version>
+	<version>0.21.6-PIDM-486-update-helm-chart</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 

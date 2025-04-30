@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.21.6"
+    tag: "0.21.6-PIDM-486-update-helm-chart"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -28,9 +28,6 @@ microservice-chart:
       - interval: 10s #jmx-exporter
         targetPort: 12345
         path: /metrics
-  ports:
-    - 80 #http
-    - 12345 #jmx-exporter
   service:
     create: true
     type: ClusterIP
