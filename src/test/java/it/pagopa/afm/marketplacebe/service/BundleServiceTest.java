@@ -293,6 +293,55 @@ class BundleServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
     }
 
+    @Test
+    void shouldRaiseBadRequestWithOverlappingBundle() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        // Setup invalid validity date to
+        bundleRequest.setValidityDateTo(bundleRequest.getValidityDateFrom().plusDays(2));
+        // Set same idPsp
+        bundle.setIdPsp(idPsp);
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(), any(), anyString(), anyString()))
+                .thenReturn(List.of(bundle));
+
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleService.createBundle(idPsp, bundleRequest)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+    }
+
+    @Test
+    void shouldCreatePrivateBundleWithLaterExpiring() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        // Set bundle request validityDateTo to later date
+        bundleRequest.setValidityDateTo(bundleRequest.getValidityDateFrom().plusYears(2));
+        // Set bundle request type to PRIVATE
+        bundleRequest.setType(BundleType.PRIVATE);
+        // Set same idPsp
+        bundle.setIdPsp(idPsp);
+        // Set bundle to PRIVATE
+        bundle.setType(BundleType.PRIVATE);
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(), any(), anyString(), anyString()))
+                .thenReturn(List.of(bundle));
+
+        bundleService.createBundle(idPsp, bundleRequest);
+
+        verify(bundleRepository).save(bundleArgumentCaptor.capture());
+
+        Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
+        assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
+    }
+
 
     @Test
     void shouldUpdateBundle() {
