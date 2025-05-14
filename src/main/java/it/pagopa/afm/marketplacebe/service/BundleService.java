@@ -743,6 +743,13 @@ public class BundleService {
     }
 
     /**
+     * Verify if validDateTo of the request is before or after the validityDateTo of the existent bundle
+     */
+    private boolean isValidityDateToLater(LocalDate validityDateToBundleRequest, LocalDate validityDateToBundleExistent) {
+        return validityDateToBundleRequest.isAfter(validityDateToBundleExistent);
+    }
+
+    /**
      * If date is null, returns the next acceptable date
      *
      * @return date
@@ -823,7 +830,9 @@ public class BundleService {
                             // verify transfer category list overlapping and verify
                             !isTransferCategoryListValid(bundleRequest.getTransferCategoryList(), bundle.getTransferCategoryList()) &&
                             // verify if validityDateFrom is acceptable
-                            !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo())
+                            !isValidityDateFromValid(bundleRequest.getValidityDateFrom(), bundle.getValidityDateTo()) &&
+                            // verify if validityDateTo of request is after the validityDateTo of the existing bundle (only for private bundles)
+                            !(bundleRequest.getType().equals(BundleType.PRIVATE) && isValidityDateToLater(bundleRequest.getValidityDateTo(), bundle.getValidityDateTo()))
             ) {
                 throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Bundle configuration overlaps an existing one.");
             }

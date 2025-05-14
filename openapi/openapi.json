@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.21.6"
+    "version": "0.21.6-1-PIDM-473"
   },
   "servers": [
     {
@@ -5365,6 +5365,7 @@
           "abi",
           "idBrokerPsp",
           "idChannel",
+          "onUs",
           "pspBusinessName"
         ],
         "type": "object",
