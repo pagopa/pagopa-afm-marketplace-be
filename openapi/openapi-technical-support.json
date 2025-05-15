@@ -4,7 +4,7 @@
     "title": "Marketplace API for Technical Support",
     "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.21.7-1-PIDM-486"
+    "version": "0.21.7-2-PIDM-486"
   },
   "servers": [
     {
