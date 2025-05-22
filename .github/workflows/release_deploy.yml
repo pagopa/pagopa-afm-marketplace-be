@@ -3,6 +3,8 @@ name: Release And Deploy
 # Controls when the workflow will run
 on:
   pull_request:
+    branches:
+      - main
     types: [ closed ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -28,6 +30,11 @@ on:
         description: skip the release. Only deploy
         default: false
 
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
 
 permissions:
   packages: write
