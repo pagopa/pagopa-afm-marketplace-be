@@ -218,6 +218,9 @@ public class BundleService {
         // verify validityDateFrom and validityDateTo
         analyzeValidityDate(bundleRequest, null);
 
+        // verify minPaymentAmount < maxPaymentAmount
+        analyzeMinMaxPaymentAmount(bundleRequest);
+
         // check if exists already the same configuration (minPaymentAmount, maxPaymentAmount, paymentType, touchpoint, type, transferCategoryList)
         // if it exists check validityDateFrom of the new configuration is next to validityDateTo of the existing one
         // check if the same payment amount range must not have the same tuple (paymentType, touchpoint, type, transferCategoryList)
@@ -263,6 +266,9 @@ public class BundleService {
 
         // verify validityDateFrom, if it is null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
+
+        // verify maxPaymentAmount > minPaymentAmount
+        analyzeMinMaxPaymentAmount(bundleRequest);
 
         if (!forceUpdate) {
             // verify validityDateFrom and validityDateTo
@@ -790,6 +796,16 @@ public class BundleService {
             }
         }
     }
+
+    /**
+     * Verify the amount range set in bundle request is correct
+     */
+    private void analyzeMinMaxPaymentAmount(BundleRequest bundleRequest) {
+        if (bundleRequest.getMinPaymentAmount() >= bundleRequest.getMaxPaymentAmount()) {
+            throw new AppException(AppError.BUNDLE_BAD_REQUEST, "Amount range not valid. MaxPaymentAmount must be >= than MinPaymentAmount");
+        }
+    }
+
 
     /**
      * Verify if paymentType exists in the related container

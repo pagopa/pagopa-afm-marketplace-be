@@ -49,11 +49,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -342,6 +338,25 @@ class BundleServiceTest {
         assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
     }
 
+    @Test
+    void shouldRaiseBadRequestWithWrongAmountRangeCreate() {
+        var bundleRequest = getMockBundleRequest();
+        String idPsp = "test_id_psp";
+
+        // Set not correct amount range
+        bundleRequest.setMinPaymentAmount(1L);
+        bundleRequest.setMaxPaymentAmount(0L);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleService.createBundle(idPsp, bundleRequest)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+        assertTrue(appException.getMessage().contains("Amount range not valid. MaxPaymentAmount must be >= than MinPaymentAmount"));
+    }
+
 
     @Test
     void shouldUpdateBundle() {
@@ -386,6 +401,29 @@ class BundleServiceTest {
         Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, false);
 
         assertEquals(bundleRequest.getName(), updatedBundle.getName());
+    }
+
+    @Test
+    void shouldRaiseBadRequestWithWrongAmountRangeUpdate() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+        String bundleId = bundle.getId();
+
+        // Set not correct amount range
+        bundleRequest.setMinPaymentAmount(1L);
+        bundleRequest.setMaxPaymentAmount(0L);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
+                .thenReturn(Optional.of(bundle));
+
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleService.updateBundle(idPsp, bundleId, bundleRequest, false)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+        assertTrue(appException.getMessage().contains("Amount range not valid. MaxPaymentAmount must be >= than MinPaymentAmount"));
     }
 
 
