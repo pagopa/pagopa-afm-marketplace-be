@@ -408,6 +408,7 @@ class BundleServiceTest {
         var bundleRequest = getMockBundleRequest();
         Bundle bundle = getMockBundle();
         String idPsp = "test_id_psp";
+        String bundleId = bundle.getId();
 
         // Set not correct amount range
         bundleRequest.setMinPaymentAmount(1L);
@@ -418,7 +419,7 @@ class BundleServiceTest {
                 .thenReturn(Optional.of(bundle));
 
         AppException appException = assertThrows(AppException.class,
-                () -> bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, false)
+                () -> bundleService.updateBundle(idPsp, bundleId, bundleRequest, false)
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
