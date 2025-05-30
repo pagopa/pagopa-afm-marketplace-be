@@ -725,7 +725,7 @@ public class BundleService {
             Long maxPaymentAmountTarget
     ) {
         return minPaymentAmount < maxPaymentAmount && (
-                minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount < minPaymentAmountTarget || minPaymentAmount >= maxPaymentAmountTarget
+                minPaymentAmount < minPaymentAmountTarget && maxPaymentAmount <= minPaymentAmountTarget || minPaymentAmount >= maxPaymentAmountTarget
         );
     }
 
