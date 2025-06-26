@@ -146,6 +146,6 @@ class PaymentTypeControllerTest {
         mvc.perform(delete(url)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));;
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }
