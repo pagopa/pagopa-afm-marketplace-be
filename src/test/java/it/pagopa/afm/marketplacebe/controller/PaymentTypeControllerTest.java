@@ -7,12 +7,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 import java.util.Optional;
 
+import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypeRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -87,4 +89,63 @@ class PaymentTypeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
+    @Test
+    void createPaymentType_201() throws Exception {
+        when(paymentTypeService.createPaymentType(any(PaymentTypeRequest.class)))
+                .thenReturn(TestUtil.getMockPaymentType());
+
+        String url = URL + "/create";
+        PaymentTypeRequest paymentTypeRequest = PaymentTypeRequest.builder()
+                .name("name")
+                .description("description")
+                .build();
+
+        mvc.perform(post(url)
+                        .content(TestUtil.toJson(paymentTypeRequest))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void createPaymentType_409() throws Exception {
+        when(paymentTypeService.createPaymentType(any(PaymentTypeRequest.class)))
+                .thenThrow(new AppException(AppError.PAYMENT_TYPE_CONFLICT, "test"));
+
+        String url = URL + "/create";
+        PaymentTypeRequest paymentTypeRequest = PaymentTypeRequest.builder()
+                .name("name")
+                .description("description")
+                .build();
+
+        mvc.perform(post(url)
+                        .content(TestUtil.toJson(paymentTypeRequest))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void deletePaymentType_200() throws Exception {
+        doNothing().when(paymentTypeService).deletePaymentType(anyString());
+
+        String url = URL + "/delete/TEST";
+
+        mvc.perform(delete(url)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void deletePaymentType_404() throws Exception {
+        doThrow(new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, "test"))
+                .when(paymentTypeService).deletePaymentType(anyString());
+
+        String url = URL + "/delete/TEST";
+
+        mvc.perform(delete(url)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));;
+    }
 }
