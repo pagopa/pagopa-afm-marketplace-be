@@ -5,6 +5,7 @@ import static it.pagopa.afm.marketplacebe.TestUtil.getMockPaymentTypeList;
 import static it.pagopa.afm.marketplacebe.exception.AppError.PAYMENT_TYPE_NOT_DELETABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypeRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -39,10 +41,11 @@ import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
 class PaymentTypeServiceTest {
 
     @Captor
-    ArgumentCaptor<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpointArgumentCaptor = ArgumentCaptor.forClass(it.pagopa.afm.marketplacebe.entity.Touchpoint.class);
+    ArgumentCaptor<it.pagopa.afm.marketplacebe.entity.PaymentType> paymentTypeArgumentCaptor = ArgumentCaptor.forClass(it.pagopa.afm.marketplacebe.entity.PaymentType.class);
 
     @Captor
-    ArgumentCaptor<Collection<it.pagopa.afm.marketplacebe.entity.PaymentType>> paymentTypeArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
+    ArgumentCaptor<Collection<it.pagopa.afm.marketplacebe.entity.PaymentType>> paymentTypeListArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
+
     @MockBean
     private PaymentTypeRepository paymentTypeRepository;
     @MockBean
@@ -205,10 +208,98 @@ class PaymentTypeServiceTest {
         assertEquals(PAYMENT_TYPE_NOT_DELETABLE.getTitle(), exception.getTitle());
     }
 
+    @Test
+    void shouldCreatePaymentType() {
+        String PAYMENT_TYPE_NAME = "CP";
+        String PAYMENT_TYPE_DESCRIPTION = "PAYMENT_TYPE_DESCRIPTION";
+        PaymentTypeRequest paymentTypeRequest = PaymentTypeRequest
+                .builder()
+                .name(PAYMENT_TYPE_NAME)
+                .description(PAYMENT_TYPE_DESCRIPTION)
+                .build();
+
+        // Precondition
+        when(paymentTypeRepository.findByName(PAYMENT_TYPE_NAME)).thenReturn(Optional.empty());
+        when(paymentTypeRepository.save(any())).thenReturn(TestUtil.getMockPaymentType());
+
+        // Tests
+        it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = paymentTypeService.createPaymentType(paymentTypeRequest);
+
+        // Assertions
+        assertEquals(PAYMENT_TYPE_NAME, paymentType.getName());
+    }
+
+    @Test
+    void shouldCreatePaymentTypeConflict() {
+        String PAYMENT_TYPE_NAME = "CP";
+        String PAYMENT_TYPE_DESCRIPTION = "PAYMENT_TYPE_DESCRIPTION";
+        PaymentTypeRequest paymentTypeRequest = PaymentTypeRequest
+                .builder()
+                .name(PAYMENT_TYPE_NAME)
+                .description(PAYMENT_TYPE_DESCRIPTION)
+                .build();
+
+        // Precondition
+        when(paymentTypeRepository.findByName(PAYMENT_TYPE_NAME)).thenReturn(Optional.of(getMockPaymentType()));
+
+        // Test
+        AppException exception = assertThrows(AppException.class, () -> {
+            paymentTypeService.createPaymentType(paymentTypeRequest);
+        });
+
+        assertEquals(HttpStatus.CONFLICT, exception.getHttpStatus());
+    }
+
+    @Test
+    void shouldDeletePaymentType() {
+        it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
+
+        // Precondition
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(paymentType));
+        when(bundleRepository.findByPaymentType(anyString())).thenReturn(new ArrayList<>());
+
+        // Tests
+        paymentTypeService.deletePaymentType(paymentType.getName());
+
+        verify(paymentTypeRepository).delete(paymentTypeArgumentCaptor.capture());
+
+        assertEquals(paymentType.getName(), paymentTypeArgumentCaptor.getValue().getName());
+    }
+
+    @Test
+    void shouldThrowNotFoundDeletePaymentType() {
+        it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
+        // Precondition
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.empty());
+
+        // Tests
+        AppException exception = assertThrows(AppException.class, () -> {
+            paymentTypeService.deletePaymentType(paymentType.getName());
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
+    }
+
+    @Test
+    void shouldThrowBadRequestDeletePaymentType() {
+        it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
+
+        // Precondition
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(paymentType));
+        when(bundleRepository.findByPaymentType(anyString())).thenReturn(List.of(TestUtil.getMockBundle()));
+
+        // Tests
+        AppException exception = assertThrows(AppException.class, () -> {
+            paymentTypeService.deletePaymentType(paymentType.getName());
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
+    }
+
     void executeTestForSyncPaymentTypes(List<it.pagopa.afm.marketplacebe.entity.PaymentType> paymentTypesAsInput) {
         paymentTypeService.syncPaymentTypes(paymentTypesAsInput);
-        verify(paymentTypeRepository).saveAll(paymentTypeArgumentCaptor.capture());
+        verify(paymentTypeRepository).saveAll(paymentTypeListArgumentCaptor.capture());
         Mockito.verify(paymentTypeRepository, times(1)).saveAll(Mockito.any());
-        assertEquals(paymentTypesAsInput.size(), paymentTypeArgumentCaptor.getValue().size());
+        assertEquals(paymentTypesAsInput.size(), paymentTypeListArgumentCaptor.getValue().size());
     }
 }
