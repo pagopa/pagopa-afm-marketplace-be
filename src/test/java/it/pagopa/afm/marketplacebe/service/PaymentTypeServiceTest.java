@@ -210,37 +210,37 @@ class PaymentTypeServiceTest {
 
     @Test
     void shouldCreatePaymentType() {
-        String PAYMENT_TYPE_NAME = "CP";
-        String PAYMENT_TYPE_DESCRIPTION = "PAYMENT_TYPE_DESCRIPTION";
+        String paymentTypeName = "CP";
+        String paymentTypeDescription = "PAYMENT_TYPE_DESCRIPTION";
         PaymentTypeRequest paymentTypeRequest = PaymentTypeRequest
                 .builder()
-                .name(PAYMENT_TYPE_NAME)
-                .description(PAYMENT_TYPE_DESCRIPTION)
+                .name(paymentTypeName)
+                .description(paymentTypeDescription)
                 .build();
 
         // Precondition
-        when(paymentTypeRepository.findByName(PAYMENT_TYPE_NAME)).thenReturn(Optional.empty());
+        when(paymentTypeRepository.findByName(paymentTypeName)).thenReturn(Optional.empty());
         when(paymentTypeRepository.save(any())).thenReturn(TestUtil.getMockPaymentType());
 
         // Tests
         it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = paymentTypeService.createPaymentType(paymentTypeRequest);
 
         // Assertions
-        assertEquals(PAYMENT_TYPE_NAME, paymentType.getName());
+        assertEquals(paymentTypeName, paymentType.getName());
     }
 
     @Test
     void shouldCreatePaymentTypeConflict() {
-        String PAYMENT_TYPE_NAME = "CP";
-        String PAYMENT_TYPE_DESCRIPTION = "PAYMENT_TYPE_DESCRIPTION";
+        String paymentTypeName = "CP";
+        String paymentTypeDescription = "PAYMENT_TYPE_DESCRIPTION";
         PaymentTypeRequest paymentTypeRequest = PaymentTypeRequest
                 .builder()
-                .name(PAYMENT_TYPE_NAME)
-                .description(PAYMENT_TYPE_DESCRIPTION)
+                .name(paymentTypeName)
+                .description(paymentTypeDescription)
                 .build();
 
         // Precondition
-        when(paymentTypeRepository.findByName(PAYMENT_TYPE_NAME)).thenReturn(Optional.of(getMockPaymentType()));
+        when(paymentTypeRepository.findByName(paymentTypeName)).thenReturn(Optional.of(getMockPaymentType()));
 
         // Test
         AppException exception = assertThrows(AppException.class, () -> {
@@ -269,12 +269,13 @@ class PaymentTypeServiceTest {
     @Test
     void shouldThrowNotFoundDeletePaymentType() {
         it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
+        String paymentTypeName = paymentType.getName();
         // Precondition
         when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.empty());
 
         // Tests
         AppException exception = assertThrows(AppException.class, () -> {
-            paymentTypeService.deletePaymentType(paymentType.getName());
+            paymentTypeService.deletePaymentType(paymentTypeName);
         });
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
@@ -283,6 +284,7 @@ class PaymentTypeServiceTest {
     @Test
     void shouldThrowBadRequestDeletePaymentType() {
         it.pagopa.afm.marketplacebe.entity.PaymentType paymentType = TestUtil.getMockPaymentType();
+        String paymentTypeName = paymentType.getName();
 
         // Precondition
         when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(paymentType));
@@ -290,7 +292,7 @@ class PaymentTypeServiceTest {
 
         // Tests
         AppException exception = assertThrows(AppException.class, () -> {
-            paymentTypeService.deletePaymentType(paymentType.getName());
+            paymentTypeService.deletePaymentType(paymentTypeName);
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
