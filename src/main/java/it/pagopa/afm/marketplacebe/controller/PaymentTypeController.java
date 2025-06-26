@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.pagopa.afm.marketplacebe.model.ProblemJson;
 import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentType;
+import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypeRequest;
 import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypes;
 import it.pagopa.afm.marketplacebe.service.PaymentTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,41 @@ public class PaymentTypeController {
     public ResponseEntity<Void> syncPaymentTypes(
             @RequestBody List<it.pagopa.afm.marketplacebe.entity.PaymentType> paymentTypeList) {
         paymentTypeService.syncPaymentTypes(paymentTypeList);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Create new payment type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Payment Type",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE )),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @PostMapping(
+            value = "/create",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<it.pagopa.afm.marketplacebe.entity.PaymentType> createPaymentType(
+            @RequestBody PaymentTypeRequest paymentTypeRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(paymentTypeService.createPaymentType(paymentTypeRequest));
+    }
+
+    @Operation(summary = "Delete payment type", security = {@SecurityRequirement(name = "ApiKey")}, tags = {"Payment Type",})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE )),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "429", description = "Too many requests", content = @Content(schema = @Schema())),
+            @ApiResponse(responseCode = "500", description = "Service unavailable", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProblemJson.class)))})
+    @DeleteMapping(
+            value = "/delete/{id}",
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<String> deletePaymentType(
+            @Parameter(description = "Payment type name", required = true) @PathVariable("id") String id) {
+        paymentTypeService.deletePaymentType(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

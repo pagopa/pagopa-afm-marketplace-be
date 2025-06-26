@@ -27,8 +27,8 @@ public enum AppError {
     TOUCHPOINT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Touchpoint bad request", "Touchpoint with id %s."),
 
     PAYMENT_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "Payment type not found", "Payment type %s not found"),
-
     PAYMENT_TYPE_NOT_DELETABLE(HttpStatus.BAD_REQUEST, "Payment type associated to bundle", "Payment type %s is associated to an existent bundle."),
+    PAYMENT_TYPE_CONFLICT(HttpStatus.CONFLICT, "Payment type conflict", "Payment type with name %s already exists"),
 
     CI_BUNDLE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "CI-BUNDLE bad request", "Problem to create CI-BUNDLE. %s"),
     CI_BUNDLE_NOT_FOUND(HttpStatus.NOT_FOUND, "No CI-BUNDLE relationship found", "Relation between Bundle %s and CI %s not found."),
