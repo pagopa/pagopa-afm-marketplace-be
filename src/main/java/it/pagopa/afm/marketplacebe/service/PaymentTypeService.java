@@ -6,6 +6,7 @@ import it.pagopa.afm.marketplacebe.entity.PaymentType;
 import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.PageInfo;
+import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypeRequest;
 import it.pagopa.afm.marketplacebe.model.paymenttype.PaymentTypes;
 import it.pagopa.afm.marketplacebe.repository.BundleRepository;
 import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
@@ -88,5 +89,29 @@ public class PaymentTypeService {
 
         paymentTypeRepository.deleteAll();
         paymentTypeRepository.saveAll(paymentTypeEntityList);
+    }
+
+    public PaymentType createPaymentType(PaymentTypeRequest paymentTypeRequest) {
+        if (paymentTypeRepository.findByName(paymentTypeRequest.getName()).isPresent()) {
+            throw new AppException(AppError.PAYMENT_TYPE_CONFLICT, paymentTypeRequest.getName());
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        it.pagopa.afm.marketplacebe.entity.PaymentType entry = it.pagopa.afm.marketplacebe.entity.PaymentType.builder()
+                .createdDate(now)
+                .name(paymentTypeRequest.getName())
+                .description(paymentTypeRequest.getDescription())
+                .build();
+
+        return modelMapper.map(paymentTypeRepository.save(entry), PaymentType.class);
+    }
+
+    public void deletePaymentType(String paymentTypeName) {
+        PaymentType paymentType = paymentTypeRepository.findByName(paymentTypeName)
+                .orElseThrow(() -> new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentTypeName));
+        if(!bundleRepository.findByPaymentType(paymentTypeName).isEmpty()) {
+            throw new AppException(AppError.PAYMENT_TYPE_NOT_DELETABLE, paymentTypeName);
+        }
+        paymentTypeRepository.delete(paymentType);
     }
 }
