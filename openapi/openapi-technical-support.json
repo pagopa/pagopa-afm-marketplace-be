@@ -4,7 +4,7 @@
     "title": "Marketplace API for Technical Support",
     "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.21.14"
+    "version": "0.21.14-1-crud-payment-methods"
   },
   "servers": [
     {
