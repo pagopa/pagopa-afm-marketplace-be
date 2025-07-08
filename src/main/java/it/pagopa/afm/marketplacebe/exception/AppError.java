@@ -3,6 +3,8 @@ package it.pagopa.afm.marketplacebe.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import javax.validation.constraints.NotNull;
+
 
 @Getter
 public enum AppError {
@@ -47,7 +49,17 @@ public enum AppError {
 
     BUNDLE_ATTRIBUTE_NOT_INITIALIZED(HttpStatus.CONFLICT, "Bundle attribute element is null", "CiBundle with id %s has attribute field null. Contact tech support"),
 
-    CALCULATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something was wrong generating configuration");
+    CALCULATOR_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "Something was wrong generating configuration"),
+
+    PAYMENT_METHOD_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "Payment method not found",
+            "Payment method with id %s not found"),
+    PAYMENT_METHOD_MULTIPLE_FOUND(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "Payment method multiple found",
+            "Payment method with id %s multiple found, contact technical support");
+
 
     public final HttpStatus httpStatus;
     public final String title;
