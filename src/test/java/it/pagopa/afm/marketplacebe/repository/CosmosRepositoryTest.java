@@ -71,6 +71,7 @@ class CosmosRepositoryTest {
                         List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL),
                         LocalDate.now(),
                         LocalDate.now(),
+                        false,
                         0,
                         50)
         );

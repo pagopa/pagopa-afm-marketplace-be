@@ -66,10 +66,11 @@ public class BundleController {
             @Parameter(description = "Bundle's name") @RequestParam(required = false) @Valid String name,
             @Parameter(description = "Validity date of bundles, used to retrieve all bundles valid from the specified date (yyyy-MM-dd)", example = "2024-05-10") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate validFrom,
             @Parameter(description = "Validity date of bundles, used to retrieve all bundles that expire at the specified date (yyyy-MM-dd)", example = "2024-05-10") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expireAt,
+            @Parameter(description = "Only Active Bundle", example = "true") @RequestParam(required = false) Boolean active,
             @Parameter(description = "Number of items for page") @RequestParam(required = false, defaultValue = "50") @Positive Integer limit,
             @Parameter(description = "Page number") @RequestParam(required = false, defaultValue = "0") @Min(0) @PositiveOrZero Integer page
     ) {
-        return ResponseEntity.ok(this.bundleService.getBundles(types, name, validFrom, expireAt, limit, page));
+        return ResponseEntity.ok(this.bundleService.getBundles(types, name, validFrom, expireAt, active, limit, page));
     }
 
     /**

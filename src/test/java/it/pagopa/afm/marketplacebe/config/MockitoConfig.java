@@ -1,23 +1,12 @@
 package it.pagopa.afm.marketplacebe.config;
 
+import it.pagopa.afm.marketplacebe.repository.*;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import com.azure.spring.data.cosmos.core.CosmosTemplate;
-
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedBundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.ArchivedCiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleOfferRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.BundleRequestRepository;
-import it.pagopa.afm.marketplacebe.repository.CiBundleRepository;
-import it.pagopa.afm.marketplacebe.repository.PaymentTypeRepository;
-import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
-import it.pagopa.afm.marketplacebe.repository.ValidBundleRepository;
 
 @Configuration
 public class MockitoConfig {
@@ -93,6 +82,13 @@ public class MockitoConfig {
     @Primary
     public CosmosTemplate cosmosTemplate() {
       return Mockito.mock(CosmosTemplate.class);
+    }
+
+
+    @Bean
+    @Primary
+    public PaymentMethodRepository paymentMethodRepository() {
+        return Mockito.mock(PaymentMethodRepository.class);
     }
 
 }
