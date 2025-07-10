@@ -112,12 +112,13 @@ public class BundleService {
             String name,
             LocalDate validFrom,
             LocalDate expireAt,
+            Boolean active,
             Integer limit,
             Integer pageNumber
     ) {
         // NOT a search by idPsp --> return only valid bundles
         List<PspBundleDetails> bundleList = this.cosmosRepository
-                .getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(name, bundleTypes, validFrom, expireAt, limit * pageNumber, limit)
+                .getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(name, bundleTypes, validFrom, expireAt, active, limit * pageNumber, limit)
                 .stream()
                 .map(bundle -> this.modelMapper.map(bundle, PspBundleDetails.class))
                 .toList();

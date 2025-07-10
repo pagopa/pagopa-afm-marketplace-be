@@ -105,7 +105,7 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), eq(null), eq(null), anyInt(), anyInt()))
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), eq(null), eq(null), eq(null), anyInt(), anyInt()))
                 .thenReturn(bundleList);
         when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), eq(null), eq(null)))
                 .thenReturn((long) bundleList.size());
@@ -119,7 +119,7 @@ class BundleServiceTest {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
         }
 
-        Bundles bundles = assertDoesNotThrow(() -> bundleService.getBundles(list, null, null, null, 50, 0));
+        Bundles bundles = assertDoesNotThrow(() -> bundleService.getBundles(list, null, null, null, null, 50, 0));
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -132,7 +132,7 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(anyString(), anyList(), eq(null), eq(null), anyInt(), anyInt()))
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(anyString(), anyList(), eq(null), eq(null), eq(null), anyInt(), anyInt()))
                 .thenReturn(bundleList);
         when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(anyString(), anyList(), eq(null), eq(null)))
                 .thenReturn((long) bundleList.size());
@@ -140,7 +140,7 @@ class BundleServiceTest {
         List<BundleType> bundleTypeList = new ArrayList<>();
         bundleTypeList.add(BundleType.GLOBAL);
         String nameParams = "mockName";
-        Bundles bundles = bundleService.getBundles(bundleTypeList, nameParams, null, null, 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, nameParams, null, null, null, 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -153,14 +153,14 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), any(), any(), anyInt(), anyInt()))
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), any(), any(),any(), anyInt(), anyInt()))
                 .thenReturn(bundleList);
         when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), any(), any()))
                 .thenReturn((long) bundleList.size());
 
         List<BundleType> bundleTypeList = new ArrayList<>();
         bundleTypeList.add(BundleType.GLOBAL);
-        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), LocalDate.now(), 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), LocalDate.now(), null,50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
