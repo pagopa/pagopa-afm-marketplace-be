@@ -248,7 +248,7 @@ public class CosmosRepository {
         }
 
         if (validFrom != null) {
-            buildDateQuery(validFrom, false, false, builder);
+            buildDateQuery(validFrom, false, true, builder);
         }
 
         if (expireAt != null) {
