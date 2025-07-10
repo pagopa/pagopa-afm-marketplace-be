@@ -13,7 +13,7 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.21.14-3-crud-payment-methods</version>
+	<version>0.21.14-4-crud-payment-methods</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
