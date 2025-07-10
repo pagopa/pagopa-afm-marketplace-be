@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.21.14-2-crud-payment-methods"
+    tag: "0.21.14-3-crud-payment-methods"
     pullPolicy: Always
   livenessProbe:
     httpGet:
