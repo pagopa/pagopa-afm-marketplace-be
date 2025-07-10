@@ -78,6 +78,15 @@
           },
           "example" : "2024-05-10"
         }, {
+          "name" : "active",
+          "in" : "query",
+          "description" : "Only Active Bundle",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          },
+          "example" : true
+        }, {
           "name" : "limit",
           "in" : "query",
           "description" : "Number of items for page",
