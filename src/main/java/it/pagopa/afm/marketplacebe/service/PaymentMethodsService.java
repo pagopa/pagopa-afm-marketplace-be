@@ -43,7 +43,7 @@ public class PaymentMethodsService {
         existing.setUserTouchpoint(paymentMethod.getUserTouchpoint());
         existing.setUserDevice(paymentMethod.getUserDevice());
         existing.setStatus(paymentMethod.getStatus());
-        existing.setTypes(paymentMethod.getTypes());
+        existing.setPaymentMethodTypes(paymentMethod.getPaymentMethodTypes());
         existing.setValidityDateFrom(paymentMethod.getValidityDateFrom());
         existing.setTarget(paymentMethod.getTarget());
         existing.setRangeAmount(paymentMethod.getRangeAmount());
