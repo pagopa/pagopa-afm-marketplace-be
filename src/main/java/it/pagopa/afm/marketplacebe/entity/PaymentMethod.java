@@ -39,6 +39,9 @@ public class PaymentMethod {
     @NotNull
     private Map<Language, String> description;
     @NotNull
+    @JsonProperty("payment_method_types")
+    private List<PaymentMethodType> paymentMethodTypes;
+    @NotNull
     @JsonProperty("user_touchpoint")
     private List<UserTouchpoint> userTouchpoint;
     @NotNull
