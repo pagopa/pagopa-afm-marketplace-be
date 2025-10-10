@@ -262,7 +262,7 @@ class BundleServiceTest {
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
 
-        when(paymentTypeRepository.findByName(bundle.getPaymentType())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        when(paymentTypeRepository.findByName("ANY")).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         bundleService.createBundle(idPsp, bundleRequest);
 
@@ -279,6 +279,7 @@ class BundleServiceTest {
         // Setup invalid validity date to
         bundleRequest.setValidityDateTo(bundleRequest.getValidityDateFrom().minusDays(2));
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         String idPsp = "test_id_psp";
 
@@ -348,6 +349,7 @@ class BundleServiceTest {
         bundleRequest.setMaxPaymentAmount(0L);
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         AppException appException = assertThrows(AppException.class,
                 () -> bundleService.createBundle(idPsp, bundleRequest)
@@ -390,9 +392,10 @@ class BundleServiceTest {
         String idPsp = "test";
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
         when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
                 .thenReturn(Optional.of(bundle));
-        when(paymentTypeRepository.findByName(bundle.getPaymentType()))
+        when(paymentTypeRepository.findByName("ANY"))
                 .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         when(bundleRepository.save(Mockito.any()))
@@ -415,6 +418,7 @@ class BundleServiceTest {
         bundleRequest.setMaxPaymentAmount(0L);
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
         when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
                 .thenReturn(Optional.of(bundle));
 
@@ -1306,6 +1310,9 @@ class BundleServiceTest {
         when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
         when(paymentTypeRepository.findByName("ANY"))
                 .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        when(touchpointRepository.findByName("ANY"))
+                .thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
 
         BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
         assertNotNull(result);
@@ -1450,6 +1457,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().minusDays(1));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
@@ -1535,6 +1543,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateFrom(LocalDate.now().minusDays(1));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
@@ -1546,6 +1555,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now());
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
@@ -1558,6 +1568,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(7));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
@@ -1711,6 +1722,7 @@ class BundleServiceTest {
         bundle.setValidityDateTo(LocalDate.now().minusDays(1));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
         when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundle));
 
         updateBundle_ko(bundle, HttpStatus.BAD_REQUEST);
@@ -1797,6 +1809,7 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(7));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
         String idPsp = TestUtil.getMockIdPsp();
         List<BundleRequest> bundleRequestList = List.of(bundleRequest);
         try {
