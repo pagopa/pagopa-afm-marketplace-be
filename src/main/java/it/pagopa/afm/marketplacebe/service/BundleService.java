@@ -213,6 +213,9 @@ public class BundleService {
     private Bundle generateBundle(String idPsp, BundleRequest bundleRequest) {
         setVerifyTouchpointAnyIfNull(bundleRequest);
 
+        setVerifyPaymentTypeAnyIfNull(bundleRequest);
+
+
         // verify validityDateFrom, if null set to now +1d
         bundleRequest.setValidityDateFrom(getNextAcceptableDate(bundleRequest.getValidityDateFrom()));
 
@@ -229,7 +232,7 @@ public class BundleService {
         analyzeBundlesOverlapping(null, idPsp, bundleRequest);
 
         // verify if paymentType exists with the requested name
-        Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));
+        //Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));
 
         LocalDateTime now = LocalDateTime.now();
         return Bundle.builder()
@@ -262,6 +265,8 @@ public class BundleService {
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest, boolean forceUpdate) {
         setVerifyTouchpointAnyIfNull(bundleRequest);
+
+        setVerifyPaymentTypeAnyIfNull(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
@@ -653,12 +658,23 @@ public class BundleService {
 
         if (touchpoint == null) {
             bundleRequest.setTouchpoint("ANY");
-        } else {
-            if (touchpointRepository.findByName(touchpoint).isEmpty()) {
-                throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
-            }
+        }
+        if (touchpointRepository.findByName(touchpoint).isEmpty()) {
+            throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
         }
     }
+
+    private void setVerifyPaymentTypeAnyIfNull(BundleRequest bundleRequest) {
+        String paymentType = bundleRequest.getPaymentType();
+
+        if (paymentType == null || paymentType.equalsIgnoreCase("ANY")) {
+            bundleRequest.setPaymentType("ANY");
+        }
+        if (paymentTypeRepository.findByName(paymentType).isEmpty()) {
+            throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
+        }
+    }
+
 
     /**
      * find CI-Bundle by fiscalCode and idBundle if exists from DB
@@ -888,10 +904,6 @@ public class BundleService {
     }
 
     private List<Bundle> getBundlesIdPspTypePaymentTypeTouchPoint(String idPsp, BundleRequest bundleRequest) {
-        if (Optional.ofNullable(bundleRequest.getPaymentType()).isPresent()) {
-            return bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()).getName(), bundleRequest.getTouchpoint());
-        } else {
-            return bundleRepository.findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(idPsp, bundleRequest.getType(), bundleRequest.getTouchpoint());
-        }
+        return bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()).getName(), bundleRequest.getTouchpoint());
     }
 }
