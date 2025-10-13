@@ -231,9 +231,6 @@ public class BundleService {
         // check if there is overlapping transferCategoryList
         analyzeBundlesOverlapping(null, idPsp, bundleRequest);
 
-        // verify if paymentType exists with the requested name
-        //Optional.ofNullable(bundleRequest.getPaymentType()).ifPresent(value -> getPaymentTypeByName(bundleRequest.getPaymentType()));
-
         LocalDateTime now = LocalDateTime.now();
         return Bundle.builder()
                 .idPsp(idPsp)
