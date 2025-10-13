@@ -131,7 +131,7 @@ public class TestUtil {
                 .paymentAmount(100L)
                 .minPaymentAmount(0L)
                 .maxPaymentAmount(10000L)
-                .paymentType(null)
+                .paymentType("ANY")
                 .digitalStamp(false)
                 .digitalStampRestriction(false)
                 .touchpoint("IO")
