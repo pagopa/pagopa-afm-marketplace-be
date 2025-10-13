@@ -661,7 +661,8 @@ public class BundleService {
     private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
         String touchpoint = bundleRequest.getTouchpoint();
 
-        if (touchpoint == null) {
+        if (touchpoint == null  || touchpoint.equalsIgnoreCase("ANY")) {
+            touchpoint= "ANY";
             bundleRequest.setTouchpoint("ANY");
         }
         if (touchpointRepository.findByName(bundleRequest.getTouchpoint()).isEmpty()) {
@@ -673,6 +674,7 @@ public class BundleService {
         String paymentType = bundleRequest.getPaymentType();
 
         if (paymentType == null || paymentType.equalsIgnoreCase("ANY")) {
+            paymentType = "ANY";
             bundleRequest.setPaymentType("ANY");
         }
         if (paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
