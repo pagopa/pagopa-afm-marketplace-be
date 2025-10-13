@@ -1300,8 +1300,8 @@ class BundleServiceTest {
     void createBundle_ok_6() {
         // same (payment method, touchpoint, transferCategoryList, payment amount range), different type
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
-        bundleRequest.setPaymentType(null);
-        bundleRequest.setTouchpoint(null);
+        bundleRequest.setPaymentType("ANY");
+        bundleRequest.setTouchpoint("ANY");
         bundleRequest.setType(BundleType.PUBLIC);
 
         when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),

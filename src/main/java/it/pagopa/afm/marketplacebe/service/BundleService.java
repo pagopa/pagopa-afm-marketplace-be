@@ -211,9 +211,9 @@ public class BundleService {
     }
 
     private Bundle generateBundle(String idPsp, BundleRequest bundleRequest) {
-        setVerifyTouchpointAnyIfNull(bundleRequest);
+        setVerifyTouchpointExist(bundleRequest);
 
-        setVerifyPaymentTypeAnyIfNull(bundleRequest);
+        setVerifyPaymentTypeExist(bundleRequest);
 
 
         // verify validityDateFrom, if null set to now +1d
@@ -261,9 +261,9 @@ public class BundleService {
     }
 
     public Bundle updateBundle(String idPsp, String idBundle, BundleRequest bundleRequest, boolean forceUpdate) {
-        setVerifyTouchpointAnyIfNull(bundleRequest);
+        setVerifyTouchpointExist(bundleRequest);
 
-        setVerifyPaymentTypeAnyIfNull(bundleRequest);
+        setVerifyPaymentTypeExist(bundleRequest);
 
         Bundle bundle = getBundle(idBundle, idPsp);
 
@@ -650,26 +650,19 @@ public class BundleService {
                 .whenComplete((msg, ex) -> log.info("Configuration executed " + LocalDateTime.now()));
     }
 
-    private void setVerifyTouchpointAnyIfNull(BundleRequest bundleRequest) {
+    private void setVerifyTouchpointExist(BundleRequest bundleRequest) {
         String touchpoint = bundleRequest.getTouchpoint();
 
-        if (touchpoint == null  || touchpoint.equalsIgnoreCase("ANY")) {
-            touchpoint= "ANY";
-            bundleRequest.setTouchpoint("ANY");
-        }
-        if (touchpointRepository.findByName(bundleRequest.getTouchpoint()).isEmpty()) {
+        if (touchpoint != null  && !touchpoint.equalsIgnoreCase("ANY")
+            && touchpointRepository.findByName(bundleRequest.getTouchpoint()).isEmpty()) {
             throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
         }
     }
 
-    private void setVerifyPaymentTypeAnyIfNull(BundleRequest bundleRequest) {
+    private void setVerifyPaymentTypeExist(BundleRequest bundleRequest) {
         String paymentType = bundleRequest.getPaymentType();
 
-        if (paymentType == null || paymentType.equalsIgnoreCase("ANY")) {
-            paymentType = "ANY";
-            bundleRequest.setPaymentType("ANY");
-        }
-        if (paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
+        if (paymentType != null && paymentType.equalsIgnoreCase("ANY") && paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
             throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
         }
     }
