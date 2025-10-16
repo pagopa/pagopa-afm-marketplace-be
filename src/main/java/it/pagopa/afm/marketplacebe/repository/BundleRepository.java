@@ -63,7 +63,7 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
             + "    IS_NULL(b.validityDateTo)"
             + "    OR "
             + "    SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10)"
-            + "        > "
+            + "        >= "
             + "    SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0, 0, 0, 0), 0, 10)"
             + " )")
     List<Bundle> findByCurrentDateBetweenValidityDateFromAndTo(@Param("currentDate") LocalDate currentDate);

@@ -4,7 +4,7 @@
     "title": "Marketplace API for Technical Support",
     "description": "marketplace-technical-support",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.21.0"
+    "version": "0.21.19"
   },
   "servers": [
     {
@@ -2894,6 +2894,7 @@
           "abi",
           "idBrokerPsp",
           "idChannel",
+          "onUs",
           "pspBusinessName"
         ],
         "type": "object",
@@ -2972,6 +2973,9 @@
           "validityDateTo": {
             "type": "string",
             "format": "date"
+          },
+          "onUs": {
+            "type": "boolean"
           }
         }
       },
@@ -3386,6 +3390,9 @@
           },
           "abi": {
             "type": "string"
+          },
+          "onUs": {
+            "type": "boolean"
           },
           "idBundle": {
             "type": "string"
