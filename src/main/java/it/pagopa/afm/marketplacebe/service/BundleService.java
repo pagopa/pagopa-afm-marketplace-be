@@ -653,8 +653,10 @@ public class BundleService {
     private void setVerifyTouchpointExist(BundleRequest bundleRequest) {
         String touchpoint = bundleRequest.getTouchpoint();
 
-        if (touchpoint != null  && !touchpoint.equalsIgnoreCase("ANY")
-            && touchpointRepository.findByName(bundleRequest.getTouchpoint()).isEmpty()) {
+        if (touchpoint == null) {
+            bundleRequest.setTouchpoint("ANY");
+        }
+        if (touchpointRepository.findByName(bundleRequest.getTouchpoint()).isEmpty()) {
             throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
         }
     }
@@ -662,7 +664,10 @@ public class BundleService {
     private void setVerifyPaymentTypeExist(BundleRequest bundleRequest) {
         String paymentType = bundleRequest.getPaymentType();
 
-        if (paymentType != null && paymentType.equalsIgnoreCase("ANY") && paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
+        if (paymentType == null) {
+            bundleRequest.setPaymentType("ANY");
+        }
+        if (paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
             throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
         }
     }
@@ -815,15 +820,6 @@ public class BundleService {
         }
     }
 
-
-    /**
-     * Verify if paymentType exists in the related container
-     */
-    private PaymentType getPaymentTypeByName(String paymentTypeName) {
-        return paymentTypeRepository.findByName(paymentTypeName)
-                .orElseThrow(() -> new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentTypeName));
-    }
-
     /**
      * Verify if the request could be accepted according to the existent bundles
      */
@@ -896,6 +892,6 @@ public class BundleService {
     }
 
     private List<Bundle> getBundlesIdPspTypePaymentTypeTouchPoint(String idPsp, BundleRequest bundleRequest) {
-        return bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), getPaymentTypeByName(bundleRequest.getPaymentType()).getName(), bundleRequest.getTouchpoint());
+        return bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(idPsp, bundleRequest.getType(), bundleRequest.getPaymentType(), bundleRequest.getTouchpoint());
     }
 }
