@@ -8,6 +8,7 @@ import it.pagopa.afm.marketplacebe.entity.BundleOffer;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
 import it.pagopa.afm.marketplacebe.entity.BundleType;
 import it.pagopa.afm.marketplacebe.entity.CiBundle;
+import it.pagopa.afm.marketplacebe.exception.AppError;
 import it.pagopa.afm.marketplacebe.exception.AppException;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleDetailsAttributes;
 import it.pagopa.afm.marketplacebe.model.bundle.BundleRequest;
@@ -55,9 +56,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {BundleService.class, MappingsConfiguration.class})
 class BundleServiceTest {
@@ -391,8 +390,8 @@ class BundleServiceTest {
         Bundle bundle = getMockBundle();
         String idPsp = "test";
 
-        // Preconditions
-        // Avoid duplicate
+        bundleRequest.setValidityDateFrom(LocalDate.now().plusDays(2));
+        bundleRequest.setValidityDateTo(LocalDate.now().minusDays(1)); // invalid range
 
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
@@ -405,9 +404,14 @@ class BundleServiceTest {
                 .thenReturn(bundle);
 
 
-        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, true);
+        bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, true);
 
-        assertEquals(bundleRequest.getName(), updatedBundle.getName());
+        AppException exception = assertThrows(AppException.class, () ->
+                bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, false)
+        );
+
+        assertEquals(AppError.BUNDLE_BAD_REQUEST.title, exception.getTitle());
+        assertEquals(AppError.BUNDLE_BAD_REQUEST.httpStatus, exception.getHttpStatus());
     }
 
     @Test
