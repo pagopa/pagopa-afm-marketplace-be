@@ -386,6 +386,31 @@ class BundleServiceTest {
     }
 
     @Test
+    void shouldUpdateBundleNotForceUpdate() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test";
+
+        // Preconditions
+        // Avoid duplicate
+
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
+                .thenReturn(Optional.of(bundle));
+        when(paymentTypeRepository.findByName(bundle.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
+
+
+        Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, true);
+
+        assertEquals(bundleRequest.getName(), updatedBundle.getName());
+    }
+
+    @Test
     void shouldUpdateBundleWithPaymentTypeNull() {
         var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
         Bundle bundle = getMockBundle();
