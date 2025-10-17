@@ -294,7 +294,7 @@ class BundleServiceTest {
     }
     @Test
     void shouldCreateBundleWithPaymentTypeNotFound() {
-        var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
+        var bundleRequest = TestUtil.getMockBundleRequest();
         Bundle bundle = getMockBundle();
         String idPsp = "test_id_psp";
 
@@ -303,7 +303,7 @@ class BundleServiceTest {
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
 
-        when(paymentTypeRepository.findByName("ANY")).thenReturn(Optional.empty());
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.empty());
 
         AppException exception = assertThrows(AppException.class,
                 () -> bundleService.createBundle(idPsp, bundleRequest)

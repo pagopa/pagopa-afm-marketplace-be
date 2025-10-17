@@ -655,9 +655,10 @@ public class BundleService {
 
         if (touchpoint == null) {
             bundleRequest.setTouchpoint("ANY");
-        }
-        if (touchpointRepository.findByName(bundleRequest.getTouchpoint()).isEmpty()) {
-            throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
+        } else {
+            if (touchpointRepository.findByName(touchpoint).isEmpty()) {
+                throw new AppException(AppError.TOUCHPOINT_NOT_FOUND, touchpoint);
+            }
         }
     }
 
@@ -666,9 +667,10 @@ public class BundleService {
 
         if (paymentType == null) {
             bundleRequest.setPaymentType("ANY");
-        }
-        if (paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
-            throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
+        } else {
+            if (paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
+                throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
+            }
         }
     }
 
