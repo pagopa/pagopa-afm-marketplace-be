@@ -131,6 +131,32 @@ public class TestUtil {
                 .paymentAmount(100L)
                 .minPaymentAmount(0L)
                 .maxPaymentAmount(10000L)
+                .paymentType(null)
+                .digitalStamp(false)
+                .digitalStampRestriction(false)
+                .touchpoint("IO")
+                .type(BundleType.GLOBAL)
+                .transferCategoryList(transferCategoryList)
+                .validityDateFrom(LocalDate.now().plusDays(1))
+                .validityDateTo(LocalDate.now().plusDays(8))
+                .cart(Boolean.TRUE)
+                .onUs(false)
+                .build();
+    }
+
+    public static BundleRequest getMockBundleRequestWithPaymentTypeAny() {
+        List<String> transferCategoryList = Arrays.asList("taxonomy1", "taxonomy2");
+
+        return BundleRequest.builder()
+                .idChannel("idChannel")
+                .idBrokerPsp("idBrokerPsp")
+                .idCdi("idCdi")
+                .abi("abi")
+                .name("name")
+                .description("description")
+                .paymentAmount(100L)
+                .minPaymentAmount(0L)
+                .maxPaymentAmount(10000L)
                 .paymentType("ANY")
                 .digitalStamp(false)
                 .digitalStampRestriction(false)

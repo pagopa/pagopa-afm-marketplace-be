@@ -272,6 +272,72 @@ class BundleServiceTest {
     }
 
     @Test
+    void shouldCreateBundleWithTouchPointeNull() {
+        var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeAny();
+        bundleRequest.setTouchpoint(null);
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName("ANY")).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        bundleService.createBundle(idPsp, bundleRequest);
+
+        verify(bundleRepository).save(bundleArgumentCaptor.capture());
+
+        Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
+        assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
+    }
+    @Test
+    void shouldCreateBundleWithPaymentTypeNotFound() {
+        var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName("ANY")).thenReturn(Optional.empty());
+
+        AppException exception = assertThrows(AppException.class,
+                () -> bundleService.createBundle(idPsp, bundleRequest)
+        );
+
+        assertEquals(AppError.PAYMENT_TYPE_NOT_FOUND.title, exception.getTitle());
+        assertEquals(AppError.PAYMENT_TYPE_NOT_FOUND.httpStatus, exception.getHttpStatus());
+
+        verify(bundleRepository, never()).save(any());
+    }
+
+
+    @Test
+    void shouldCreateBundleWithPaymentTypeAny() {
+        var bundleRequest = TestUtil.getMockBundleRequestWithPaymentTypeNull();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        when(bundleRepository.save(Mockito.any()))
+                .thenReturn(bundle);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName("ANY")).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        bundleService.createBundle(idPsp, bundleRequest);
+
+        verify(bundleRepository).save(bundleArgumentCaptor.capture());
+
+        Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
+        assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
+    }
+
+    @Test
     void shouldRaiseBadRequestWithInvalidDateBundle() {
         var bundleRequest = getMockBundleRequest();
 
