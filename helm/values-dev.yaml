@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.21.0"
+    tag: "0.21.19"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -48,9 +48,9 @@ microservice-chart:
     path: /pagopa-afm-marketplace-service/(.*)
     servicePort: 8080
   serviceAccount:
-    create: false
-    annotations: {}
     name: "afm-workload-identity"
+  azure:
+    workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   podAnnotations: {}
   podSecurityContext:
     seccompProfile:

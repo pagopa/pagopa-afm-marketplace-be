@@ -31,7 +31,7 @@ class BundleControllerTest {
 
     @Test
     void getGlobalBundles() throws Exception {
-        when(bundleService.getBundles(anyList(), anyString(), any(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        when(bundleService.getBundles(anyList(), anyString(), any(), any(),any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
         String url = "/bundles";
         mvc.perform(get(url).contentType(MediaType.APPLICATION_JSON))
@@ -40,7 +40,7 @@ class BundleControllerTest {
 
     @Test
     void getGlobalBundlesByName() throws Exception {
-        when(bundleService.getBundles(anyList(), anyString(), any(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
+        when(bundleService.getBundles(anyList(), anyString(), any(), any(), any(), anyInt(), anyInt())).thenReturn(TestUtil.getMockBundles());
 
         String url = "/bundles";
         mvc.perform(get(url).param("name", "mockName").contentType(MediaType.APPLICATION_JSON))

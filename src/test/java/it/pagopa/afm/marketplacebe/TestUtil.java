@@ -114,6 +114,7 @@ public class TestUtil {
                 .digitalStamp(Boolean.TRUE)
                 .digitalStampRestriction(Boolean.FALSE)
                 .cart(Boolean.TRUE)
+                .onUs(false)
                 .build();
     }
 
@@ -139,6 +140,7 @@ public class TestUtil {
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(LocalDate.now().plusDays(8))
                 .cart(Boolean.TRUE)
+                .onUs(false)
                 .build();
     }
 
@@ -169,6 +171,7 @@ public class TestUtil {
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(LocalDate.now().plusDays(8))
                 .cart(Boolean.TRUE)
+                .onUs(false)
                 .build());
         bundleRequestList.add(BundleRequest.builder()
                 .idChannel("idChannel2")
@@ -191,6 +194,7 @@ public class TestUtil {
                 .validityDateFrom(null)
                 .validityDateTo(null)
                 .cart(Boolean.TRUE)
+                .onUs(false)
                 .build());
         bundleRequestList.add(BundleRequest.builder()
                 .idChannel("idChannel3")
@@ -213,6 +217,7 @@ public class TestUtil {
                 .validityDateFrom(LocalDate.now().plusDays(1))
                 .validityDateTo(null)
                 .cart(Boolean.FALSE)
+                .onUs(false)
                 .build());
 
         return bundleRequestList;

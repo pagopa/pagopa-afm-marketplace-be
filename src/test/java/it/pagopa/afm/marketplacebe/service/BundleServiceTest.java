@@ -46,19 +46,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static it.pagopa.afm.marketplacebe.TestUtil.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -114,7 +105,7 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), eq(null), eq(null), anyInt(), anyInt()))
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), eq(null), eq(null), eq(null), anyInt(), anyInt()))
                 .thenReturn(bundleList);
         when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), eq(null), eq(null)))
                 .thenReturn((long) bundleList.size());
@@ -128,7 +119,7 @@ class BundleServiceTest {
             list = List.of(BundleType.PRIVATE, BundleType.PUBLIC, BundleType.GLOBAL);
         }
 
-        Bundles bundles = assertDoesNotThrow(() -> bundleService.getBundles(list, null, null, null, 50, 0));
+        Bundles bundles = assertDoesNotThrow(() -> bundleService.getBundles(list, null, null, null, null, 50, 0));
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -141,7 +132,7 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(anyString(), anyList(), eq(null), eq(null), anyInt(), anyInt()))
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(anyString(), anyList(), eq(null), eq(null), eq(null), anyInt(), anyInt()))
                 .thenReturn(bundleList);
         when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(anyString(), anyList(), eq(null), eq(null)))
                 .thenReturn((long) bundleList.size());
@@ -149,7 +140,7 @@ class BundleServiceTest {
         List<BundleType> bundleTypeList = new ArrayList<>();
         bundleTypeList.add(BundleType.GLOBAL);
         String nameParams = "mockName";
-        Bundles bundles = bundleService.getBundles(bundleTypeList, nameParams, null, null, 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, nameParams, null, null, null, 50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -162,14 +153,14 @@ class BundleServiceTest {
         List<Bundle> bundleList = List.of(bundle);
 
         // Precondition
-        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), any(), any(), anyInt(), anyInt()))
+        when(cosmosRepository.getBundlesByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), any(), any(),any(), anyInt(), anyInt()))
                 .thenReturn(bundleList);
         when(cosmosRepository.getTotalItemsFindByNameAndTypeAndValidityDateFromAndExpireAt(eq(null), anyList(), any(), any()))
                 .thenReturn((long) bundleList.size());
 
         List<BundleType> bundleTypeList = new ArrayList<>();
         bundleTypeList.add(BundleType.GLOBAL);
-        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), LocalDate.now(), 50, 0);
+        Bundles bundles = bundleService.getBundles(bundleTypeList, null, LocalDate.now(), LocalDate.now(), null,50, 0);
 
         assertEquals(bundleList.size(), bundles.getBundleDetailsList().size());
         assertEquals(bundle.getId(), bundles.getBundleDetailsList().get(0).getId());
@@ -298,6 +289,74 @@ class BundleServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
     }
 
+    @Test
+    void shouldRaiseBadRequestWithOverlappingBundle() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        // Setup invalid validity date to
+        bundleRequest.setValidityDateTo(bundleRequest.getValidityDateFrom().plusDays(2));
+        // Set same idPsp
+        bundle.setIdPsp(idPsp);
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(), any(), anyString(), anyString()))
+                .thenReturn(List.of(bundle));
+
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleService.createBundle(idPsp, bundleRequest)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+    }
+
+    @Test
+    void shouldCreatePrivateBundleWithLaterExpiring() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+
+        // Set bundle request validityDateTo to later date
+        bundleRequest.setValidityDateTo(bundleRequest.getValidityDateFrom().plusYears(2));
+        // Set bundle request type to PRIVATE
+        bundleRequest.setType(BundleType.PRIVATE);
+        // Set same idPsp
+        bundle.setIdPsp(idPsp);
+        // Set bundle to PRIVATE
+        bundle.setType(BundleType.PRIVATE);
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(), any(), anyString(), anyString()))
+                .thenReturn(List.of(bundle));
+
+        bundleService.createBundle(idPsp, bundleRequest);
+
+        verify(bundleRepository).save(bundleArgumentCaptor.capture());
+
+        Mockito.verify(bundleRepository, times(1)).save(Mockito.any());
+        assertEquals(bundleRequest.getName(), bundleArgumentCaptor.getValue().getName());
+    }
+
+    @Test
+    void shouldRaiseBadRequestWithWrongAmountRangeCreate() {
+        var bundleRequest = getMockBundleRequest();
+        String idPsp = "test_id_psp";
+
+        // Set not correct amount range
+        bundleRequest.setMinPaymentAmount(1L);
+        bundleRequest.setMaxPaymentAmount(0L);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleService.createBundle(idPsp, bundleRequest)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+        assertTrue(appException.getMessage().contains("Amount range not valid. MaxPaymentAmount must be >= than MinPaymentAmount"));
+    }
+
 
     @Test
     void shouldUpdateBundle() {
@@ -342,6 +401,29 @@ class BundleServiceTest {
         Bundle updatedBundle = bundleService.updateBundle(idPsp, bundle.getId(), bundleRequest, false);
 
         assertEquals(bundleRequest.getName(), updatedBundle.getName());
+    }
+
+    @Test
+    void shouldRaiseBadRequestWithWrongAmountRangeUpdate() {
+        var bundleRequest = getMockBundleRequest();
+        Bundle bundle = getMockBundle();
+        String idPsp = "test_id_psp";
+        String bundleId = bundle.getId();
+
+        // Set not correct amount range
+        bundleRequest.setMinPaymentAmount(1L);
+        bundleRequest.setMaxPaymentAmount(0L);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(bundleRepository.findById(bundle.getId(), new PartitionKey(idPsp)))
+                .thenReturn(Optional.of(bundle));
+
+        AppException appException = assertThrows(AppException.class,
+                () -> bundleService.updateBundle(idPsp, bundleId, bundleRequest, false)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, appException.getHttpStatus());
+        assertTrue(appException.getMessage().contains("Amount range not valid. MaxPaymentAmount must be >= than MinPaymentAmount"));
     }
 
 
@@ -1264,6 +1346,103 @@ class BundleServiceTest {
     }
 
     @Test
+    void createBundle_ok_9() {
+        // same (payment method, touchpoint, payment amount range), different transferCategoryList
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setTransferCategoryList(Arrays.asList("taxonomy3", "taxonomy4"));
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_10() {
+        // same (payment method, touchpoint, payment amount range), transferCategoryList target null
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+        bundles.get(0).setTransferCategoryList(null);
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_11() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range), idChannel ONUS case
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setOnUs(true);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_12() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range), idChannel ONUS case and transferCategoryList null
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setOnUs(true);
+        bundleRequest.setTransferCategoryList(null);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_13() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range, idChannel), and bundle type is PRIVATE.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PRIVATE);
+        bundleRequest.setIdChannel("different");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(TestUtil.getMockIdPsp(), bundleRequest);
+        assertNotNull(result);
+    }
+
+    @Test
     void createBundle_ko_1() {
         // validityDateFrom > validityDateTo
         BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
@@ -1379,6 +1558,77 @@ class BundleServiceTest {
         bundleRequest.setValidityDateTo(LocalDate.now().plusDays(7));
 
         when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_10() {
+        // Same bundle configuration with a different idChannel, but it does not end with _ONUS.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setIdChannel("idChannel_NOT-ONUS");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_11() {
+        // Same bundle configuration for two bundle (1 ONUS, 1 NOT ONUS) with different normalized idChannel.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+        bundles.get(0).setIdChannel("idChannel1_ONUS");
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_12() {
+        // Same bundle configuration for two bundle with same idChannel ONUS.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setIdChannel("idChannel_ONUS");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+        bundles.get(0).setIdChannel("idChannel_ONUS");
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void createBundle_ko_sameBundlePrivateWithSameChannel() {
+        // same (payment method, touchpoint, transferCategoryList, payment amount range, idChannel), and bundle type is PRIVATE.
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PRIVATE);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+                any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+                .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
         createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
     }
