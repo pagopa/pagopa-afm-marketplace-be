@@ -50,7 +50,7 @@ microservice-chart:
   serviceAccount:
     create: false
     annotations: {}
-    name: ""
+    name: "afm-workload-identity"
   podAnnotations: {}
   podSecurityContext:
     seccompProfile:
