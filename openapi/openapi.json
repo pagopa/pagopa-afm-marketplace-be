@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.21.19"
+    "version": "0.21.20"
   },
   "servers": [
     {
