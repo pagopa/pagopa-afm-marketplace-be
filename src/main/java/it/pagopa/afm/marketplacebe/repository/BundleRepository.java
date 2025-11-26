@@ -32,8 +32,6 @@ public interface BundleRepository extends CosmosRepository<Bundle, String> {
 
     List<Bundle> findByIdPspAndTypeAndPaymentTypeAndTouchpoint(String idPsp, BundleType type, String paymentType, String touchpoint);
 
-    List<Bundle> findByIdPspAndTypeAndTouchpointAndPaymentTypeIsNull(String idPsp, BundleType type, String touchpoint);
-
     List<Bundle> findByPaymentType(String paymentType);
 
     @Query(value = "SELECT * " +
