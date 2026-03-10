@@ -40,7 +40,7 @@ module "apim_api_afm_marketplace_technical_support_api_v1" {
   service_url  = local.apim_afm_marketplace_technical_support_api.service_url
 
   content_format = "openapi"
-  content_value = templatefile("../api/openapi/openapi-technical-support.json", {
+  content_value = templatefile("../openapi/openapi-technical-support.json", {
     host = local.apim_hostname
   })
 
