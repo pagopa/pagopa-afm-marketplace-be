@@ -36,7 +36,6 @@ module "apim_api_afm_marketplace_jwt_api_v1" {
 
   xml_content = templatefile("./api/marketplace-service/jwt_v1/_base_policy.xml", {
     hostname               = local.afm_hostname
-    pagopa_tenant_id       = data.azurerm_client_config.current.tenant_id
   })
 }
 
