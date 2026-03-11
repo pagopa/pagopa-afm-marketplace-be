@@ -1,8 +1,6 @@
-# named-values
-
-#############################
-## Product AFM Marketplace ##
-#############################
+#################################
+## Product AFM Marketplace JWT ##
+#################################
 
 resource "azurerm_api_management_api_version_set" "api_afm_marketplace_jwt_api" {
 
@@ -20,7 +18,7 @@ module "apim_api_afm_marketplace_jwt_api_v1" {
   name                  = format("%s-afm-marketplace-service-jwt-api", local.project)
   api_management_name   = local.pagopa_apim_name
   resource_group_name   = local.pagopa_apim_rg
-  product_ids           = [local.apim_afm_marketplace_service_api.product_id]
+  product_ids           = ["afm-marketplace-jwt"]
   subscription_required = false
   version_set_id        = azurerm_api_management_api_version_set.api_afm_marketplace_jwt_api.id
   api_version           = "v1"
@@ -39,7 +37,6 @@ module "apim_api_afm_marketplace_jwt_api_v1" {
   xml_content = templatefile("./api/marketplace-service/jwt_v1/_base_policy.xml", {
     hostname               = local.afm_hostname
     pagopa_tenant_id       = data.azurerm_client_config.current.tenant_id
-    apiconfig_fe_client_id = data.azuread_application.apiconfig-fe.application_id
   })
 }
 
