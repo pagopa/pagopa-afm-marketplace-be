@@ -17,6 +17,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -65,6 +66,8 @@ public class BundleService {
 
     private final ModelMapper modelMapper;
 
+    private final String posteIdPsp;
+
     @Autowired
     public BundleService(
             BundleRepository bundleRepository,
@@ -79,7 +82,8 @@ public class BundleService {
             ValidBundleRepository validBundleRepository,
             PaymentTypeRepository paymentTypeRepository,
             CosmosRepository cosmosRepository,
-            ModelMapper modelMapper
+            ModelMapper modelMapper,
+            @Value("${poste.id-psp}") String posteIdPsp
     ) {
         this.bundleRepository = bundleRepository;
         this.ciBundleRepository = ciBundleRepository;
@@ -94,6 +98,7 @@ public class BundleService {
         this.paymentTypeRepository = paymentTypeRepository;
         this.cosmosRepository = cosmosRepository;
         this.modelMapper = modelMapper;
+        this.posteIdPsp = posteIdPsp;
     }
 
     /**
@@ -838,9 +843,11 @@ public class BundleService {
             if (bundle.getOnUs() != null && !bundle.getOnUs().equals(bundleRequest.getOnUs())) {
                 return;
             }
-            if (bundleRequest.getType().equals(BundleType.PRIVATE) && (!bundleRequest.getIdChannel().equals(bundle.getIdChannel()))) {
+            if ((bundleRequest.getType().equals(BundleType.PRIVATE) || this.posteIdPsp.equals(idPsp)) && (!bundleRequest.getIdChannel().equals(bundle.getIdChannel()))) {
                 return;
             }
+
+
             if (
                 // verify payment amount range validity
                     !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&

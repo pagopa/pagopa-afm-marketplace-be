@@ -97,6 +97,7 @@ class BundleServiceTest {
     @Autowired
     private BundleService bundleService;
 
+    private static final String POSTE_ID_PSP = "BPPIITRRXXX";
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
@@ -1830,6 +1831,64 @@ class BundleServiceTest {
 
         assertNotNull(e);
         assertEquals(HttpStatus.NOT_FOUND, e.getHttpStatus());
+    }
+
+    @Test
+    void createBundle_ok_postePublicDifferentChannel() {
+        // Poste PSP, PUBLIC bundle, same configuration as an existing one but different channel -> allowed
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PUBLIC);
+        bundleRequest.setIdChannel("POSTE_CHANNEL_02");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+            any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+            .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(POSTE_ID_PSP, bundleRequest);
+
+        assertNotNull(result);
+        verify(bundleRepository, times(1)).save(any(Bundle.class));
+    }
+
+    @Test
+    void createBundle_ko_postePublicSameChannel() {
+        // Poste PSP, PUBLIC bundle, overlapping configuration on the SAME channel -> rejected
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PUBLIC);
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+        bundles.get(0).setIdChannel(bundleRequest.getIdChannel()); // force same channel
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+            any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+            .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        AppException e = assertThrows(AppException.class,
+            () -> bundleService.createBundle(POSTE_ID_PSP, bundleRequest));
+
+        assertEquals(HttpStatus.BAD_REQUEST, e.getHttpStatus());
+    }
+
+    @Test
+    void createBundle_ko_nonPostePublicDifferentChannel() {
+        // non-Poste PSP, PUBLIC bundle, different channel only -> still rejected
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PUBLIC);
+        bundleRequest.setIdChannel("ANOTHER_CHANNEL");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+            any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+            .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST); // helper esistente, usa getMockIdPsp()
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
