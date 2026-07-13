@@ -1,4 +1,5 @@
 # pagopa-afm-marketplace-be
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-afm-marketplace-be&metric=alert_status)](https://sonarcloud.io/project/overview?id=pagopa_pagopa-afm-marketplace-be)
 Spring Boot backend for Advanced Fee Management marketplace
 
@@ -19,14 +20,17 @@ Spring Boot backend for Advanced Fee Management marketplace
     * [Contributors 👥](#contributors---)
         + [Maintainers](#maintainers)
 
-
 ---
+
 ## Api Documentation 📖
-See the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-afm-marketplace-be/main/openapi/openapi.json)
+
+See
+the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-afm-marketplace-be/main/openapi/openapi.json)
 
 ---
 
 ## Technology Stack
+
 - Java 17
 - Spring Boot
 - Spring WebFlux
@@ -37,10 +41,12 @@ See the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubuserc
 ## Start Project Locally 🚀
 
 ### Prerequisites
+
 - docker
 - TODO
 
 ### Run docker container
+
 `docker-compose up --build`
 
 TODO
@@ -50,12 +56,14 @@ TODO
 ## Develop Locally 💻
 
 ### Prerequisites
+
 - git
 - maven
 - jdk-11
 - docker
 
 ### Run the project
+
 TODO
 
 #### Spring Profiles
@@ -71,19 +79,22 @@ by `junit` typing `mvn clean verify`
 
 #### Integration testing
 
-by `newman` & `postman` collection 
-- automatically  via Azure pipeline ( see `.devops` folder )
-- TODO
+by `newman` & `postman` collection
 
+- automatically via Azure pipeline ( see `.devops` folder )
+- TODO
 
 #### Load testing
 
-by `k6` & `postman` collection 
+by `k6` & `postman` collection
+
 - automatically via Azure pipeline ( see `.devops` folder )
 - TODO
 
 ## Contributors 👥
+
 Made with ❤️ from PagoPa S.p.A.
 
 ### Maintainers
+
 See `CODEOWNERS` file

@@ -1,7 +1,10 @@
 # Docker Environment 🐳
-`run_docker.sh` is a script to launch the image of this microservice and all the dependencies on Docker.
+
+`run_docker.sh` is a script to launch the image of this microservice and all the dependencies on
+Docker.
 
 ## How to use 💻
+
 You can use `local`, `dev`, `uat` or `prod` images
 
 Precondition: `az login`

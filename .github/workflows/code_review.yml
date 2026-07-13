@@ -53,12 +53,12 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
-        
+
       - name: Check file existence
         id: check_files
         uses: andstor/file-existence-action@20b4d2e596410855db8f9ca21e96fbe18e12930b # v2
         with:
-          files: "./integration-test/run_integration_test.sh" 
+          files: "./integration-test/run_integration_test.sh"
 
       - name: Login
         id: login
