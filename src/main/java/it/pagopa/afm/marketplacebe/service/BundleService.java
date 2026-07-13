@@ -840,13 +840,21 @@ public class BundleService {
             if (bundle.getId().equals(idBundle)) {
                 return;
             }
+
             if (bundle.getOnUs() != null && !bundle.getOnUs().equals(bundleRequest.getOnUs())) {
                 return;
             }
-            if ((bundleRequest.getType().equals(BundleType.PRIVATE) || this.posteIdPsp.equals(idPsp)) && (!bundleRequest.getIdChannel().equals(bundle.getIdChannel()))) {
+
+            boolean isChannelChanged = !bundleRequest.getIdChannel().equals(bundle.getIdChannel());
+
+            // private bundles cannot change channel
+            if (bundleRequest.getType().equals(BundleType.PRIVATE)  && isChannelChanged) {
                 return;
             }
-
+            // Poste PSP cannot change channel
+            if (this.posteIdPsp.equals(idPsp) && isChannelChanged) {
+                return;
+            }
 
             if (
                 // verify payment amount range validity
