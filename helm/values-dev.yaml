@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.21.25"
+    tag: "0.21.25-1-PIDM-2184-poste-modifica-bundle-canale-diverso"
     pullPolicy: Always
   livenessProbe:
     httpGet:

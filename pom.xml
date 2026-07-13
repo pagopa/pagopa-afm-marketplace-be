@@ -13,7 +13,7 @@
 
 	<groupId>it.pagopa.afm</groupId>
 	<artifactId>marketplace-be</artifactId>
-	<version>0.21.25</version>
+	<version>0.21.25-1-PIDM-2184-poste-modifica-bundle-canale-diverso</version>
 	<name>marketplace-be</name>
 	<description>Marketplace API for PagoPA AFM</description>
 
