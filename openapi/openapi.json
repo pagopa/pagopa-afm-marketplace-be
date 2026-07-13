@@ -4,7 +4,7 @@
     "title": "Marketplace API for PagoPA AFM",
     "description": "marketplace-be",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "0.21.25-1-PIDM-2184-poste-modifica-bundle-canale-diverso"
+    "version": "0.21.26"
   },
   "servers": [
     {
