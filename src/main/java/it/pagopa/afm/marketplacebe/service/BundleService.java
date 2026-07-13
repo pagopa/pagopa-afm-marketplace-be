@@ -17,6 +17,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -65,6 +66,8 @@ public class BundleService {
 
     private final ModelMapper modelMapper;
 
+    private final String posteIdPsp;
+
     @Autowired
     public BundleService(
             BundleRepository bundleRepository,
@@ -79,7 +82,8 @@ public class BundleService {
             ValidBundleRepository validBundleRepository,
             PaymentTypeRepository paymentTypeRepository,
             CosmosRepository cosmosRepository,
-            ModelMapper modelMapper
+            ModelMapper modelMapper,
+            @Value("${poste.id-psp}") String posteIdPsp
     ) {
         this.bundleRepository = bundleRepository;
         this.ciBundleRepository = ciBundleRepository;
@@ -94,6 +98,7 @@ public class BundleService {
         this.paymentTypeRepository = paymentTypeRepository;
         this.cosmosRepository = cosmosRepository;
         this.modelMapper = modelMapper;
+        this.posteIdPsp = posteIdPsp;
     }
 
     /**
@@ -830,17 +835,27 @@ public class BundleService {
         bundles.forEach(bundle -> {
             // If bundles have same id SKIP configuration check (UPDATE operation)
             // If bundles have different onUs flag SKIP configuration check
-            // If bundles are private AND have different channels SKIP configuration check
+            // If bundles are PRIVATE (any PSP) or belong to the Poste PSP AND have different channels SKIP configuration check
             // ELSE CHECK if they have the same configuration
             if (bundle.getId().equals(idBundle)) {
                 return;
             }
+
             if (bundle.getOnUs() != null && !bundle.getOnUs().equals(bundleRequest.getOnUs())) {
                 return;
             }
-            if (bundleRequest.getType().equals(BundleType.PRIVATE) && (!bundleRequest.getIdChannel().equals(bundle.getIdChannel()))) {
+
+            boolean isChannelChanged = !bundleRequest.getIdChannel().equals(bundle.getIdChannel());
+
+
+            if (bundleRequest.getType().equals(BundleType.PRIVATE)  && isChannelChanged) {
                 return;
             }
+
+            if (this.posteIdPsp.equals(idPsp) && isChannelChanged) {
+                return;
+            }
+
             if (
                 // verify payment amount range validity
                     !isPaymentAmountRangeValid(bundleRequest.getMinPaymentAmount(), bundleRequest.getMaxPaymentAmount(), bundle.getMinPaymentAmount(), bundle.getMaxPaymentAmount()) &&
