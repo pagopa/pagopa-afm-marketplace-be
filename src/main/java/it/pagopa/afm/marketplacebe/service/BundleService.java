@@ -835,7 +835,7 @@ public class BundleService {
         bundles.forEach(bundle -> {
             // If bundles have same id SKIP configuration check (UPDATE operation)
             // If bundles have different onUs flag SKIP configuration check
-            // If bundles are private AND have different channels SKIP configuration check
+            // If bundles are PRIVATE (any PSP) or belong to the Poste PSP AND have different channels SKIP configuration check
             // ELSE CHECK if they have the same configuration
             if (bundle.getId().equals(idBundle)) {
                 return;
@@ -847,11 +847,11 @@ public class BundleService {
 
             boolean isChannelChanged = !bundleRequest.getIdChannel().equals(bundle.getIdChannel());
 
-            // private bundles cannot change channel
+
             if (bundleRequest.getType().equals(BundleType.PRIVATE)  && isChannelChanged) {
                 return;
             }
-            // Poste PSP cannot change channel
+
             if (this.posteIdPsp.equals(idPsp) && isChannelChanged) {
                 return;
             }

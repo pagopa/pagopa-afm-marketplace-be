@@ -1888,7 +1888,50 @@ class BundleServiceTest {
         when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
             .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
 
-        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST); // helper esistente, usa getMockIdPsp()
+        createBundle_ko(bundleRequest, HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void updateBundle_ok_postePublicDifferentChannel() {
+        // Poste PSP, update of a PUBLIC bundle colliding with another one only on channel -> allowed
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.PUBLIC);
+        bundleRequest.setIdChannel("POSTE_CHANNEL_02");
+        Bundle bundleToUpdate = TestUtil.getMockBundle();
+        Bundle otherBundle = TestUtil.getMockBundleSameConfiguration().get(0);
+        otherBundle.setId("another-bundle-id"); // different id so the comparison actually happens
+
+        when(bundleRepository.findById(anyString(), any(PartitionKey.class))).thenReturn(Optional.of(bundleToUpdate));
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+            any(BundleType.class), anyString(), anyString())).thenReturn(List.of(otherBundle));
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(bundleToUpdate);
+        when(ciBundleRepository.findByIdBundle(anyString())).thenReturn(List.of(TestUtil.getMockCiBundle()));
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        Bundle result = bundleService.updateBundle(POSTE_ID_PSP, bundleToUpdate.getId(), bundleRequest, false);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void createBundle_ok_posteGlobalDifferentChannel() {
+        // Poste PSP, GLOBAL bundle, same configuration but different channel -> allowed
+        // (the Poste exception applies to every non-private bundle type)
+        BundleRequest bundleRequest = TestUtil.getMockBundleRequest();
+        bundleRequest.setType(BundleType.GLOBAL);
+        bundleRequest.setIdChannel("POSTE_CHANNEL_02");
+        List<Bundle> bundles = TestUtil.getMockBundleSameConfiguration();
+
+        when(bundleRepository.findByIdPspAndTypeAndPaymentTypeAndTouchpoint(anyString(),
+            any(BundleType.class), anyString(), anyString())).thenReturn(bundles);
+        when(bundleRepository.save(any(Bundle.class))).thenReturn(TestUtil.getMockBundle());
+        when(touchpointRepository.findByName(anyString())).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+        when(paymentTypeRepository.findByName(bundleRequest.getPaymentType()))
+            .thenReturn(Optional.of(TestUtil.getMockPaymentType()));
+
+        BundleResponse result = bundleService.createBundle(POSTE_ID_PSP, bundleRequest);
+        assertNotNull(result);
     }
 
     private void createBundle_ko(BundleRequest bundleRequest, HttpStatus status) {
