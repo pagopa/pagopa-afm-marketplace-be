@@ -665,12 +665,8 @@ public class BundleService {
     private void setVerifyPaymentTypeExist(BundleRequest bundleRequest) {
         String paymentType = bundleRequest.getPaymentType();
 
-        if (paymentType == null) {
-            bundleRequest.setPaymentType("ANY");
-        } else {
-            if (paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
-                throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
-            }
+        if (paymentType == null || paymentTypeRepository.findByName(bundleRequest.getPaymentType()).isEmpty()) {
+            throw new AppException(AppError.PAYMENT_TYPE_NOT_FOUND, paymentType);
         }
     }
 
