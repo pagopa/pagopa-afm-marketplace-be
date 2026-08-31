@@ -2,9 +2,9 @@ apiVersion: v2
 name: pagopa-afm-marketplace
 description: Microservice that handles marketplace for pagoPA Advanced Fees Management
 type: application
-version: 0.111.0
-appVersion: 0.21.19-1-PIDM-863-paymenttypes-touchpoint-any
+version: 0.118.0
+appVersion: 0.21.26
 dependencies:
   - name: microservice-chart
-    version: 7.5.0
+    version: 8.0.2
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
