@@ -14,6 +14,6 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 public class CiBundleId {
 
-    @JsonProperty("idCiBundle")
-    private String id;
+  @JsonProperty("idCiBundle")
+  private String id;
 }

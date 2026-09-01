@@ -1,10 +1,9 @@
 package it.pagopa.afm.marketplacebe.model.paymenttype;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import lombok.*;
 
 @Data
 @Builder(toBuilder = true)
@@ -13,14 +12,13 @@ import javax.validation.constraints.NotNull;
 @ToString
 public class PaymentTypeRequest {
 
-    @Schema(required = true)
-    @NotNull
-    @Valid
-    private String name;
+  @Schema(required = true)
+  @NotNull
+  @Valid
+  private String name;
 
-
-    @Schema(required = true)
-    @NotNull
-    @Valid
-    private String description;
+  @Schema(required = true)
+  @NotNull
+  @Valid
+  private String description;
 }

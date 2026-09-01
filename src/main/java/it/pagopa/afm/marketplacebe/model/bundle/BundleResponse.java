@@ -12,5 +12,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class BundleResponse {
-    private String idBundle;
+  private String idBundle;
 }

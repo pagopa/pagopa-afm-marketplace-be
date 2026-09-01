@@ -13,6 +13,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 public class BundleDetailsForCi extends PspBundleDetails {
 
-    private String idPsp;
-
+  private String idPsp;
 }

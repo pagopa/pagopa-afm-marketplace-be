@@ -3,6 +3,11 @@ package it.pagopa.afm.marketplacebe.entity;
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,12 +17,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Container(containerName = "bundles")
 @Getter
 @Setter
@@ -26,63 +25,54 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class Bundle {
 
-    @Id
-    @GeneratedValue
-    private String id;
+  @Id @GeneratedValue private String id;
 
-    @PartitionKey
-    @NotNull
-    @Size(max = 35)
-    private String idPsp;
+  @PartitionKey
+  @NotNull
+  @Size(max = 35)
+  private String idPsp;
 
-    @NotNull
-    private String idChannel;
+  @NotNull private String idChannel;
 
-    @NotNull
-    private String idBrokerPsp;
+  @NotNull private String idBrokerPsp;
 
-    private Boolean cart;
-    
-    private String idCdi;
+  private Boolean cart;
 
-    @NotNull
-    private String abi;
-    
-    @NotNull
-    private String pspBusinessName;
+  private String idCdi;
 
-    private String urlPolicyPsp;
+  @NotNull private String abi;
 
-    private Boolean digitalStamp;
+  @NotNull private String pspBusinessName;
 
-    // true if bundle must be used only for digital stamp
-    private Boolean digitalStampRestriction;
+  private String urlPolicyPsp;
 
-    private String name;
-    private String description;
+  private Boolean digitalStamp;
 
-    private Long paymentAmount;
-    private Long minPaymentAmount;
-    private Long maxPaymentAmount;
+  // true if bundle must be used only for digital stamp
+  private Boolean digitalStampRestriction;
 
-    private String paymentType;
+  private String name;
+  private String description;
 
-    private String touchpoint;
+  private Long paymentAmount;
+  private Long minPaymentAmount;
+  private Long maxPaymentAmount;
 
-    private BundleType type;
+  private String paymentType;
 
-    private List<String> transferCategoryList;
+  private String touchpoint;
 
-    private LocalDate validityDateFrom;
+  private BundleType type;
 
-    private LocalDate validityDateTo;
+  private List<String> transferCategoryList;
 
-    @CreatedDate
-    private LocalDateTime insertedDate;
+  private LocalDate validityDateFrom;
 
-    @LastModifiedDate
-    private LocalDateTime lastUpdatedDate;
+  private LocalDate validityDateTo;
 
-    private Boolean onUs;
+  @CreatedDate private LocalDateTime insertedDate;
 
+  @LastModifiedDate private LocalDateTime lastUpdatedDate;
+
+  private Boolean onUs;
 }

@@ -2,19 +2,18 @@ package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Container(containerName = "archivedcibundles")
 @Getter
@@ -24,24 +23,17 @@ import java.util.List;
 @AllArgsConstructor
 public class ArchivedCiBundle {
 
-    @Id
-    @NotBlank
-    private String id;
+  @Id @NotBlank private String id;
 
-    @PartitionKey
-    @NotBlank
-    private String ciFiscalCode;
+  @PartitionKey @NotBlank private String ciFiscalCode;
 
-    @NotNull
-    private String idBundle;
+  @NotNull private String idBundle;
 
-    @Valid
-    private List<CiBundleAttribute> attributes;
+  @Valid private List<CiBundleAttribute> attributes;
 
-    private LocalDate validityDateFrom;
+  private LocalDate validityDateFrom;
 
-    private LocalDate validityDateTo;
+  private LocalDate validityDateTo;
 
-    private LocalDateTime insertedDate;
-
+  private LocalDateTime insertedDate;
 }
