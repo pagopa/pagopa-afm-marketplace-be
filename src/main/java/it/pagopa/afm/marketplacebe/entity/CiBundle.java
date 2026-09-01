@@ -3,6 +3,12 @@ package it.pagopa.afm.marketplacebe.entity;
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,13 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Container(containerName = "cibundles")
 @Getter
@@ -26,29 +25,19 @@ import java.util.List;
 @AllArgsConstructor
 public class CiBundle {
 
-    @Id
-    @GeneratedValue
-    @NotBlank
-    private String id;
+  @Id @GeneratedValue @NotBlank private String id;
 
-    @PartitionKey
-    @NotBlank
-    private String ciFiscalCode;
+  @PartitionKey @NotBlank private String ciFiscalCode;
 
-    @NotNull
-    private String idBundle;
+  @NotNull private String idBundle;
 
-    @NotNull
-    private BundleType type;
+  @NotNull private BundleType type;
 
-    @Valid
-    private List<CiBundleAttribute> attributes;
+  @Valid private List<CiBundleAttribute> attributes;
 
-    private LocalDate validityDateFrom;
+  private LocalDate validityDateFrom;
 
-    private LocalDate validityDateTo;
+  private LocalDate validityDateTo;
 
-    @CreatedDate
-    private LocalDateTime insertedDate;
-
+  @CreatedDate private LocalDateTime insertedDate;
 }

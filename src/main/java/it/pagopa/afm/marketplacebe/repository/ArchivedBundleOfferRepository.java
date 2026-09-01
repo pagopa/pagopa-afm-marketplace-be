@@ -5,6 +5,5 @@ import it.pagopa.afm.marketplacebe.entity.ArchivedBundleOffer;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ArchivedBundleOfferRepository extends CosmosRepository<ArchivedBundleOffer, String> {
-
-}
+public interface ArchivedBundleOfferRepository
+    extends CosmosRepository<ArchivedBundleOffer, String> {}

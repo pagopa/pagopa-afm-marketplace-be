@@ -14,10 +14,9 @@ import lombok.Setter;
 @Builder
 public class PspCiBundleAttribute {
 
-    private Long maxPaymentAmount;
+  private Long maxPaymentAmount;
 
-    private String transferCategory;
+  private String transferCategory;
 
-    private TransferCategoryRelation transferCategoryRelation;
-
+  private TransferCategoryRelation transferCategoryRelation;
 }

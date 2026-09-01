@@ -2,6 +2,11 @@ package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,12 +14,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Container(containerName = "archivedbundles")
 @Getter
@@ -24,37 +23,34 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class ArchivedBundle {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    @PartitionKey
-    @NotNull
-    @Size(max = 35)
-    private String idPsp;
+  @PartitionKey
+  @NotNull
+  @Size(max = 35)
+  private String idPsp;
 
-    private String name;
-    private String description;
+  private String name;
+  private String description;
 
-    private Long paymentAmount;
-    private Long minPaymentAmount;
-    private Long maxPaymentAmount;
+  private Long paymentAmount;
+  private Long minPaymentAmount;
+  private Long maxPaymentAmount;
 
-    private PaymentType paymentType;
+  private PaymentType paymentType;
 
-    private Touchpoint touchpoint;
+  private Touchpoint touchpoint;
 
-    private BundleType type;
+  private BundleType type;
 
-    private List<String> transferCategoryList;
+  private List<String> transferCategoryList;
 
-    private LocalDate validityDateFrom;
-    private LocalDate validityDateTo;
+  private LocalDate validityDateFrom;
+  private LocalDate validityDateTo;
 
-    private LocalDateTime insertedDate;
+  private LocalDateTime insertedDate;
 
-    @LastModifiedDate
-    private LocalDateTime lastUpdatedDate;
+  @LastModifiedDate private LocalDateTime lastUpdatedDate;
 
-    private Boolean onUs;
-
+  private Boolean onUs;
 }

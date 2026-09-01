@@ -3,62 +3,64 @@ package it.pagopa.afm.marketplacebe.repository;
 import com.azure.spring.data.cosmos.repository.CosmosRepository;
 import com.azure.spring.data.cosmos.repository.Query;
 import it.pagopa.afm.marketplacebe.entity.BundleRequestEntity;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface BundleRequestRepository extends CosmosRepository<BundleRequestEntity, String> {
 
-    Page<BundleRequestEntity> findByIdPsp(String idPsp, Pageable pageable);
+  Page<BundleRequestEntity> findByIdPsp(String idPsp, Pageable pageable);
 
-    Page<BundleRequestEntity> findByIdPspAndCiFiscalCode(String idPsp, String fiscalCode, Pageable pageable);
+  Page<BundleRequestEntity> findByIdPspAndCiFiscalCode(
+      String idPsp, String fiscalCode, Pageable pageable);
 
-    List<BundleRequestEntity> findByIdPsp(String idPsp);
+  List<BundleRequestEntity> findByIdPsp(String idPsp);
 
-    List<BundleRequestEntity> findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(String idBundle, String idPsp);
+  List<BundleRequestEntity> findByIdBundleAndIdPspAndAcceptedDateIsNullAndRejectionDateIsNull(
+      String idBundle, String idPsp);
 
-    Optional<BundleRequestEntity> findByIdAndIdPsp(String id, String idPsp);
+  Optional<BundleRequestEntity> findByIdAndIdPsp(String id, String idPsp);
 
-    @Query(value = "SELECT * " +
-            "FROM bundlerequests b" +
-            " WHERE " +
-            " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
-            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
-            " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)" +
-            " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
-    List<BundleRequestEntity> findByIdPspAndFiscalCodeAndIdBundle(
-            @Param("idPsp") String idPsp,
-            @Param("ciFiscalCode") String ciFiscalCode,
-            @Param("idBundle") String idBundle,
-            @Param("offset") int offset,
-            @Param("pageSize") int pageSize
-    );
+  @Query(
+      value =
+          "SELECT * "
+              + "FROM bundlerequests b"
+              + " WHERE "
+              + " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)"
+              + " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)"
+              + " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)"
+              + " ORDER BY b.id OFFSET @offset LIMIT @pageSize")
+  List<BundleRequestEntity> findByIdPspAndFiscalCodeAndIdBundle(
+      @Param("idPsp") String idPsp,
+      @Param("ciFiscalCode") String ciFiscalCode,
+      @Param("idBundle") String idBundle,
+      @Param("offset") int offset,
+      @Param("pageSize") int pageSize);
 
-    @Query(value = "SELECT VALUE COUNT(1) " +
-            "FROM bundlerequests b" +
-            " WHERE " +
-            " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)" +
-            " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)" +
-            " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)")
-    Integer getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(
-            @Param("idPsp") String idPsp,
-            @Param("ciFiscalCode") String ciFiscalCode,
-            @Param("idBundle") String idBundle
-    );
+  @Query(
+      value =
+          "SELECT VALUE COUNT(1) "
+              + "FROM bundlerequests b"
+              + " WHERE "
+              + " (IS_NULL(@idPsp) OR b.idPsp = @idPsp)"
+              + " AND (IS_NULL(@ciFiscalCode) OR b.ciFiscalCode = @ciFiscalCode)"
+              + " AND (IS_NULL(@idBundle) OR b.idBundle = @idBundle)")
+  Integer getTotalItemsFindByIdPspAndFiscalCodeAndIdBundle(
+      @Param("idPsp") String idPsp,
+      @Param("ciFiscalCode") String ciFiscalCode,
+      @Param("idBundle") String idBundle);
 
-    @Query(value = "SELECT * " +
-            "FROM bundlerequests b " +
-            "WHERE (" +
-            "SUBSTRING(DateTimeFromParts(b.validityDateTo[0], b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10)" +
-            " < " +
-            "SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0, 0, 0, 0), 0, 10)" +
-            ")")
-    List<BundleRequestEntity> findByValidityDateToBefore(@Param("currentDate") LocalDate validityDateTo);
-
+  @Query(
+      value =
+          "SELECT * FROM bundlerequests b WHERE (SUBSTRING(DateTimeFromParts(b.validityDateTo[0],"
+              + " b.validityDateTo[1], b.validityDateTo[2], 0, 0, 0, 0), 0, 10) <"
+              + " SUBSTRING(DateTimeFromParts(@currentDate[0], @currentDate[1], @currentDate[2], 0,"
+              + " 0, 0, 0), 0, 10))")
+  List<BundleRequestEntity> findByValidityDateToBefore(
+      @Param("currentDate") LocalDate validityDateTo);
 }

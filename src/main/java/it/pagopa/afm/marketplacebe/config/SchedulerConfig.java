@@ -8,14 +8,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @Configuration
 @EnableScheduling
 public class SchedulerConfig {
-    int archivedContainer = 4;
+  int archivedContainer = 4;
 
-    @Bean
-    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
-        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        threadPoolTaskScheduler.setPoolSize(archivedContainer);
-        threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
-        return threadPoolTaskScheduler;
-    }
-
+  @Bean
+  public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+    ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+    threadPoolTaskScheduler.setPoolSize(archivedContainer);
+    threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
+    return threadPoolTaskScheduler;
+  }
 }

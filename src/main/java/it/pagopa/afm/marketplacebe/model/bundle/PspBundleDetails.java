@@ -1,15 +1,14 @@
 package it.pagopa.afm.marketplacebe.model.bundle;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -18,33 +17,34 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 public class PspBundleDetails {
 
-    @JsonProperty("idBundle")
-    private String id;
-    private String name;
-    private String description;
-    private Long paymentAmount;
-    private Long minPaymentAmount;
-    private Long maxPaymentAmount;
-    private String paymentType;
-    private String touchpoint;
-    private String type;
-    private List<String> transferCategoryList;
-    private LocalDate validityDateFrom;
-    private LocalDate validityDateTo;
-    private LocalDateTime insertedDate;
-    private LocalDateTime lastUpdatedDate;
-    private String idChannel;
-    private String idPsp;
+  @JsonProperty("idBundle")
+  private String id;
 
-    private String idBrokerPsp;
-    private Boolean digitalStamp;
-    private Boolean digitalStampRestriction;
+  private String name;
+  private String description;
+  private Long paymentAmount;
+  private Long minPaymentAmount;
+  private Long maxPaymentAmount;
+  private String paymentType;
+  private String touchpoint;
+  private String type;
+  private List<String> transferCategoryList;
+  private LocalDate validityDateFrom;
+  private LocalDate validityDateTo;
+  private LocalDateTime insertedDate;
+  private LocalDateTime lastUpdatedDate;
+  private String idChannel;
+  private String idPsp;
 
-    private String pspBusinessName;
-    private String urlPolicyPsp;
+  private String idBrokerPsp;
+  private Boolean digitalStamp;
+  private Boolean digitalStampRestriction;
 
-    private Boolean cart;
-    private String abi;
+  private String pspBusinessName;
+  private String urlPolicyPsp;
 
-    private Boolean onUs;
+  private Boolean cart;
+  private String abi;
+
+  private Boolean onUs;
 }

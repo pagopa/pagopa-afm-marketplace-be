@@ -14,15 +14,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MappingsConfiguration {
 
-    @Bean
-    public ModelMapper modelMapper() {
+  @Bean
+  public ModelMapper modelMapper() {
 
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    ModelMapper mapper = new ModelMapper();
+    mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        mapper.createTypeMap(Bundle.class, PspBundleDetails.class).setConverter(new ConvertBundleToPspBundleDetails());
-        mapper.createTypeMap(CiBundle.class, CiBundleDetails.class).setConverter(new ConvertCIBundleTCIBundleDetails());
+    mapper
+        .createTypeMap(Bundle.class, PspBundleDetails.class)
+        .setConverter(new ConvertBundleToPspBundleDetails());
+    mapper
+        .createTypeMap(CiBundle.class, CiBundleDetails.class)
+        .setConverter(new ConvertCIBundleTCIBundleDetails());
 
-        return mapper;
-    }
+    return mapper;
+  }
 }
