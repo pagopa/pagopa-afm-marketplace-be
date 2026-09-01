@@ -34,6 +34,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - name: Set up Java 21
+        uses: actions/setup-java@99b8673ff64fbee33d8c03c66c60cc64f1b6c6b6 # v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Formatting
         id: format
