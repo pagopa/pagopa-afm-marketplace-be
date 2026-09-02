@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
-    tag: "0.21.27-1-PIDM-863-test-java21"
+    tag: "0.21.27-2-PIDM-863-test-java21"
     pullPolicy: Always
   livenessProbe:
     httpGet:
