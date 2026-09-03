@@ -7,10 +7,16 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import it.pagopa.afm.marketplacebe.TestUtil;
+import it.pagopa.afm.marketplacebe.exception.AppException;
+import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoint;
+import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
+import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoints;
+import it.pagopa.afm.marketplacebe.repository.BundleRepository;
+import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -20,141 +26,135 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
-import it.pagopa.afm.marketplacebe.TestUtil;
-import it.pagopa.afm.marketplacebe.exception.AppException;
-import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoint;
-import it.pagopa.afm.marketplacebe.model.touchpoint.TouchpointRequest;
-import it.pagopa.afm.marketplacebe.model.touchpoint.Touchpoints;
-import it.pagopa.afm.marketplacebe.repository.BundleRepository;
-import it.pagopa.afm.marketplacebe.repository.TouchpointRepository;
-
 @SpringBootTest
 class TouchpointServiceTest {
 
-    @Captor
-    ArgumentCaptor<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpointArgumentCaptor = ArgumentCaptor.forClass(it.pagopa.afm.marketplacebe.entity.Touchpoint.class);
-    @MockBean
-    private TouchpointRepository touchpointRepository;
-    @MockBean
-    private BundleRepository bundleRepository;
-    @Autowired
-    @InjectMocks
-    private TouchpointService touchpointService;
+  @Captor
+  ArgumentCaptor<it.pagopa.afm.marketplacebe.entity.Touchpoint> touchpointArgumentCaptor =
+      ArgumentCaptor.forClass(it.pagopa.afm.marketplacebe.entity.Touchpoint.class);
 
-    @Test
-    void shouldGetTouchpoints() {
+  @MockBean private TouchpointRepository touchpointRepository;
+  @MockBean private BundleRepository bundleRepository;
+  @Autowired @InjectMocks private TouchpointService touchpointService;
 
-        // Precondition
-        when(touchpointRepository.findAll()).thenReturn(TestUtil.getMockTouchpoints());
+  @Test
+  void shouldGetTouchpoints() {
 
-        // Tests
-        Touchpoints touchpoints = touchpointService.getTouchpoints();
+    // Precondition
+    when(touchpointRepository.findAll()).thenReturn(TestUtil.getMockTouchpoints());
 
-        // Assertions
-        assertEquals(3, touchpoints.getTouchpointList().size());
-    }
+    // Tests
+    Touchpoints touchpoints = touchpointService.getTouchpoints();
 
-    @Test
-    void shouldGetTouchpoint() {
-        it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
-        String id = mockTouchpoint.getId();
+    // Assertions
+    assertEquals(3, touchpoints.getTouchpointList().size());
+  }
 
-        // Precondition
-        when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
+  @Test
+  void shouldGetTouchpoint() {
+    it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
+    String id = mockTouchpoint.getId();
 
-        // Tests
-        Touchpoint touchpoint = touchpointService.getTouchpoint(id);
+    // Precondition
+    when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
 
-        // Assertions
-        assertEquals(mockTouchpoint.getId(),
-                touchpoint.getId());
-    }
+    // Tests
+    Touchpoint touchpoint = touchpointService.getTouchpoint(id);
 
-    @Test
-    void shouldCreateTouchpoint() {
-        String TOUCHPOINT_NAME = "IO";
-        TouchpointRequest touchpointRequest = TouchpointRequest
-                .builder()
-                .name(TOUCHPOINT_NAME)
-                .build();
+    // Assertions
+    assertEquals(mockTouchpoint.getId(), touchpoint.getId());
+  }
 
-        // Precondition
-        when(touchpointRepository.findByName(TOUCHPOINT_NAME)).thenReturn(Optional.empty());
-        when(touchpointRepository.save(any())).thenReturn(TestUtil.getMockTouchpoint(TOUCHPOINT_NAME));
+  @Test
+  void shouldCreateTouchpoint() {
+    String TOUCHPOINT_NAME = "IO";
+    TouchpointRequest touchpointRequest = TouchpointRequest.builder().name(TOUCHPOINT_NAME).build();
 
-        // Tests
-        Touchpoint entry = touchpointService.createTouchpoint(touchpointRequest);
+    // Precondition
+    when(touchpointRepository.findByName(TOUCHPOINT_NAME)).thenReturn(Optional.empty());
+    when(touchpointRepository.save(any())).thenReturn(TestUtil.getMockTouchpoint(TOUCHPOINT_NAME));
 
-        // Assertions
-        assertEquals(TOUCHPOINT_NAME, entry.getName());
-    }
+    // Tests
+    Touchpoint entry = touchpointService.createTouchpoint(touchpointRequest);
 
-    @Test
-    void shouldThrowConflictCreateTouchpoint() {
-        String TOUCHPOINT_NAME = "IO";
-        TouchpointRequest touchpointRequest = TouchpointRequest
-                .builder()
-                .name(TOUCHPOINT_NAME)
-                .build();
+    // Assertions
+    assertEquals(TOUCHPOINT_NAME, entry.getName());
+  }
 
-        // Precondition
-        when(touchpointRepository.findByName(TOUCHPOINT_NAME)).thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
+  @Test
+  void shouldThrowConflictCreateTouchpoint() {
+    String TOUCHPOINT_NAME = "IO";
+    TouchpointRequest touchpointRequest = TouchpointRequest.builder().name(TOUCHPOINT_NAME).build();
 
-        // Assertions
-        AppException exception = assertThrows(AppException.class, () -> {
-            touchpointService.createTouchpoint(touchpointRequest);
-        });
+    // Precondition
+    when(touchpointRepository.findByName(TOUCHPOINT_NAME))
+        .thenReturn(Optional.of(TestUtil.getMockTouchpoint()));
 
-        assertEquals(HttpStatus.CONFLICT, exception.getHttpStatus());
-    }
+    // Assertions
+    AppException exception =
+        assertThrows(
+            AppException.class,
+            () -> {
+              touchpointService.createTouchpoint(touchpointRequest);
+            });
 
-    @Test
-    void shouldDeleteTouchpoint() {
-        it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
-        String id = mockTouchpoint.getId();
+    assertEquals(HttpStatus.CONFLICT, exception.getHttpStatus());
+  }
 
-        // Precondition
-        when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
-        when(bundleRepository.findByTouchpointAndValid(anyString())).thenReturn(new ArrayList<>());
+  @Test
+  void shouldDeleteTouchpoint() {
+    it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
+    String id = mockTouchpoint.getId();
 
-        // Tests
-        touchpointService.deleteTouchpoint(id);
+    // Precondition
+    when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
+    when(bundleRepository.findByTouchpointAndValid(anyString())).thenReturn(new ArrayList<>());
 
-        verify(touchpointRepository).delete(touchpointArgumentCaptor.capture());
+    // Tests
+    touchpointService.deleteTouchpoint(id);
 
-        assertEquals(id, touchpointArgumentCaptor.getValue().getId());
-    }
+    verify(touchpointRepository).delete(touchpointArgumentCaptor.capture());
 
-    @Test
-    void shouldThrowNotFoundDeleteTouchpoint() {
-        it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
-        String id = mockTouchpoint.getId();
+    assertEquals(id, touchpointArgumentCaptor.getValue().getId());
+  }
 
-        // Precondition
-        when(touchpointRepository.findById(id)).thenReturn(Optional.empty());
+  @Test
+  void shouldThrowNotFoundDeleteTouchpoint() {
+    it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
+    String id = mockTouchpoint.getId();
 
-        // Tests
-        AppException exception = assertThrows(AppException.class, () -> {
-            touchpointService.deleteTouchpoint(id);
-        });
+    // Precondition
+    when(touchpointRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
-    }
+    // Tests
+    AppException exception =
+        assertThrows(
+            AppException.class,
+            () -> {
+              touchpointService.deleteTouchpoint(id);
+            });
 
-    @Test
-    void shouldThrowBadRequestDeleteTouchpoint() {
-        it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
-        String id = mockTouchpoint.getId();
+    assertEquals(HttpStatus.NOT_FOUND, exception.getHttpStatus());
+  }
 
-        // Precondition
-        when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
-        when(bundleRepository.findByTouchpointAndValid(anyString())).thenReturn(List.of(TestUtil.getMockBundle()));
+  @Test
+  void shouldThrowBadRequestDeleteTouchpoint() {
+    it.pagopa.afm.marketplacebe.entity.Touchpoint mockTouchpoint = TestUtil.getMockTouchpoint();
+    String id = mockTouchpoint.getId();
 
-        // Tests
-        AppException exception = assertThrows(AppException.class, () -> {
-            touchpointService.deleteTouchpoint(id);
-        });
+    // Precondition
+    when(touchpointRepository.findById(id)).thenReturn(Optional.of(mockTouchpoint));
+    when(bundleRepository.findByTouchpointAndValid(anyString()))
+        .thenReturn(List.of(TestUtil.getMockBundle()));
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
-    }
+    // Tests
+    AppException exception =
+        assertThrows(
+            AppException.class,
+            () -> {
+              touchpointService.deleteTouchpoint(id);
+            });
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
+  }
 }

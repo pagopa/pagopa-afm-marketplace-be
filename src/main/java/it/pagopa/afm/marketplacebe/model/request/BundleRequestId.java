@@ -13,5 +13,5 @@ import lombok.Setter;
 @Builder
 public class BundleRequestId {
 
-    private String idBundleRequest;
+  private String idBundleRequest;
 }

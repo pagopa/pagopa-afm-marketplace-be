@@ -1,15 +1,14 @@
 package it.pagopa.afm.marketplacebe.entity;
 
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
+import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,18 +17,13 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class CiBundleAttribute {
 
-    @Id
-    @GeneratedValue
-    @NotNull
-    private String id;
+  @Id @GeneratedValue @NotNull private String id;
 
-    private Long maxPaymentAmount;
+  private Long maxPaymentAmount;
 
-    private String transferCategory;
+  private String transferCategory;
 
-    private TransferCategoryRelation transferCategoryRelation;
+  private TransferCategoryRelation transferCategoryRelation;
 
-    @NotNull
-    private LocalDateTime insertedDate;
-
+  @NotNull private LocalDateTime insertedDate;
 }

@@ -1,13 +1,11 @@
 package it.pagopa.afm.marketplacebe.model.touchpoint;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
-
 
 @Getter
 @Setter
@@ -16,8 +14,7 @@ import java.time.LocalDateTime;
 @SuperBuilder(toBuilder = true)
 public class Touchpoint {
 
-    private String id;
-    private String name;
-    private LocalDateTime createdDate;
-
+  private String id;
+  private String name;
+  private LocalDateTime createdDate;
 }

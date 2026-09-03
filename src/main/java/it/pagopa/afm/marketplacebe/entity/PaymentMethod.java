@@ -6,14 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.afm.marketplacebe.model.paymentmethods.FeeRange;
 import it.pagopa.afm.marketplacebe.model.paymentmethods.enums.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.springframework.data.annotation.Id;
-
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
 
 @Getter
 @Setter
@@ -25,53 +24,50 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentMethod {
 
-    @Id
-    @GeneratedValue
-    private String id;
+  @Id @GeneratedValue private String id;
 
-    @JsonProperty("payment_method_id")
-    @NotNull
-    private String paymentMethodId;
-    @NotNull
-    private PaymentMethodGroup group;
-    @NotNull
-    private Map<Language, String> name;
-    @NotNull
-    private Map<Language, String> description;
-    @NotNull
-    @JsonProperty("payment_method_types")
-    private List<PaymentMethodType> paymentMethodTypes;
-    @NotNull
-    @JsonProperty("user_touchpoint")
-    private List<UserTouchpoint> userTouchpoint;
-    @NotNull
-    @JsonProperty("user_device")
-    private List<UserDevice> userDevice;
-    @NotNull
-    private PaymentMethodStatus status;
+  @JsonProperty("payment_method_id")
+  @NotNull
+  private String paymentMethodId;
 
-    @JsonProperty("validity_date_from")
-    @NotNull
-    private LocalDate validityDateFrom;
+  @NotNull private PaymentMethodGroup group;
+  @NotNull private Map<Language, String> name;
+  @NotNull private Map<Language, String> description;
 
-    private List<String> target;
+  @NotNull
+  @JsonProperty("payment_method_types")
+  private List<PaymentMethodType> paymentMethodTypes;
 
-    @JsonProperty("range_amount")
-    @NotNull
-    private FeeRange rangeAmount;
+  @NotNull
+  @JsonProperty("user_touchpoint")
+  private List<UserTouchpoint> userTouchpoint;
 
-    private Map<String, String> metadata;
+  @NotNull
+  @JsonProperty("user_device")
+  private List<UserDevice> userDevice;
 
-    @NotNull
-    @JsonProperty("payment_method_asset")
-    private String paymentMethodAsset;
+  @NotNull private PaymentMethodStatus status;
 
-    @NotNull
-    @JsonProperty("method_management")
-    private MethodManagement methodManagement;
+  @JsonProperty("validity_date_from")
+  @NotNull
+  private LocalDate validityDateFrom;
 
-    @JsonProperty("payment_methods_brand_assets")
-    private Map<String, String> paymentMethodsBrandAssets;
+  private List<String> target;
 
+  @JsonProperty("range_amount")
+  @NotNull
+  private FeeRange rangeAmount;
 
+  private Map<String, String> metadata;
+
+  @NotNull
+  @JsonProperty("payment_method_asset")
+  private String paymentMethodAsset;
+
+  @NotNull
+  @JsonProperty("method_management")
+  private MethodManagement methodManagement;
+
+  @JsonProperty("payment_methods_brand_assets")
+  private Map<String, String> paymentMethodsBrandAssets;
 }

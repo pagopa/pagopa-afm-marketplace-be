@@ -4,9 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum MethodManagement {
-
-    ONBOARDABLE,
-    ONBOARDABLE_ONLY,
-    NOT_ONBOARDABLE,
-    REDIRECT,
+  ONBOARDABLE,
+  ONBOARDABLE_ONLY,
+  NOT_ONBOARDABLE,
+  REDIRECT,
 }

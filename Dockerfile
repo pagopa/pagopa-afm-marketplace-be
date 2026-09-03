@@ -1,11 +1,11 @@
-FROM maven:3.9.3-amazoncorretto-17@sha256:4ab7db7bd5f95e58b0ba1346ff29d6abdd9b73e5fd89c5140edead8b037386ff AS buildtime
+FROM maven:3.9-amazoncorretto-21@sha256:81de222c1f34ac467bf968e1800b73fb41e714427c0212ba004296ea972e808a AS buildtime
 
 WORKDIR /build
 COPY . .
 
 RUN mvn clean package -DskipTests
 
-FROM amazoncorretto:17.0.8-alpine3.18@sha256:0c61f12abfb091be48474e836e6802ff3a93e8e038e0460af8c7f447ccbd3901 AS runtime
+FROM amazoncorretto@sha256:ca805c030d45db58e93b2276580ea141aa7d33497009ab4c6b706c587a97e9b1 AS runtime
 
 VOLUME /tmp
 WORKDIR /app

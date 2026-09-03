@@ -14,7 +14,7 @@ import lombok.Setter;
 @Builder
 public class CiBundleAttributeModel {
 
-    private Long maxPaymentAmount;
-    private String transferCategory;
-    private TransferCategoryRelation transferCategoryRelation;
+  private Long maxPaymentAmount;
+  private String transferCategory;
+  private TransferCategoryRelation transferCategoryRelation;
 }

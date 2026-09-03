@@ -3,18 +3,17 @@ package it.pagopa.afm.marketplacebe.model.request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,26 +23,25 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PublicBundleRequest {
 
-    @JsonProperty("idBundleRequest")
-    @NotNull
-    private String id;
-    @NotBlank
-    private String idBundle;
-    private String idPsp;
-    @NotNull
-    private String ciFiscalCode;
+  @JsonProperty("idBundleRequest")
+  @NotNull
+  private String id;
 
-    @Schema(description = "the start date of the bundle if accepted")
-    private LocalDate validityDateFrom;
+  @NotBlank private String idBundle;
+  private String idPsp;
+  @NotNull private String ciFiscalCode;
 
-    @Schema(description = "the end date of the bundle if accepted")
-    private LocalDate validityDateTo;
+  @Schema(description = "the start date of the bundle if accepted")
+  private LocalDate validityDateFrom;
 
-    private LocalDateTime acceptedDate;
-    private LocalDateTime rejectionDate;
-    private LocalDateTime insertedDate;
+  @Schema(description = "the end date of the bundle if accepted")
+  private LocalDate validityDateTo;
 
-    @JsonProperty("attributes")
-    @Valid
-    private List<CiBundleAttributeModel> ciBundleAttributes;
+  private LocalDateTime acceptedDate;
+  private LocalDateTime rejectionDate;
+  private LocalDateTime insertedDate;
+
+  @JsonProperty("attributes")
+  @Valid
+  private List<CiBundleAttributeModel> ciBundleAttributes;
 }

@@ -13,5 +13,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CalculatorInfoConfiguration {
 
-    String filename;
+  String filename;
 }

@@ -1,6 +1,5 @@
 package it.pagopa.afm.marketplacebe.model.offer;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +13,7 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 public class BundleOffered {
 
-    private String ciFiscalCode;
+  private String ciFiscalCode;
 
-    private String idBundleOffer;
+  private String idBundleOffer;
 }
