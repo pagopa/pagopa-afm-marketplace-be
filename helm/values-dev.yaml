@@ -122,5 +122,5 @@ microservice-chart:
         repository: ghcr.io/pagopa/pagopa-afm-marketplace-be
         tag: "0.13.4"
         pullPolicy: Always
-      envConfig: {JAVA_OPTS: "-XX:-UseBASE64Intrinsics"}
+      envConfig: {}
       envSecret: {}
