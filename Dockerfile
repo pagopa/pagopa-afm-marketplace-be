@@ -18,4 +18,4 @@ RUN chown -R nobody:nobody /app
 
 EXPOSE 8080
 
-ENTRYPOINT [ "java","-XX:-UseBASE64Intrinsics","-XX:UseAVX=2","-jar","/app/app.jar" ]
+ENTRYPOINT [ "java","-jar","/app/app.jar" ]
